@@ -7,7 +7,7 @@ import { Text, Button, TextInput, Card } from 'react-native-paper';
 import { ethers } from 'ethers';
 import { rpcManager } from '../core/RPCManager';
 import { useWalletStore } from '../store/walletStore';
-import { CHAINS, Token } from '../core/ChainConfig';
+import { CHAINS } from '../core/ChainConfig';
 import { theme } from '../theme/Theme';
 
 const ERC20_ABI_MINIMAL = [
@@ -21,7 +21,7 @@ export default function CustomTokenScreen() {
   const [contractAddress, setContractAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [tokenInfo, setTokenInfo] = useState<any>(null);
-  const { address, selectedChain, balances } = useWalletStore();
+  const { selectedChain } = useWalletStore();
 
   const fetchTokenInfo = async () => {
     if (!ethers.isAddress(contractAddress)) {
@@ -142,3 +142,4 @@ const styles = StyleSheet.create({
   tokenDetail: { color: theme.colors.textSecondary, fontSize: 13, marginTop: 2 },
   hint: { color: theme.colors.textMuted, fontSize: 12, marginTop: 20, lineHeight: 18, textAlign: 'center' },
 });
+

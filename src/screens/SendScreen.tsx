@@ -6,7 +6,7 @@ import {
   SafeAreaView, StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Line } from 'react-native-svg';
+import Svg, { Path, Circle, Line, Rect, Text as SvgText } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
@@ -36,7 +36,7 @@ const TokenLogos: Record<string, React.ReactElement> = {
   USDC: (
     <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
       <Circle cx="12" cy="12" r="11" fill="#2775CA" />
-      <Text x="12" y="16" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">USDC</Text>
+      <SvgText x="12" y="16" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">USDC</SvgText>
     </Svg>
   ),
   SOL: (
@@ -146,7 +146,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
 
           {/* Asset Selector */}
           <TouchableOpacity style={styles.assetSelector} onPress={() => setShowAssetSelector(true)} activeOpacity={0.7}>
-            {TokenLogos[selectedAsset] ? <TokenLogos[selectedAsset] /> : (
+            {TokenLogos[selectedAsset] || (
               <Svg width={40} height={40} viewBox="0 0 24 24" fill="none">
                 <Circle cx="12" cy="12" r="11" fill="#E2E8F0" />
               </Svg>
@@ -259,7 +259,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
                 onPress={() => { setSelectedAsset(asset); setShowAssetSelector(false); }}
                 activeOpacity={0.7}
               >
-                {TokenLogos[asset] ? <TokenLogos[asset] /> : null}
+                {TokenLogos[asset] || null}
                 <View>
                   <Text style={styles.modalItemSymbol}>{asset}</Text>
                   <Text style={styles.modalItemBalance}>{MOCK_BALANCES[asset]} {asset}</Text>
@@ -276,11 +276,11 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           <TouchableOpacity onPress={() => setShowNetworkSelector(false)} activeOpacity={1} style={styles.modalBackdrop} />
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Select Network</Text>
-            {Object.values(CHAINS).map((chain) => (
+            {Object.entries(CHAINS).map(([key, chain]) => (
               <TouchableOpacity
-                key={chain.id}
+                key={key}
                 style={styles.modalItem}
-                onPress={() => { setSelectedNetwork(chain.id); setShowNetworkSelector(false); }}
+                onPress={() => { setSelectedNetwork(key); setShowNetworkSelector(false); }}
                 activeOpacity={0.7}
               >
                 <View style={styles.modalItemNetwork}>
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   modalItemBalance: { fontSize: 13, color: '#64748B' },
   modalItemNetwork: { flex: 1 },
   modalItemName: { fontSize: 16, fontWeight: '600', color: '#0F172A' },
-  modalItemSymbol: { fontSize: 13, color: '#64748B' },
+  modalItemNetworkSymbol: { fontSize: 13, color: '#64748B' },
   scanModal: { paddingBottom: 20 },
   scanArea: { alignItems: 'center', marginVertical: 20 },
   scanHint: { fontSize: 14, color: '#64748B', marginBottom: 20, textAlign: 'center' },

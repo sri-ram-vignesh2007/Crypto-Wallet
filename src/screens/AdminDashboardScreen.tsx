@@ -1,4 +1,4 @@
-// src/screens/DeveloperDashboard.tsx
+// src/screens/AdminDashboardScreen.tsx
 // ADMIN PANEL — view users, transactions, stats (requires PIN)
 // ⚠️ ONLY accessible with PIN. Users must consent to analytics during onboarding.
 
@@ -10,7 +10,7 @@ import { theme } from '../theme/Theme';
 
 const ADMIN_PIN = '1337'; // Change this! In production, store hashed in Supabase
 
-export default function DeveloperDashboard() {
+export default function AdminDashboardScreen() {
   const [pin, setPin] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -42,7 +42,7 @@ export default function DeveloperDashboard() {
   if (!authenticated) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Developer Dashboard</Text>
+        <Text style={styles.title}>Admin Dashboard</Text>
         <Text style={styles.subtitle}>Enter admin PIN to access analytics</Text>
         <TextInput
           mode="outlined"
@@ -65,7 +65,7 @@ export default function DeveloperDashboard() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>📊 Developer Dashboard</Text>
+      <Text style={styles.title}>📊 Admin Dashboard</Text>
       <Text style={styles.stats}>Total Users: {users.length} | Total Transactions: {transactions.length}</Text>
 
       <View style={styles.tabRow}>
@@ -130,3 +130,4 @@ const styles = StyleSheet.create({
   tabRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   tableCard: { backgroundColor: theme.colors.surfaceElevated, borderColor: theme.colors.border, borderWidth: 1, borderRadius: 12 },
 });
+

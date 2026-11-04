@@ -7,7 +7,7 @@ const PYTHON_BACKEND_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 
 const OPENROUTER_API_KEY = '';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
-const CRYPTOVAULT_SYSTEM_PROMPT = `You are CryptoVault AI, an expert, friendly Web3 crypto wallet assistant.
+const SYSTEM_PROMPT = `You are Crypto Wallet AI, an expert, friendly Web3 crypto wallet assistant.
 You help users understand crypto tokens (ETH, BTC, SOL, MATIC, BNB, etc.), gas fees, DeFi protocols, smart contract safety, and portfolio balance.
 Keep answers concise, clear, and easy for beginners. Never ask for or mention private keys.`;
 
@@ -28,7 +28,7 @@ export const DEFAULT_MODELS = {
 // Comprehensive Built-in Knowledge Base for instant, 100% reliable responses
 const LOCAL_KNOWLEDGE: Record<string, string> = {
   ethereum: "Ethereum is the world's leading decentralized smart contract platform. It uses Proof of Stake (PoS) and its native cryptocurrency is Ether (ETH). It powers DeFi protocols, NFTs, and Layer 2 rollups like Arbitrum, Optimism, and Base.",
-  gas: "Gas is the fee required to conduct a transaction on EVM blockchains (like Ethereum or Polygon). It compensates validators for the computing power used. Gas fees fluctuate based on network congestion. You can track real-time Gwei in CryptoVault AI.",
+  gas: "Gas is the fee required to conduct a transaction on EVM blockchains (like Ethereum or Polygon). It compensates validators for the computing power used. Gas fees fluctuate based on network congestion. You can track real-time Gwei in Crypto Wallet.",
   safe: "To keep your crypto wallet secure:\n1. Never share your 12-word seed phrase or private keys with anyone.\n2. Write your seed phrase on paper or stamp it on metal — never screenshot or email it.\n3. Always double-check recipient addresses before sending.\n4. Disconnect your wallet from unknown dApps when finished.",
   stablecoin: "A stablecoin is a cryptocurrency designed to have a stable price pegged to a fiat currency (usually $1 USD). Popular examples include USDT (Tether), USDC (USD Coin), and DAI. They provide a safe haven during market volatility.",
   diversify: "A balanced crypto portfolio typically contains:\n• 40-50% Blue-chips (BTC, ETH) for foundational stability\n• 20-30% Layer 1/Layer 2 ecosystems (SOL, MATIC/POL, BNB, AVAX)\n• 15-20% Stablecoins (USDC/USDT) for market dips\n• 5-10% High-growth DeFi/AI tokens.",
@@ -44,7 +44,7 @@ export class AIService {
   ): Promise<string> {
     const userMessage = history[history.length - 1]?.content || '';
     const fullMessages = [
-      { role: 'system', content: CRYPTOVAULT_SYSTEM_PROMPT },
+      { role: 'system' as const, content: SYSTEM_PROMPT },
       ...history,
     ];
 
@@ -88,8 +88,8 @@ export class AIService {
           headers: {
             'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
             'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://cryptovault.ai',
-            'X-Title': 'CryptoVault AI Wallet',
+            'HTTP-Referer': 'https://cryptowallet.app',
+            'X-Title': 'Crypto Wallet AI',
           },
           body: JSON.stringify({
             model: modelToUse,
@@ -120,7 +120,7 @@ export class AIService {
 
     // 3. Smart Local Knowledge Engine Fallback
     const lower = userMessage.toLowerCase();
-    let reply = "I am CryptoVault AI, your non-custodial Web3 assistant. I can help you check gas fees, analyze token safety, review swap routes, or explain blockchain concepts. What would you like to explore?";
+    let reply = "I am Crypto Wallet AI, your non-custodial Web3 assistant. I can help you check gas fees, analyze token safety, review swap routes, or explain blockchain concepts. What would you like to explore?";
 
     if (lower.includes('gas') || lower.includes('fee')) {
       reply = LOCAL_KNOWLEDGE.gas;
@@ -148,21 +148,43 @@ export class AIService {
     return reply;
   }
 
-  static async explainTransaction(details: string, onToken: (chunk: string) => void): Promise<string> {
+  static async chat(
+    promptOrMessages: string | Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+    featureModel?: string
+  ): Promise<string> {
+    const history: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = typeof promptOrMessages === 'string'
+      ? [{ role: 'user', content: promptOrMessages }]
+      : promptOrMessages;
+    return this.chatStream(history, () => {}, featureModel);
+  }
+
+  static async callAI(prompt: string, featureModel?: string): Promise<string> {
+    return this.chat(prompt, featureModel);
+  }
+
+  static async explainTransaction(details: string, onToken?: (chunk: string) => void): Promise<string> {
     return this.chatStream([
       { role: 'user', content: `Please explain this blockchain transaction in plain, reassuring English for a crypto user:\n${details}` }
-    ], onToken, DEFAULT_MODELS.transactionExplain);
+    ], onToken || (() => {}), DEFAULT_MODELS.transactionExplain);
   }
 
-  static async analyzeScam(addressOrUrl: string, onToken: (chunk: string) => void): Promise<string> {
+  static async analyzeScam(addressOrUrl: string, onToken?: (chunk: string) => void): Promise<string> {
     return this.chatStream([
       { role: 'user', content: `Please analyze this address/URL for potential phishing, scam, or drainer risks:\n${addressOrUrl}` }
-    ], onToken, DEFAULT_MODELS.scamAnalysis);
+    ], onToken || (() => {}), DEFAULT_MODELS.scamAnalysis);
   }
 
-  static async getGasAdvice(currentGwei: number, onToken: (chunk: string) => void): Promise<string> {
+  static async analyzeScamRisk(addressOrContract: string, reasonsOrOnToken?: string[] | ((chunk: string) => void)): Promise<string> {
+    if (Array.isArray(reasonsOrOnToken)) {
+      const details = `${addressOrContract}\nKnown flags: ${reasonsOrOnToken.join(', ')}`;
+      return this.analyzeScam(details);
+    }
+    return this.analyzeScam(addressOrContract, reasonsOrOnToken);
+  }
+
+  static async getGasAdvice(currentGwei: number, onToken?: (chunk: string) => void): Promise<string> {
     return this.chatStream([
       { role: 'user', content: `Current Ethereum base fee is ${currentGwei} Gwei. Is this a good time to send transactions or swap tokens? Suggest optimal timing and alternatives.` }
-    ], onToken, DEFAULT_MODELS.gasAdvice);
+    ], onToken || (() => {}), DEFAULT_MODELS.gasAdvice);
   }
 }

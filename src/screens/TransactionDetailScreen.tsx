@@ -9,6 +9,7 @@ import {
   Modal, Pressable, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
 import {
   useTheme, useColors, useSpacing, useBorderRadius, useShadows, useTypography, useIsDark,
   spacing, borderRadius, colors, shadows, typography,

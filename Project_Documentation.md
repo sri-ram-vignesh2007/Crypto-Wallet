@@ -1,16 +1,16 @@
-# CryptoVaultAI: AI-Powered Non-Custodial Crypto Wallet
+# Crypto Wallet: AI-Powered Non-Custodial Cryptocurrency Wallet
 
 ## Certificate
 
-This is to certify that the project report titled "CryptoVaultAI: AI-Powered Non-Custodial Crypto Wallet" has been successfully completed by the developer(s) in partial fulfillment of the requirements for the award of the degree. The project work has been carried out under our guidance and supervision. The project embodies original thought, systematic investigation, and technical rigor.
+This is to certify that the project report titled "Crypto Wallet: AI-Powered Non-Custodial Cryptocurrency Wallet" has been successfully completed by the developer(s) in partial fulfillment of the requirements for the award of the degree. The project work has been carried out under our guidance and supervision. The project embodies original thought, systematic investigation, and technical rigor.
 
 ## Acknowledgement
 
-The developer(s) wish to express deep sense of gratitude and indebtedness to all those who helped in the successful completion of this project. Special thanks to the open-source community for providing excellent libraries and tools that made this project possible. Gratitude is also extended to the Expo and React Native communities for their continuous support and documentation. The guidance provided by mentors and peers has been invaluable in shaping the direction and implementation of this project. Finally, sincere thanks to all users and contributors who provided feedback and feature requests that helped shape the evolution of CryptoVaultAI.
+The developer(s) wish to express deep sense of gratitude and indebtedness to all those who helped in the successful completion of this project. Special thanks to the open-source community for providing excellent libraries and tools that made this project possible. Gratitude is also extended to the Expo and React Native communities for their continuous support and documentation. The guidance provided by mentors and peers has been invaluable in shaping the direction and implementation of this project. Finally, sincere thanks to all users and contributors who provided feedback and feature requests that helped shape the evolution of Crypto Wallet.
 
 ## Abstract
 
-CryptoVaultAI is a decentralized, non-custodial cryptocurrency wallet mobile application built with React Native and Expo, designed to provide secure digital asset management while integrating artificial intelligence capabilities. The application supports 15+ EVM-compatible blockchains and Solana, enabling users to create, import, and manage wallets with biometric protection. CryptoVaultAI differentiates itself by incorporating AI-powered features throughout the user experience, including transaction explanation, portfolio analysis, risk assessment, scam detection, and AI chatbot assistance. The system leverages OpenRouter API with multiple large language models to provide personalized financial insights, educational content, and real-time market analysis. By combining traditional wallet functionality with advanced AI assistance, CryptoVaultAI aims to lower the barrier to entry for cryptocurrency users while maintaining the highest standards of security and privacy.
+Crypto Wallet is a decentralized, non-custodial cryptocurrency wallet mobile application built with React Native and Expo, designed to provide secure digital asset management while integrating artificial intelligence capabilities. The application supports 15+ EVM-compatible blockchains and Solana, enabling users to create, import, and manage wallets with biometric protection. Crypto Wallet differentiates itself by incorporating AI-powered features throughout the user experience, including transaction explanation, portfolio analysis, risk assessment, scam detection, and AI chatbot assistance. The system leverages OpenRouter API with multiple large language models to provide personalized financial insights, educational content, and real-time market analysis. By combining traditional wallet functionality with advanced AI assistance, Crypto Wallet aims to lower the barrier to entry for cryptocurrency users while maintaining the highest standards of security and privacy.
 
 ## Table of Contents
 
@@ -46,7 +46,7 @@ CryptoVaultAI is a decentralized, non-custodial cryptocurrency wallet mobile app
 
 ## Introduction
 
-Cryptocurrency has revolutionized the financial landscape, offering decentralized, borderless, and trustless transactions. However, the widespread adoption of cryptocurrencies has been hindered by significant usability and security challenges. The management of private keys, recovery seed phrases, and the complexity of interacting with multiple blockchain networks present significant obstacles for average users. While numerous wallet solutions exist, most fall into two categories: custodial wallets that hold user private keys on their servers (introducing centralization risk) or non-custodial wallets that require users to manually manage their security credentials without any intelligent assistance. CryptoVaultAI addresses these challenges by proposing a non-custodial wallet framework integrated with artificial intelligence to enhance security, usability, and user education.
+Cryptocurrency has revolutionized the financial landscape, offering decentralized, borderless, and trustless transactions. However, the widespread adoption of cryptocurrencies has been hindered by significant usability and security challenges. The management of private keys, recovery seed phrases, and the complexity of interacting with multiple blockchain networks present significant obstacles for average users. While numerous wallet solutions exist, most fall into two categories: custodial wallets that hold user private keys on their servers (introducing centralization risk) or non-custodial wallets that require users to manually manage their security credentials without any intelligent assistance. Crypto Wallet addresses these challenges by proposing a non-custodial wallet framework integrated with artificial intelligence to enhance security, usability, and user education.
 
 ## Problem Statement
 
@@ -98,7 +98,7 @@ None of the existing solutions combine non-custodial security with comprehensive
 
 ## Proposed System
 
-CryptoVaultAI proposes a novel approach by combining non-custodial wallet security with integrated artificial intelligence capabilities:
+Crypto Wallet proposes a novel approach by combining non-custodial wallet security with integrated artificial intelligence capabilities:
 
 ### Core Features:
 1. **Biometric-Protected Non-Custodial Wallet**: Secure wallet creation and import with BIP39 mnemonic storage encrypted behind biometric authentication
@@ -120,7 +120,7 @@ The system employs a layered architecture with:
 
 ## Objectives
 
-The primary objectives of the CryptoVaultAI project are:
+The primary objectives of the Crypto Wallet project are:
 
 1. **Develop a Secure Non-Custodial Wallet**: Create a wallet where users maintain full control of private keys with biometric-enhanced security
 2. **Integrate AI Assistance**: Incorporate artificial intelligence to provide transaction explanation, risk analysis, and portfolio insights
@@ -133,7 +133,7 @@ The primary objectives of the CryptoVaultAI project are:
 
 ## Scope of the Project
 
-The scope of CryptoVaultAI encompasses:
+The scope of Crypto Wallet encompasses:
 
 ### Technical Scope:
 - **Blockchain Networks**: Support for 15 EVM-compatible chains (Ethereum, BSC, Polygon, Base, Arbitrum, Avalanche, Optimism, Fantom, Cronos, and testnets) plus Solana
@@ -303,7 +303,6 @@ graph TD
         R[Supabase] --> F
     end
 
-    style CryptoVaultAI fill:#f0f9ff,stroke:#333,stroke-width:2px
 ```
 
 ### Detailed Component Description:
@@ -336,7 +335,7 @@ graph TD
 ## Methodology
 
 ### Development Methodology:
-The CryptoVaultAI project follows an **Agile Scrum methodology** with iterative development cycles. The project is structured into sprints focusing on incremental feature delivery, continuous integration, and regular feedback integration.
+The Crypto Wallet project follows an **Agile Scrum methodology** with iterative development cycles. The project is structured into sprints focusing on incremental feature delivery, continuous integration, and regular feedback integration.
 
 ### Phases:
 
@@ -390,7 +389,7 @@ The CryptoVaultAI project follows an **Agile Scrum methodology** with iterative 
 
 ### 1. Overall System Design
 
-CryptoVaultAI employs a **client-first architecture** where the mobile device serves as the primary authority for wallet operations and security critical functions. The system is designed with separation of concerns between UI, business logic, blockchain interaction, and AI services.
+Crypto Wallet employs a **client-first architecture** where the mobile device serves as the primary authority for wallet operations and security critical functions. The system is designed with separation of concerns between UI, business logic, blockchain interaction, and AI services.
 
 ### 2. Component Design
 

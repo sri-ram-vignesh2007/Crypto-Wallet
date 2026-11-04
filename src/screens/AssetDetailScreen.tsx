@@ -274,7 +274,7 @@ export default function AssetDetailScreen({ navigation, route }: Props) {
             backgroundColor: colors.bg.surface,
             borderColor: colors.border.subtle,
             borderRadius: borderRadius.cardLarge,
-            ...shadows.claySubtle,
+            ...shadows.sm,
           },
         ]}>
           {/* Token icon and info */}

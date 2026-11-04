@@ -51,3 +51,18 @@ service-account*.json
 # generated native folders
 /ios
 /android
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Git worktrees & temp directories
+.worktrees/
+.hermes/
+
+# Tool configs
+.claude/settings.local.json
+

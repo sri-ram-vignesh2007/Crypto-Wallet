@@ -203,14 +203,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           ) : (
             <View style={styles.assetsList}>
               {balances.map((balance, index) => {
-                const Logo = CHAIN_ICONS[balance.token.id] || (() => (
+                const Logo = CHAIN_ICONS[balance.token.chainKey] || (() => (
                   <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
                     <Circle cx="12" cy="12" r="11" fill="#E2E8F0" />
                   </Svg>
                 ));
                 return (
                   <TouchableOpacity
-                    key={`${balance.token.id}-${index}`}
+                    key={`${balance.token.symbol}-${balance.token.chainKey}-${index}`}
                     style={[
                       styles.assetRow,
                       { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },

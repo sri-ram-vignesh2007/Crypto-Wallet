@@ -1,5 +1,5 @@
 // src/screens/SubScreens.tsx
-// Secondary Navigation Screens for CryptoVaultAI
+// Secondary Navigation Screens for Crypto Wallet
 
 import React, { useState } from 'react';
 import {
@@ -29,7 +29,7 @@ export function ConnectedAppsScreen({ navigation }: { navigation?: any }) {
         <Text style={styles.emptyIcon}>🔗</Text>
         <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No Active Connections</Text>
         <Text style={[styles.emptyDesc, { color: colors.text.secondary }]}>
-          When you connect CryptoVaultAI to decentralized apps (Uniswap, OpenSea, Aave), they will appear here.
+          When you connect Crypto Wallet to decentralized apps (Uniswap, OpenSea, Aave), they will appear here.
         </Text>
       </View>
     </View>
@@ -91,7 +91,7 @@ export function PrivacySettingsScreen({ navigation }: { navigation?: any }) {
       <View style={[styles.card, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
         <Text style={[styles.cardTitle, { color: colors.text.primary }]}>100% Client-Side Encryption</Text>
         <Text style={[styles.cardDesc, { color: colors.text.secondary }]}>
-          CryptoVaultAI does not track IP addresses, log user queries, or store private keys on any server.
+          Crypto Wallet does not track IP addresses, log user queries, or store private keys on any server.
         </Text>
       </View>
     </View>
@@ -145,7 +145,7 @@ export function HelpScreen() {
       <Text style={[styles.title, { color: colors.text.primary, marginBottom: 8 }]}>Help & FAQ</Text>
       <Text style={[styles.subtitle, { color: colors.text.secondary, marginBottom: 20 }]}>Common questions & guides</Text>
       <View style={[styles.card, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle, marginBottom: 12 }]}>
-        <Text style={[styles.cardTitle, { color: colors.text.primary }]}>How does CryptoVaultAI secure my funds?</Text>
+        <Text style={[styles.cardTitle, { color: colors.text.primary }]}>How does Crypto Wallet secure my funds?</Text>
         <Text style={[styles.cardDesc, { color: colors.text.secondary, marginTop: 4 }]}>
           Your private key and 12-word seed phrase are generated using standard BIP-39 and stored exclusively on your device.
         </Text>
@@ -153,7 +153,7 @@ export function HelpScreen() {
       <View style={[styles.card, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
         <Text style={[styles.cardTitle, { color: colors.text.primary }]}>Are the RPC connectors really free?</Text>
         <Text style={[styles.cardDesc, { color: colors.text.secondary, marginTop: 4 }]}>
-          Yes! CryptoVaultAI connects to public high-uptime RPC nodes from Cloudflare, LlamaNodes, Ankr, and Binance.
+          Yes! Crypto Wallet connects to public high-uptime RPC nodes from Cloudflare, LlamaNodes, Ankr, and Binance.
         </Text>
       </View>
     </ScrollView>
@@ -167,7 +167,7 @@ export function FeedbackScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas, padding: 20, paddingTop: 30 }]}>
       <Text style={[styles.title, { color: colors.text.primary, marginBottom: 8 }]}>Send Feedback</Text>
-      <Text style={[styles.subtitle, { color: colors.text.secondary, marginBottom: 20 }]}>Help us improve CryptoVaultAI</Text>
+      <Text style={[styles.subtitle, { color: colors.text.secondary, marginBottom: 20 }]}>Help us improve Crypto Wallet</Text>
       <TextInput
         style={[styles.feedbackInput, { backgroundColor: colors.bg.surface, color: colors.text.primary, borderColor: colors.border.subtle }]}
         placeholder="Describe your issue or suggestion…"
@@ -196,7 +196,7 @@ export function AboutScreen() {
   const colors = useColors();
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas, padding: 20, paddingTop: 40, alignItems: 'center' }]}>
-      <Text style={[styles.title, { color: colors.text.primary }]}>CryptoVault<Text style={{ color: colors.primary.DEFAULT }}>AI</Text></Text>
+      <Text style={[styles.title, { color: colors.text.primary }]}>Crypto <Text style={{ color: colors.primary.DEFAULT }}>Wallet</Text></Text>
       <Text style={[styles.subtitle, { color: colors.text.secondary, marginTop: 4 }]}>Version 2.0.0 (Multi-Chain)</Text>
       <Text style={[styles.cardDesc, { color: colors.text.muted, textAlign: 'center', marginTop: 20, maxWidth: 300 }]}>
         Non-custodial, open-source Web3 intelligence wallet with multi-chain RPCs, AI streaming, and DEX swap aggregator.

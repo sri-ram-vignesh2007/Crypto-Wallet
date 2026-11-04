@@ -197,7 +197,7 @@ function TrendChart({ data, width, height }: { data: number[]; width: number; he
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: theme.colors.background, paddingHorizontal: theme.spacing.screenPadding },
+  root: { flex: 1, backgroundColor: theme.colors.background, paddingHorizontal: theme.spacing.lg },
   header: { marginBottom: 24 },
   title: { fontSize: 32, fontWeight: '800', color: theme.colors.text, letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: theme.colors.textMuted, marginTop: 4 },
