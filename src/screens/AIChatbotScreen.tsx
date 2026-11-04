@@ -39,7 +39,7 @@ export default function AIChatbotScreen() {
     {
       id: nextId(),
       role: 'assistant',
-      content: "Hello! I am your CryptoVault AI Assistant. Ask me anything about your tokens, gas prices, wallet security, or DeFi strategies.",
+      content: "Hello! I am your Crypto Wallet AI Assistant. Ask me anything about your tokens, gas prices, wallet security, or DeFi strategies.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -133,7 +133,7 @@ export default function AIChatbotScreen() {
               <Text style={styles.avatarText}>AI</Text>
             </View>
             <View>
-              <Text style={[styles.headerTitle, { color: colors.text.primary }]}>CryptoVault AI</Text>
+              <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Crypto Wallet AI</Text>
               <Text style={[styles.headerSubtitle, { color: colors.text.muted }]}>
                 {busy ? 'Analyzing...' : 'Online · Web3 Assistant'}
               </Text>

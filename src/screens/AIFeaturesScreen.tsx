@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
   cardDesc: { fontSize: 13, color: theme.colors.textMuted, lineHeight: 19, fontWeight: '500' },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: theme.borderRadius.pill },
-  statusReady: { backgroundColor: theme.colors.successMuted },
-  statusBeta: { backgroundColor: theme.colors.warningMuted },
-  statusComing: { backgroundColor: theme.colors.infoMuted },
+  statusReady: { backgroundColor: theme.colors.success.muted },
+  statusBeta: { backgroundColor: theme.colors.warning.muted },
+  statusComing: { backgroundColor: theme.colors.info.muted },
   statusText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.6 },
   chevron: { fontSize: 22, color: theme.colors.textMuted, fontWeight: '700' },
 });

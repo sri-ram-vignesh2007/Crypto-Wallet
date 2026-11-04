@@ -62,15 +62,15 @@ export default function NameScreen({ navigation }: { navigation: any }) {
               placeholder="First name"
               placeholderTextColor={colors.text.muted}
               autoFocus
+              textColor={colors.text.primary}
+              outlineColor={colors.border.DEFAULT}
+              activeOutlineColor={colors.primary.DEFAULT}
+              contentStyle={{ backgroundColor: colors.bg.surfaceElevated }}
               style={[
                 styles.input,
                 {
                   backgroundColor: colors.bg.surfaceElevated,
                   borderRadius: borderRadius.input,
-                  textColor: colors.text.primary,
-                  outlineColor: colors.border.DEFAULT,
-                  activeOutlineColor: colors.primary.DEFAULT,
-                  contentStyle: { backgroundColor: colors.bg.surfaceElevated },
                 },
               ]}
             />
@@ -81,16 +81,16 @@ export default function NameScreen({ navigation }: { navigation: any }) {
               onChangeText={setLastName}
               placeholder="Last name (optional)"
               placeholderTextColor={colors.text.muted}
+              textColor={colors.text.primary}
+              outlineColor={colors.border.DEFAULT}
+              activeOutlineColor={colors.primary.DEFAULT}
+              contentStyle={{ backgroundColor: colors.bg.surfaceElevated }}
               style={[
                 styles.input,
                 { marginTop: 12 },
                 {
                   backgroundColor: colors.bg.surfaceElevated,
                   borderRadius: borderRadius.input,
-                  textColor: colors.text.primary,
-                  outlineColor: colors.border.DEFAULT,
-                  activeOutlineColor: colors.primary.DEFAULT,
-                  contentStyle: { backgroundColor: colors.bg.surfaceElevated },
                 },
               ]}
             />
@@ -101,12 +101,12 @@ export default function NameScreen({ navigation }: { navigation: any }) {
               mode="contained"
               onPress={handleContinue}
               disabled={!firstName.trim()}
+              buttonColor={colors.primary.DEFAULT}
               style={[
                 styles.primaryBtn,
                 {
                   borderRadius: borderRadius.button,
                   paddingVertical: spacing.sm,
-                  buttonColor: colors.primary.DEFAULT,
                 },
               ]}
               textColor="#FFFFFF"

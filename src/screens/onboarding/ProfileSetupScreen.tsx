@@ -82,7 +82,6 @@ export default function ProfileSetupScreen({ navigation }: { navigation: any }) 
               style={[
                 styles.avatarBox,
                 {
-                  backgroundColor: colors.bg.surfaceElevated,
                   borderColor: selectedAvatar === avatar ? colors.primary.DEFAULT : 'transparent',
                   backgroundColor: selectedAvatar === avatar ? colors.primary.muted : colors.bg.surfaceElevated,
                 },
@@ -104,12 +103,12 @@ export default function ProfileSetupScreen({ navigation }: { navigation: any }) 
         <Button
           mode="contained"
           onPress={handleFinish}
+          buttonColor={colors.primary.DEFAULT}
           style={[
             styles.primaryBtn,
             {
               borderRadius: borderRadius.button,
               paddingVertical: spacing.sm,
-              buttonColor: colors.primary.DEFAULT,
             },
           ]}
           textColor="#FFFFFF"

@@ -38,6 +38,8 @@ import RiskReviewScreen from './src/screens/RiskReviewScreen';
 import NewsScreen from './src/screens/NewsScreen';
 import TokenDetailScreen from './src/screens/TokenDetailScreen';
 import ChainDetailScreen from './src/screens/ChainDetailScreen';
+import BuyScreen from './src/screens/BuyScreen';
+import CustomTokenScreen from './src/screens/CustomTokenScreen';
 import {
   ConnectedAppsScreen,
   WalletsScreen,
@@ -66,6 +68,7 @@ type RootStackParamList = {
   Send: undefined;
   Receive: undefined;
   Swap: undefined;
+  Buy: undefined;
   History: undefined;
   AssetDetail: { asset: any };
   TransactionDetail: { tx: any };
@@ -73,12 +76,15 @@ type RootStackParamList = {
   News: undefined;
   Settings: undefined;
   AIChatbot: undefined;
+  AIAssistant: { context?: string; asset?: any; tx?: any } | undefined;
   TokenDetail: { symbol: string; name: string; price: string; change: string };
   ChainDetail: { chain: any };
+  CustomToken: undefined;
   ConnectedApps: undefined;
   Wallets: undefined;
   PrivacySettings: undefined;
   NetworkSettings: undefined;
+  DefaultNetwork: undefined;
   Help: undefined;
   Feedback: undefined;
   About: undefined;
@@ -244,6 +250,7 @@ function AppContent() {
               <Stack.Screen name="Send" component={SendScreen} options={{ title: 'Send' }} />
               <Stack.Screen name="Receive" component={ReceiveScreen} options={{ title: 'Receive' }} />
               <Stack.Screen name="Swap" component={SwapScreen} options={{ title: 'Swap' }} />
+              <Stack.Screen name="Buy" component={BuyScreen} options={{ title: 'Buy Crypto' }} />
               <Stack.Screen name="History" component={ActivityScreen} options={{ title: 'History' }} />
               <Stack.Screen name="AssetDetail" component={AssetDetailScreen} options={{ title: 'Asset' }} />
               <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ title: 'Transaction' }} />
@@ -251,8 +258,10 @@ function AppContent() {
               <Stack.Screen name="News" component={NewsScreen} options={{ title: 'News' }} />
               <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
               <Stack.Screen name="AIChatbot" component={AIChatbotScreen} options={{ title: 'AI Assistant' }} />
+              <Stack.Screen name="AIAssistant" component={AIChatbotScreen} options={{ title: 'AI Assistant' }} />
               <Stack.Screen name="TokenDetail" component={TokenDetailScreen} options={{ title: 'Token' }} />
               <Stack.Screen name="ChainDetail" component={ChainDetailScreen} options={{ title: 'Chain' }} />
+              <Stack.Screen name="CustomToken" component={CustomTokenScreen} options={{ title: 'Import Token' }} />
               <Stack.Screen name="ConnectedApps" component={ConnectedAppsScreen} options={{ title: 'Connected Apps' }} />
               <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
               <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} options={{ title: 'Privacy' }} />

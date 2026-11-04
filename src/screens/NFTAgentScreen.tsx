@@ -255,7 +255,7 @@ function FloorTrendChart({ collections, width, height }: { collections: NFTColle
         ))}
         {/* Series */}
         {allSeries.map((series, si) => {
-          const color = [theme.colors.primary, theme.colors.success, theme.colors.warning, theme.colors.danger, theme.colors.primaryLight][si % 5];
+          const color = [theme.colors.primary.DEFAULT, theme.colors.success.DEFAULT, theme.colors.warning.DEFAULT, theme.colors.danger.DEFAULT, theme.colors.primary.light][si % 5];
           return (
             <Path
               key={si}
@@ -267,7 +267,7 @@ function FloorTrendChart({ collections, width, height }: { collections: NFTColle
         {/* Legend */}
         {collections.map((c, i) => (
           <View key={i} style={{ position: 'absolute', top: padding.top + i * 20, left: padding.left, flexDirection: 'row', alignItems: 'center' }}>
-            <Rect x={0} y={0} width={12} height={3} fill={[theme.colors.primary, theme.colors.success, theme.colors.warning, theme.colors.danger, theme.colors.primaryLight][i % 5]} rx={1} />
+            <Rect x={0} y={0} width={12} height={3} fill={[theme.colors.primary.DEFAULT, theme.colors.success.DEFAULT, theme.colors.warning.DEFAULT, theme.colors.danger.DEFAULT, theme.colors.primary.light][i % 5]} rx={1} />
             <SvgText x={16} y={10} fontSize={10} fill={theme.colors.textMuted} fontFamily="monospace">{c.name.slice(0, 12)}</SvgText>
           </View>
         ))}
@@ -277,7 +277,7 @@ function FloorTrendChart({ collections, width, height }: { collections: NFTColle
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: theme.colors.background, paddingHorizontal: theme.spacing.screenPadding },
+  root: { flex: 1, backgroundColor: theme.colors.background, paddingHorizontal: theme.spacing.lg },
   header: { marginBottom: 24 },
   title: { fontSize: 32, fontWeight: '800', color: theme.colors.text, letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: theme.colors.textMuted, marginTop: 4 },

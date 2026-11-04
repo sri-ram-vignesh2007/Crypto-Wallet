@@ -6,10 +6,15 @@ import {
   SafeAreaView, StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Line } from 'react-native-svg';
-import { useWalletStore } from '../store/walletStore';
+import Svg, { Path, Circle, Line, Text as SvgText } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { ClayButton } from '../components/ClayButton';
+
+const CheckIcon = ({ color = '#16A34A', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M20 6L9 17l-5-5" />
+  </Svg>
+);
 
 const ChevronRightIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
@@ -34,7 +39,7 @@ const TokenLogos: Record<string, React.ReactElement> = {
   USDC: (
     <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
       <Circle cx="12" cy="12" r="11" fill="#2775CA" />
-      <Text x="12" y="16" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">USDC</Text>
+      <SvgText x="12" y="16" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">USDC</SvgText>
     </Svg>
   ),
   SOL: (
@@ -58,7 +63,7 @@ const TokenLogos: Record<string, React.ReactElement> = {
   ARB: (
     <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
       <Circle cx="12" cy="12" r="11" fill="#28A0F0" />
-      <Text x="12" y="16" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">ARB</Text>
+      <SvgText x="12" y="16" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">ARB</SvgText>
     </Svg>
   ),
 };
@@ -87,7 +92,6 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
-  const { swapCrypto } = useWalletStore();
 
   const [fromAsset, setFromAsset] = useState('ETH');
   const [toAsset, setToAsset] = useState('USDC');
@@ -174,7 +178,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
   };
 
   const fromBalance = parseFloat(fromAssetData.balance.replace(',', ''));
-  const insufficient = fromAmount && parseFloat(fromAmount) > fromBalance;
+  const insufficient = Boolean(fromAmount && parseFloat(fromAmount) > fromBalance);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
@@ -304,7 +308,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
           <ClayButton
             title={loading ? 'Swapping...' : `Swap ${fromAsset} → ${toAsset}`}
             onPress={handleSwap}
-            disabled={loading || !fromAmount || parseFloat(fromAmount) <= 0 || insufficient}
+            disabled={Boolean(loading || !fromAmount || parseFloat(fromAmount) <= 0 || insufficient)}
             fullWidth
             size="large"
           />
@@ -577,8 +581,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
+    paddingBottom: 20,
   },
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   modalTitle: { fontSize: 18, fontWeight: '600', marginBottom: 16, textAlign: 'center' },
   assetModalItem: {
     flexDirection: 'row',
@@ -593,7 +597,6 @@ const styles = StyleSheet.create({
   assetModalBalance: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
   assetModalBalanceText: { fontSize: 15, fontWeight: '600', color: '#0F172A' },
   assetModalUsd: { fontSize: 13, color: '#64748B' },
-  slippageModal: { paddingBottom: 20 },
   slippageOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -635,7 +638,4 @@ const styles = StyleSheet.create({
   confirmDetailLabel: { fontSize: 14, color: '#64748B' },
   confirmDetailValue: { fontSize: 15, fontWeight: '600', color: '#0F172A' },
   confirmActions: { gap: 12, marginTop: 8 },
-  modalOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
-  modalTitle: { fontSize: 18, fontWeight: '600', marginBottom: 16, textAlign: 'center' },
 });

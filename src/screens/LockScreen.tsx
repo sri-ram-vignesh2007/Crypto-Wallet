@@ -51,7 +51,7 @@ export default function LockScreen({ onRetry }: Props) {
         </Svg>
       </View>
 
-      <Text style={styles.title}>CryptoVault<Text style={styles.aiAccent}>AI</Text></Text>
+      <Text style={styles.title}>Crypto <Text style={styles.aiAccent}>Wallet</Text></Text>
       <Text style={styles.subtitle}>Your vault is protected. Tap below to access your wallet.</Text>
 
       <TouchableOpacity

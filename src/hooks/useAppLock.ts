@@ -33,7 +33,7 @@ export const useAppLockStore = create<AppLockStore>((set) => ({
 
       const res = await Promise.race([
         LocalAuth.authenticateAsync({
-          promptMessage: 'Unlock CryptoVaultAI',
+          promptMessage: 'Unlock Crypto Wallet',
           fallbackLabel: 'Use device PIN',
           cancelLabel: 'Cancel',
           disableDeviceFallback: false,

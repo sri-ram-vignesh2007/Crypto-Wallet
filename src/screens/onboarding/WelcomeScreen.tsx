@@ -54,7 +54,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
         {/* Title & Tagline */}
         <View style={styles.headerBlock}>
           <Text style={[styles.title, { color: colors.text.primary }]}>
-            CryptoVault<Text style={{ color: colors.primary.DEFAULT }}>AI</Text>
+            Crypto <Text style={{ color: colors.primary.DEFAULT }}>Wallet</Text>
           </Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
             Secure self-custodial wallet with AI-powered security.

@@ -3,7 +3,7 @@
 
 import React from 'react';
 import {
-  View, StyleSheet, TouchableOpacity, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView,
   StatusBar, SafeAreaView,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';

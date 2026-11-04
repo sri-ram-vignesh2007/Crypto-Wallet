@@ -229,7 +229,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
         {/* App Version */}
         <View style={styles.version}>
-          <Text style={styles.versionText}>CryptoVaultAI v1.0.0</Text>
+          <Text style={styles.versionText}>Crypto Wallet v1.0.0</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
