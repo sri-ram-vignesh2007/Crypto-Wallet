@@ -1,111 +1,151 @@
-// src/screens/HomeScreen.tsx - Apple Style Home Dashboard
+// src/screens/HomeScreen.tsx - Trust Wallet Minimalist Dashboard
 
 import React, { useEffect, useState } from 'react';
 import {
   View, ScrollView, TouchableOpacity, Text, StyleSheet, RefreshControl,
-  SafeAreaView, StatusBar,
+  SafeAreaView, StatusBar, Modal,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
-import { CHAINS } from '../core/ChainConfig';
-import { ClayButton } from '../components/ClayButton';
+import { CHAINS, Chain } from '../core/ChainConfig';
 
 // Icons
-const SendIcon = ({ color = '#2563EB', size = 22 }: { color?: string; size?: number }) => (
+const SendIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M7 17l10-10M17 7H7v10" />
+    <Path d="M7 17L17 7M17 7H7M17 7V17" />
   </Svg>
 );
-const ReceiveIcon = ({ color = '#16A34A', size = 22 }: { color?: string; size?: number }) => (
+
+const ReceiveIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M17 7l-10 10M7 17h10v-10" />
+    <Path d="M17 7L7 17M7 17H17M7 17V7" />
   </Svg>
 );
-const SwapIcon = ({ color = '#8B5CF6', size = 22 }: { color?: string; size?: number }) => (
+
+const SwapIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M16 3l4 4-4 4M8 21l-4-4 4-4M4 17h16M20 7H4" />
   </Svg>
 );
-const BuyIcon = ({ color = '#F59E0B', size = 22 }: { color?: string; size?: number }) => (
+
+const BuyIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M2 5h20v14H2zM2 10h20M12 5v14" />
+    <Rect x="2" y="5" width="20" height="14" rx="2" />
+    <Path d="M2 10h20M12 5v14" />
   </Svg>
 );
-const AIInsightIcon = ({ color = '#2563EB', size = 18 }: { color?: string; size?: number }) => (
+
+const QrScanIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M6 8l4 4 4-4M6 12l4 4 4-4M6 16l4 4 4-4" />
-    <Circle cx="18" cy="18" r="5" />
+    <Path d="M3 7V5a2 2 0 0 1 2-2h2M17 5h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+    <Rect x="7" y="7" width="10" height="10" rx="1" />
   </Svg>
 );
+
+const CopyIcon = ({ color = '#94A3B8', size = 14 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </Svg>
+);
+
 const ChevronDownIcon = ({ color = '#94A3B8', size = 14 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M6 9l6 6 6-6" />
   </Svg>
 );
 
 // Token logos
 const EthLogo = () => (
-  <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#627EEA" />
-    <Path d="M12 5v5.8l4.7 2.1L12 5z" fill="#E5E7EB" />
-    <Path d="M12 5L7.3 12.9l4.7-2.1V5z" fill="#FFFFFF" />
+    <Path d="M12 4v6.2l5 2.3L12 4z" fill="#E5E7EB" />
+    <Path d="M12 4L7 12.5l5-2.3V4z" fill="#FFFFFF" />
+    <Path d="M12 13.5v6.5l5-7-5 .5z" fill="#E5E7EB" />
+    <Path d="M12 13.5L7 13l5 7v-6.5z" fill="#FFFFFF" />
   </Svg>
 );
+
 const BtcLogo = () => (
-  <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#F7931A" />
-    <Path d="M12 7.5c1.4 0 2.5-1.1 2.5-2.5S13.4 2.5 12 2.5 9.5 3.6 9.5 5 10.6 7.5 12 7.5zm0 10c-1.4 0-2.5-1.1-2.5-2.5S10.6 5 12 5s2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z" fill="#FFFFFF" />
+    <Path d="M14.5 10.5c.6-.4 1-.9 1-1.6 0-1.4-1.1-2-2.7-2.1V5h-1.3v1.7h-.9V5h-1.3v1.8H7.5v1.4h1.1c.3 0 .5.2.5.5v6.6c0 .3-.2.5-.5.5H7.5v1.4h1.8v1.8h1.3v-1.7h.9v1.7h1.3v-1.8c1.9-.1 3.2-.8 3.2-2.4 0-1.1-.6-1.9-1.5-2.3zm-3.2-2.1h1.4c.8 0 1.4.3 1.4 1s-.6 1-1.4 1h-1.4V8.4zm1.7 5.2h-1.7v-2.2h1.7c.9 0 1.6.4 1.6 1.1s-.7 1.1-1.6 1.1z" fill="#FFFFFF" />
   </Svg>
 );
-const SolLogo = () => (
-  <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="#14F195" />
-    <Path d="M17 9.5L12 5 7 9.5l5 4.5 5-4.5z" fill="#9945FF" />
-  </Svg>
-);
+
 const BnbLogo = () => (
-  <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#F3BA2F" />
-    <Path d="M12 7l3 3-3 3-3-3 3-3z" fill="#FFFFFF" />
+    <Path d="M12 6.5l2.2 2.2-1 1-1.2-1.2-1.2 1.2-1-1L12 6.5zm-3.2 3.2l1 1-2.2 2.2-1-1 2.2-2.2zm6.4 0l2.2 2.2-1 1-2.2-2.2 1-1zm-4.3 1.1l1.1 1.1 1.1-1.1 1.1 1.1-1.1 1.1 1.1 1.1-1.1 1.1-1.1-1.1-1.1 1.1-1.1-1.1 1.1-1.1-1.1-1.1 1.1-1.1zm-2.1 3.2l1 1-1 1-1-1 1-1zm6.4 0l1 1-1 1-1-1 1-1zm-4.3 3.2l1.2 1.2 1-1 1 1-2.2 2.2-2.2-2.2 1-1 1.2-1.2z" fill="#FFFFFF" />
   </Svg>
 );
+
 const PolygonLogo = () => (
-  <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#8247E5" />
-    <Path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="#FFFFFF" />
+    <Path d="M12 4L6 7.5v9L12 20l6-3.5v-9L12 4zm0 2.3l4 2.3v4.6l-4 2.3-4-2.3V8.6l4-2.3z" fill="#FFFFFF" />
   </Svg>
 );
 
-const QUICK_ACTIONS = [
-  { id: 'send', label: 'Send', icon: SendIcon, color: '#2563EB' },
-  { id: 'receive', label: 'Receive', icon: ReceiveIcon, color: '#16A34A' },
-  { id: 'swap', label: 'Swap', icon: SwapIcon, color: '#8B5CF6' },
-  { id: 'buy', label: 'Buy', icon: BuyIcon, color: '#F59E0B' },
-];
+const SolLogo = () => (
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#14F195" />
+    <Path d="M7 15.5l1.8-1.8h8.2l-1.8 1.8H7zm0-5l1.8-1.8h8.2l-1.8 1.8H7zm1.8-5h8.2l-1.8 1.8H7l1.8-1.8z" fill="#9945FF" />
+  </Svg>
+);
 
-const CHAIN_ICONS: Record<string, () => React.ReactElement> = {
-  ethereum: EthLogo,
-  bitcoin: BtcLogo,
-  solana: SolLogo,
-  bsc: BnbLogo,
-  polygon: PolygonLogo,
+const UsdtLogo = () => (
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#26A17B" />
+    <Path d="M13.2 11.2v-1.4h3.6V7.5H7.2v2.3h3.6v1.4c-3.1.2-5.4.9-5.4 1.8 0 .8 2.3 1.6 5.4 1.8v3.7h2.4v-3.7c3.1-.2 5.4-.9 5.4-1.8 0-.9-2.3-1.6-5.4-1.8zm0 2.2c-2.3.1-4.2-.4-4.2-.9s1.9-1 4.2-.9v1.8z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const UsdcLogo = () => (
+  <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#2775CA" />
+    <Path d="M12 6.5c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5zm.7 8.8v.9h-1.4v-.9c-1.1-.1-1.9-.7-2-1.6h1.2c.1.5.5.8 1.2.8.7 0 1.1-.3 1.1-.7 0-.5-.4-.6-1.1-.8-1.3-.3-2.1-.7-2.1-1.7 0-.8.6-1.4 1.7-1.5v-.9h1.4v.9c.9.1 1.6.6 1.8 1.4h-1.2c-.1-.4-.4-.7-1-.7-.6 0-1 .3-1 .6s.4.6 1.1.8c1.3.3 2.1.7 2.1 1.7 0 .9-.7 1.5-1.8 1.6z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const TOKEN_LOGOS: Record<string, () => React.ReactElement> = {
+  ETH: EthLogo,
+  BTC: BtcLogo,
+  BNB: BnbLogo,
+  MATIC: PolygonLogo,
+  POL: PolygonLogo,
+  SOL: SolLogo,
+  USDT: UsdtLogo,
+  USDC: UsdcLogo,
 };
+
+const DEFAULT_TOKENS = [
+  { symbol: 'ETH', name: 'Ethereum', price: '$3,485.20', change: '+2.4%', positive: true, balance: '0.00', usd: '$0.00' },
+  { symbol: 'BTC', name: 'Bitcoin', price: '$68,240.00', change: '+1.8%', positive: true, balance: '0.00', usd: '$0.00' },
+  { symbol: 'BNB', name: 'BNB Chain', price: '$718.50', change: '+0.5%', positive: true, balance: '0.00', usd: '$0.00' },
+  { symbol: 'POL', name: 'Polygon', price: '$0.82', change: '-1.1%', positive: false, balance: '0.00', usd: '$0.00' },
+  { symbol: 'SOL', name: 'Solana', price: '$184.30', change: '+3.9%', positive: true, balance: '0.00', usd: '$0.00' },
+  { symbol: 'USDT', name: 'Tether USD', price: '$1.00', change: '0.0%', positive: true, balance: '0.00', usd: '$0.00' },
+  { symbol: 'USDC', name: 'USD Coin', price: '$1.00', change: '0.0%', positive: true, balance: '0.00', usd: '$0.00' },
+];
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
-  const { totalValueUsd, balances, selectedChain, refreshBalances } = useWalletStore();
   const colors = useColors();
   const isDark = useIsDark();
+
+  const { address, totalValueUsd, balances, selectedChain, setSelectedChain, refreshBalances } = useWalletStore();
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedChainName, setSelectedChainName] = useState('Ethereum');
-  const [showChainSelector, setShowChainSelector] = useState(false);
-  const [aiInsight, setAiInsight] = useState('Your portfolio is well diversified across major chains.');
+  const [showNetworkModal, setShowNetworkModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'crypto' | 'nfts'>('crypto');
+  const [copiedToast, setCopiedToast] = useState(false);
 
   useEffect(() => {
     refreshBalances();
-  }, [refreshBalances]);
+  }, [refreshBalances, selectedChain]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -113,286 +153,531 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     setRefreshing(false);
   };
 
-  const formatValue = (value: number) => {
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(2)}K`;
-    return `$${value.toFixed(2)}`;
+  const copyAddress = async () => {
+    if (!address) return;
+    try {
+      await Clipboard.setStringAsync(address);
+      setCopiedToast(true);
+      setTimeout(() => setCopiedToast(false), 2000);
+    } catch {}
   };
 
-  const chainList = Object.values(CHAINS);
+  const currentChainObj = CHAINS[selectedChain] || CHAINS.ethereum;
+
+  // Merge live balances with token display
+  const tokenList = DEFAULT_TOKENS.map(dt => {
+    const live = balances.find(b => b.token.symbol.toUpperCase() === dt.symbol.toUpperCase());
+    if (live) {
+      const balNum = parseFloat(live.balance);
+      return {
+        ...dt,
+        balance: isNaN(balNum) ? '0.00' : balNum.toFixed(4),
+        usd: `$${live.valueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      };
+    }
+    return dt;
+  });
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary.DEFAULT]} />
-        }
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.greeting}>
-            <Text style={styles.greetingText}>Welcome back</Text>
-            <Text style={styles.greetingName}>User</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.chainSelector}
-            onPress={() => setShowChainSelector(!showChainSelector)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.chainLabel}>{selectedChainName}</Text>
-            <ChevronDownIcon color={colors.text.muted} size={16} />
-          </TouchableOpacity>
-        </View>
+      {/* Top Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+        {/* Address Pill */}
+        <TouchableOpacity
+          onPress={copyAddress}
+          activeOpacity={0.75}
+          style={[styles.addressPill, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+        >
+          <Text style={[styles.addressText, { color: colors.text.primary }]}>
+            {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '0x...'}
+          </Text>
+          <CopyIcon color={copiedToast ? '#10B981' : colors.text.muted} size={13} />
+        </TouchableOpacity>
 
-        {/* Portfolio Card */}
-        <View style={[styles.portfolioCard, { backgroundColor: colors.primary.DEFAULT }]}>
-          <Text style={styles.portfolioLabel}>Total Balance</Text>
-          <Text style={styles.portfolioValue}>{formatValue(totalValueUsd)}</Text>
-          <Text style={styles.portfolioSubtitle}>≈ ${totalValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-        </View>
+        {/* Network Selector Pill */}
+        <TouchableOpacity
+          onPress={() => setShowNetworkModal(true)}
+          activeOpacity={0.75}
+          style={[styles.networkPill, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+        >
+          <View style={[styles.networkDot, { backgroundColor: colors.primary.DEFAULT }]} />
+          <Text style={[styles.networkName, { color: colors.text.primary }]}>{currentChainObj.name}</Text>
+          <ChevronDownIcon color={colors.text.muted} size={13} />
+        </TouchableOpacity>
 
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
-          </View>
-          <View style={styles.actionsGrid}>
-            {QUICK_ACTIONS.map((action) => (
-              <TouchableOpacity
-                key={action.id}
-                style={[styles.actionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
-                onPress={() => navigation.navigate(action.id.charAt(0).toUpperCase() + action.id.slice(1))}
-                activeOpacity={0.85}
-              >
-                <View style={[styles.actionIcon, { backgroundColor: `${action.color}15` }]}>
-                  <action.icon color={action.color} size={24} />
-                </View>
-                <Text style={[styles.actionLabel, { color: colors.text.primary }]}>{action.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        {/* QR Scan / Search */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Receive')}
+          activeOpacity={0.7}
+          style={[styles.iconButton, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+        >
+          <QrScanIcon color={colors.text.primary} size={18} />
+        </TouchableOpacity>
+      </View>
 
-        {/* AI Insight */}
-        <View style={[
-          styles.aiCard,
-          { backgroundColor: colors.primary.muted, borderColor: colors.primary.DEFAULT },
-        ]}>
-          <View style={styles.aiHeader}>
-            <View style={[styles.aiIcon, { backgroundColor: colors.primary.DEFAULT }]}>
-              <AIInsightIcon color="#FFFFFF" size={18} />
-            </View>
-            <Text style={[styles.aiTitle, { color: colors.text.primary }]}>AI Insight</Text>
-          </View>
-          <Text style={[styles.aiText, { color: colors.text.secondary }]}>{aiInsight}</Text>
-        </View>
-
-        {/* Assets */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Assets</Text>
-          </View>
-          {balances.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={[styles.emptyText, { color: colors.text.muted }]}>No assets yet. Receive or buy crypto to get started.</Text>
-            </View>
-          ) : (
-            <View style={styles.assetsList}>
-              {balances.map((balance, index) => {
-                const Logo = CHAIN_ICONS[balance.token.chainKey] || (() => (
-                  <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="11" fill="#E2E8F0" />
-                  </Svg>
-                ));
-                return (
-                  <TouchableOpacity
-                    key={`${balance.token.symbol}-${balance.token.chainKey}-${index}`}
-                    style={[
-                      styles.assetRow,
-                      { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },
-                    ]}
-                    onPress={() => navigation.navigate('AssetDetail', { asset: balance })}
-                    activeOpacity={0.85}
-                  >
-                    <Logo />
-                    <View style={styles.assetInfo}>
-                      <Text style={[styles.assetSymbol, { color: colors.text.primary }]}>{balance.token.symbol}</Text>
-                      <Text style={[styles.assetName, { color: colors.text.muted }]}>{balance.token.name}</Text>
-                    </View>
-                    <View style={styles.assetValue}>
-                      <Text style={[styles.assetAmount, { color: colors.text.primary }]}>{formatValue(balance.valueUsd)}</Text>
-                      <Text style={[styles.assetBalance, { color: colors.text.muted }]}>{parseFloat(balance.balance).toFixed(4)} {balance.token.symbol}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Chain Selector Modal */}
-      {showChainSelector && (
-        <View style={styles.modalOverlay} onStartShouldSetResponder={() => true}>
-          <TouchableOpacity onPress={() => setShowChainSelector(false)} activeOpacity={1} style={styles.modalBackdrop} />
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Select Network</Text>
-            {chainList.map((chain) => (
-              <TouchableOpacity
-                key={chain.id}
-                style={styles.chainOption}
-                onPress={() => {
-                  setSelectedChainName(chain.name);
-                  setShowChainSelector(false);
-                }}
-                activeOpacity={0.7}
-              >
-                {(() => {
-                  const ChainLogo = CHAIN_ICONS[chain.id];
-                  return ChainLogo ? <ChainLogo /> : (
-                    <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
-                      <Circle cx="12" cy="12" r="11" fill="#E2E8F0" />
-                    </Svg>
-                  );
-                })()}
-                <Text style={styles.chainOptionName}>{chain.name}</Text>
-                <Text style={styles.chainOptionSymbol}>{chain.symbol}</Text>
-              </TouchableOpacity>
-            ))}
+      {/* Toast Notification */}
+      {copiedToast && (
+        <View style={styles.toastContainer}>
+          <View style={[styles.toast, { backgroundColor: isDark ? '#1F2937' : '#0F172A' }]}>
+            <Text style={styles.toastText}>Address copied to clipboard</Text>
           </View>
         </View>
       )}
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary.DEFAULT]}
+            tintColor={colors.primary.DEFAULT}
+          />
+        }
+      >
+        {/* Hero Balance Section (Clean Trust Wallet Style) */}
+        <View style={styles.heroSection}>
+          <Text style={[styles.balanceAmount, { color: colors.text.primary }]}>
+            ${totalValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </Text>
+          <View style={styles.changeRow}>
+            <View style={[styles.changeBadge, { backgroundColor: isDark ? '#064E3B' : '#ECFDF5' }]}>
+              <Text style={styles.changeBadgeText}>+0.00%</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 4 Circular Action Buttons (Send, Receive, Buy, Swap) */}
+        <View style={styles.actionsRow}>
+          <View style={styles.actionItem}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Send')}
+              activeOpacity={0.82}
+              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+            >
+              <SendIcon color="#FFFFFF" size={22} />
+            </TouchableOpacity>
+            <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Send</Text>
+          </View>
+
+          <View style={styles.actionItem}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Receive')}
+              activeOpacity={0.82}
+              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+            >
+              <ReceiveIcon color="#FFFFFF" size={22} />
+            </TouchableOpacity>
+            <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Receive</Text>
+          </View>
+
+          <View style={styles.actionItem}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Buy')}
+              activeOpacity={0.82}
+              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+            >
+              <BuyIcon color="#FFFFFF" size={20} />
+            </TouchableOpacity>
+            <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Buy</Text>
+          </View>
+
+          <View style={styles.actionItem}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Swap')}
+              activeOpacity={0.82}
+              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+            >
+              <SwapIcon color="#FFFFFF" size={22} />
+            </TouchableOpacity>
+            <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Swap</Text>
+          </View>
+        </View>
+
+        {/* Tabs: Crypto / NFTs */}
+        <View style={[styles.tabBar, { borderBottomColor: colors.border.subtle }]}>
+          <TouchableOpacity
+            onPress={() => setActiveTab('crypto')}
+            style={[styles.tabItem, activeTab === 'crypto' && { borderBottomColor: colors.primary.DEFAULT, borderBottomWidth: 2 }]}
+          >
+            <Text style={[styles.tabText, { color: activeTab === 'crypto' ? colors.text.primary : colors.text.muted, fontWeight: activeTab === 'crypto' ? '700' : '500' }]}>
+              Crypto
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setActiveTab('nfts')}
+            style={[styles.tabItem, activeTab === 'nfts' && { borderBottomColor: colors.primary.DEFAULT, borderBottomWidth: 2 }]}
+          >
+            <Text style={[styles.tabText, { color: activeTab === 'nfts' ? colors.text.primary : colors.text.muted, fontWeight: activeTab === 'nfts' ? '700' : '500' }]}>
+              NFTs
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Token List */}
+        {activeTab === 'crypto' ? (
+          <View style={styles.tokenList}>
+            {tokenList.map((token, index) => {
+              const Logo = TOKEN_LOGOS[token.symbol] || EthLogo;
+              return (
+                <TouchableOpacity
+                  key={`${token.symbol}-${index}`}
+                  onPress={() => navigation.navigate('Send')}
+                  activeOpacity={0.7}
+                  style={[styles.tokenRow, { borderBottomColor: colors.border.subtle }]}
+                >
+                  <Logo />
+                  <View style={styles.tokenMeta}>
+                    <Text style={[styles.tokenSymbol, { color: colors.text.primary }]}>{token.name}</Text>
+                    <View style={styles.tokenPriceRow}>
+                      <Text style={[styles.tokenPrice, { color: colors.text.muted }]}>{token.price}</Text>
+                      <Text style={[styles.tokenChange, { color: token.positive ? '#10B981' : '#EF4444' }]}>
+                        {token.change}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.tokenBalanceCol}>
+                    <Text style={[styles.tokenAmount, { color: colors.text.primary }]}>{token.balance} {token.symbol}</Text>
+                    <Text style={[styles.tokenUsd, { color: colors.text.muted }]}>{token.usd}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyNftContainer}>
+            <Text style={[styles.emptyNftText, { color: colors.text.muted }]}>No NFTs yet in this wallet</Text>
+          </View>
+        )}
+
+        {/* Manage Crypto Button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('CustomToken')}
+          activeOpacity={0.75}
+          style={[styles.manageCryptoBtn, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+        >
+          <Text style={[styles.manageCryptoText, { color: colors.primary.DEFAULT }]}>+ Manage Crypto</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Network Switcher Modal */}
+      <Modal
+        visible={showNetworkModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowNetworkModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalDismissArea}
+            activeOpacity={1}
+            onPress={() => setShowNetworkModal(false)}
+          />
+          <View style={[styles.modalSheet, { backgroundColor: colors.bg.surface, borderTopColor: colors.border.subtle }]}>
+            <View style={styles.modalHandle} />
+            <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Select Network</Text>
+            <Text style={[styles.modalSubtitle, { color: colors.text.secondary }]}>Free High-Speed Public RPC Connectors</Text>
+
+            <ScrollView style={{ maxHeight: 340 }}>
+              {Object.entries(CHAINS).map(([key, chain]) => (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => {
+                    setSelectedChain(key);
+                    setShowNetworkModal(false);
+                  }}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.chainItem,
+                    { borderBottomColor: colors.border.subtle },
+                    selectedChain === key && { backgroundColor: colors.primary.muted }
+                  ]}
+                >
+                  <View style={styles.chainItemLeft}>
+                    <View style={[styles.chainLogoCircle, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}>
+                      <Text style={[styles.chainLogoText, { color: colors.text.primary }]}>{chain.logo}</Text>
+                    </View>
+                    <View>
+                      <Text style={[styles.chainItemName, { color: colors.text.primary }]}>{chain.name}</Text>
+                      <Text style={[styles.chainItemRpc, { color: colors.text.muted }]} numberOfLines={1}>
+                        {chain.rpcUrls[0].replace('https://', '')}
+                      </Text>
+                    </View>
+                  </View>
+                  {selectedChain === key && (
+                    <View style={[styles.activeDot, { backgroundColor: colors.primary.DEFAULT }]} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
+  root: { flex: 1 },
   header: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
-  greeting: {
-    flex: 1,
-  },
-  greetingText: { fontSize: 17, fontWeight: '400', color: '#64748B' },
-  greetingName: { fontSize: 28, fontWeight: '700', color: '#0F172A' },
-  chainSelector: {
+  addressPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-  },
-  chainLabel: { fontSize: 15, fontWeight: '600', color: '#0F172A' },
-  portfolioCard: {
+    paddingVertical: 7,
     borderRadius: 20,
-    padding: 24,
-    marginBottom: 24,
-  },
-  portfolioLabel: { fontSize: 14, fontWeight: '500', color: 'rgba(255,255,255,0.8)' },
-  portfolioValue: { fontSize: 42, fontWeight: '700', color: '#FFFFFF', letterSpacing: -1.5, marginTop: 8 },
-  portfolioSubtitle: { fontSize: 14, fontWeight: '400', color: 'rgba(255,255,255,0.7)', marginTop: 4 },
-  section: { marginBottom: 24 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#0F172A' },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  actionCard: {
-    width: '48%',
-    aspectRatio: 1,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderWidth: 1,
   },
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
+  addressText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginRight: 6,
   },
-  actionLabel: { fontSize: 15, fontWeight: '600' },
-  aiCard: {
-    borderRadius: 16,
-    padding: 16,
+  networkPill: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
     borderWidth: 1,
-    marginBottom: 24,
   },
-  aiHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  aiIcon: {
+  networkDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  networkName: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginRight: 4,
+  },
+  iconButton: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: 70,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 99,
+  },
+  toast: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  heroSection: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  balanceAmount: {
+    fontSize: 38,
+    fontWeight: '800',
+    letterSpacing: -1,
+  },
+  changeRow: {
+    marginTop: 8,
+  },
+  changeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  changeBadgeText: {
+    color: '#10B981',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 24,
+    marginBottom: 28,
+  },
+  actionItem: {
+    alignItems: 'center',
+  },
+  actionCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    marginBottom: 8,
+  },
+  tabItem: {
+    paddingVertical: 10,
+    marginRight: 24,
+  },
+  tabText: {
+    fontSize: 15,
+  },
+  tokenList: {
+    paddingHorizontal: 16,
+  },
+  tokenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 0.5,
+  },
+  tokenMeta: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  tokenSymbol: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  tokenPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tokenPrice: {
+    fontSize: 13,
+    marginRight: 6,
+  },
+  tokenChange: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tokenBalanceCol: {
+    alignItems: 'flex-end',
+  },
+  tokenAmount: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  tokenUsd: {
+    fontSize: 13,
+  },
+  emptyNftContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyNftText: {
+    fontSize: 14,
+  },
+  manageCryptoBtn: {
+    marginHorizontal: 24,
+    marginTop: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  aiTitle: { fontSize: 15, fontWeight: '600' },
-  aiText: { fontSize: 14, lineHeight: 22, flex: 1 },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+  manageCryptoText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
-  emptyText: { fontSize: 14, textAlign: 'center' },
-  assetsList: { gap: 8 },
-  assetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 12,
-  },
-  assetInfo: { flex: 1, gap: 2 },
-  assetSymbol: { fontSize: 15, fontWeight: '600' },
-  assetName: { fontSize: 13 },
-  assetValue: { alignItems: 'flex-end', gap: 2 },
-  assetAmount: { fontSize: 15, fontWeight: '600' },
-  assetBalance: { fontSize: 13 },
   modalOverlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    zIndex: 1000,
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
   },
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
-  modal: {
-    position: 'absolute',
-    bottom: 0, left: 0, right: 0,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '70%',
+  modalDismissArea: {
+    flex: 1,
   },
-  modalTitle: { fontSize: 18, fontWeight: '600', marginBottom: 16, textAlign: 'center' },
-  chainOption: {
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 34,
+    borderTopWidth: 1,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#94A3B8',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    marginBottom: 14,
+    marginTop: 2,
+  },
+  chainItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 4,
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderBottomWidth: 0.5,
   },
-  chainOptionName: { fontSize: 16, fontWeight: '600', color: '#0F172A' },
-  chainOptionSymbol: { fontSize: 14, color: '#64748B' },
+  chainItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chainLogoCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  chainLogoText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  chainItemName: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  chainItemRpc: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
 });

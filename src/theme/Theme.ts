@@ -11,17 +11,17 @@ export const moderateScale = (size: number, factor = 0.5) => size + (scale - 1) 
 export const verticalScale = (size: number) => size * scale;
 
 // ============================================
-// LIGHT PALETTE — Apple Style Clean Design
+// LIGHT PALETTE — Trust Wallet Clean Style
 // ============================================
 export const lightColors = {
   // Base
   bg: {
-    canvas: '#FFFFFF',
+    canvas: '#F6F8FA',
     surface: '#FFFFFF',
-    surfaceElevated: '#F8FAFC',
+    surfaceElevated: '#FFFFFF',
     surfaceMuted: '#F1F5F9',
     surfacePressed: '#E2E8F0',
-    toString() { return '#FFFFFF'; },
+    toString() { return '#F6F8FA'; },
   },
 
   // Text
@@ -34,16 +34,16 @@ export const lightColors = {
     toString() { return '#0F172A'; },
   },
 
-  // Primary - iOS Blue
+  // Primary - Trust Wallet Signature Royal Blue
   primary: {
-    DEFAULT: '#007AFF',
-    pressed: '#0056CC',
-    muted: '#E5F0FF',
-    container: '#E5F0FF',
-    onContainer: '#003D99',
-    light: '#4DA6FF',
-    dark: '#0056CC',
-    toString() { return '#007AFF'; },
+    DEFAULT: '#0500FF',
+    pressed: '#0400CC',
+    muted: '#EEF2FF',
+    container: '#EEF2FF',
+    onContainer: '#0500FF',
+    light: '#3B82F6',
+    dark: '#0400CC',
+    toString() { return '#0500FF'; },
   },
 
   // Semantic
@@ -163,36 +163,36 @@ export const lightColors = {
 };
 
 // ============================================
-// DARK PALETTE — Apple Style Dark Mode
+// DARK PALETTE — Trust Wallet Clean Dark Mode
 // ============================================
 export const darkColors = {
   bg: {
-    canvas: '#000000',
-    surface: '#1C1C1E',
-    surfaceElevated: '#2C2C2E',
-    surfaceMuted: '#1C1C1E',
-    surfacePressed: '#2C2C2E',
-    toString() { return '#000000'; },
+    canvas: '#0B0E14',
+    surface: '#151B26',
+    surfaceElevated: '#1C2433',
+    surfaceMuted: '#151B26',
+    surfacePressed: '#222C3D',
+    toString() { return '#0B0E14'; },
   },
 
   text: {
     primary: '#FFFFFF',
-    secondary: '#8E8E93',
-    muted: '#636366',
+    secondary: '#94A3B8',
+    muted: '#64748B',
     inverse: '#000000',
     onPrimary: '#FFFFFF',
     toString() { return '#FFFFFF'; },
   },
 
   primary: {
-    DEFAULT: '#0A84FF',
-    pressed: '#007AFF',
-    muted: '#1A3A5C',
-    container: '#1A3A5C',
+    DEFAULT: '#0A5CFF',
+    pressed: '#0500FF',
+    muted: '#142240',
+    container: '#142240',
     onContainer: '#E5F0FF',
-    light: '#64A9FF',
-    dark: '#007AFF',
-    toString() { return '#0A84FF'; },
+    light: '#3B82F6',
+    dark: '#0500FF',
+    toString() { return '#0A5CFF'; },
   },
 
   success: {

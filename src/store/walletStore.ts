@@ -84,12 +84,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     try {
       const allBalances = await rpcManager.getAllBalances(address, selectedChain);
       
-      // Mock USD prices — in production, fetch from CoinGecko API
+      // USD price reference
       const prices: Record<string, number> = {
         'ETH': 3500, 'BNB': 720, 'MATIC': 0.85, 'AVAX': 42, 'FTM': 0.72,
         'CRO': 0.15, 'USDT': 1, 'USDC': 1, 'DAI': 1,
         'UNI': 12, 'LINK': 18, 'WBTC': 72000, 'SHIB': 0.000025,
-        'CAKE': 3.5, 'tBNB': 0,
+        'CAKE': 3.5, 'tBNB': 0, 'POL': 0.85, 'SOL': 185,
       };
 
       const balancesWithValue = allBalances.map(b => ({
@@ -154,7 +154,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { selectedChain } = get();
-      const result = await WalletManager.sendCrypto(toAddress, amount, selectedChain, token);
+      const targetChain = token?.chainKey || selectedChain;
+      const result = await WalletManager.sendCrypto(toAddress, amount, targetChain, token);
 
       if (result.success) {
         await get().refreshBalances();

@@ -118,20 +118,22 @@ class RPCManager {
     chainKey: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     const chain = CHAINS[chainKey] || CHAINS.ethereum;
+    let lastError = '';
     for (const rpcUrl of chain.rpcUrls) {
       try {
         const provider = createStaticProvider(rpcUrl, chain);
         const wallet = new ethers.Wallet(privateKey, provider);
         const tx = await wallet.sendTransaction({
           to: toAddress,
-          value: ethers.parseEther(amount),
+          value: ethers.parseUnits(amount, chain.decimals),
         });
         return { success: true, txHash: tx.hash };
       } catch (e: any) {
+        lastError = e?.message || 'Transaction broadcast failed';
         console.warn('Send native error on RPC:', e?.message);
       }
     }
-    return { success: false, error: 'Transaction broadcast failed on all RPC nodes' };
+    return { success: false, error: lastError || 'Transaction broadcast failed on all RPC nodes' };
   }
 
   async sendERC20(
@@ -142,6 +144,7 @@ class RPCManager {
     chainKey: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     const chain = CHAINS[chainKey] || CHAINS.ethereum;
+    let lastError = '';
     for (const rpcUrl of chain.rpcUrls) {
       try {
         const provider = createStaticProvider(rpcUrl, chain);
@@ -151,10 +154,11 @@ class RPCManager {
         const tx = await contract.transfer(toAddress, parsedAmount);
         return { success: true, txHash: tx.hash };
       } catch (e: any) {
+        lastError = e?.message || 'Token transfer failed';
         console.warn('Send ERC20 error on RPC:', e?.message);
       }
     }
-    return { success: false, error: 'Token transfer failed on all RPC nodes' };
+    return { success: false, error: lastError || 'Token transfer failed on all RPC nodes' };
   }
 }
 

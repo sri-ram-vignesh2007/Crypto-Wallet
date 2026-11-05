@@ -66,7 +66,7 @@ export function WalletsScreen({ navigation }: { navigation?: any }) {
 
       <TouchableOpacity
         style={[styles.primaryBtn, { backgroundColor: colors.primary.DEFAULT }]}
-        onPress={() => navigation?.navigate?.('CreateImportWallet', { mode: 'import' })}
+        onPress={() => navigation?.navigate?.('SeedPhrase', { mode: 'import' })}
         activeOpacity={0.85}
       >
         <Text style={styles.primaryBtnText}>+ Import Another Wallet</Text>
@@ -199,7 +199,7 @@ export function AboutScreen() {
       <Text style={[styles.title, { color: colors.text.primary }]}>Crypto <Text style={{ color: colors.primary.DEFAULT }}>Wallet</Text></Text>
       <Text style={[styles.subtitle, { color: colors.text.secondary, marginTop: 4 }]}>Version 2.0.0 (Multi-Chain)</Text>
       <Text style={[styles.cardDesc, { color: colors.text.muted, textAlign: 'center', marginTop: 20, maxWidth: 300 }]}>
-        Non-custodial, open-source Web3 intelligence wallet with multi-chain RPCs, AI streaming, and DEX swap aggregator.
+        Non-custodial, open-source Web3 wallet with multi-chain free RPC connectors, instant BIP-39 address generation, and clean Trust Wallet navigation.
       </Text>
     </View>
   );

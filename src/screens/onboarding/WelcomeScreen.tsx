@@ -1,84 +1,87 @@
 // src/screens/onboarding/WelcomeScreen.tsx
-// Clean Welcome Screen - No emojis, minimal text
+// Trust Wallet Minimalist Welcome Screen
 
 import React from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView,
 } from 'react-native';
-import Svg, { Path, Circle, Line } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { useColors, useIsDark } from '../../theme/ThemeContext';
 
-// Safe area hook with fallback
 let useSafeAreaInsets = () => ({ top: 0, bottom: 0, left: 0, right: 0 });
 try {
   const safeAreaContext = require('react-native-safe-area-context');
   if (safeAreaContext.useSafeAreaInsets) {
     useSafeAreaInsets = safeAreaContext.useSafeAreaInsets;
   }
-} catch (e) {
-  // Fallback already defined
-}
+} catch (e) {}
 
 export default function WelcomeScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
 
-  const handleContinue = () => {
-    navigation.navigate('Email');
+  const handleCreate = () => {
+    navigation.navigate('SeedPhrase', { mode: 'create' });
+  };
+
+  const handleImport = () => {
+    navigation.navigate('SeedPhrase', { mode: 'import' });
   };
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
 
-      <View style={[styles.content, { paddingTop: Math.max(40, insets.top + 20), paddingBottom: Math.max(30, insets.bottom + 16) }]}>
-        {/* Brand Icon */}
-        <View style={styles.iconContainer}>
-          <View style={[styles.iconBackdrop, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Svg width={72} height={72} viewBox="0 0 24 24" fill="none">
+      <View style={[styles.content, { paddingTop: Math.max(30, insets.top + 20), paddingBottom: Math.max(20, insets.bottom + 16) }]}>
+        {/* Brand Shield Logo */}
+        <View style={styles.centerContainer}>
+          <View style={[styles.shieldContainer, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+            <Svg width={76} height={76} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z"
                 fill={colors.primary.DEFAULT}
               />
               <Path
-                d="M12 7V17M9 12H15"
+                d="M9 12L11 14L15 10"
                 stroke="#FFFFFF"
-                strokeWidth={2.2}
+                strokeWidth={2.5}
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </Svg>
           </View>
-        </View>
 
-        {/* Title & Tagline */}
-        <View style={styles.headerBlock}>
           <Text style={[styles.title, { color: colors.text.primary }]}>
-            Crypto <Text style={{ color: colors.primary.DEFAULT }}>Wallet</Text>
+            The Most Trusted & Secure Crypto Wallet
           </Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-            Secure self-custodial wallet with AI-powered security.
+            Store, send, and swap your crypto across major blockchains with non-custodial security.
           </Text>
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity
-          onPress={handleContinue}
-          activeOpacity={0.85}
-          style={[
-            styles.primaryButton,
-            {
-              backgroundColor: colors.primary.DEFAULT,
-              shadowColor: colors.primary.DEFAULT,
-              shadowOpacity: 0.35,
-              shadowRadius: 12,
-              shadowOffset: { width: 0, height: 6 },
-              elevation: 6,
-            },
-          ]}
-        >
-          <Text style={styles.primaryButtonText}>Get Started</Text>
-        </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            onPress={handleCreate}
+            activeOpacity={0.88}
+            style={[styles.primaryButton, { backgroundColor: colors.primary.DEFAULT }]}
+          >
+            <Text style={styles.primaryButtonText}>Create a new wallet</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleImport}
+            activeOpacity={0.8}
+            style={[styles.secondaryButton, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+          >
+            <Text style={[styles.secondaryButtonText, { color: colors.text.primary }]}>I already have a wallet</Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.footerText, { color: colors.text.muted }]}>
+            By continuing, you agree to our Terms of Service & Privacy Policy
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -90,42 +93,69 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  iconContainer: { marginTop: 20, alignItems: 'center' },
-  iconBackdrop: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  shieldContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    marginBottom: 28,
   },
-  headerBlock: { alignItems: 'center', marginVertical: 16 },
   title: {
+    fontSize: 26,
     fontWeight: '800',
-    fontSize: 32,
-    letterSpacing: -0.8,
     textAlign: 'center',
+    letterSpacing: -0.6,
+    lineHeight: 34,
   },
   subtitle: {
     fontSize: 14,
-    marginTop: 8,
     textAlign: 'center',
-    lineHeight: 20,
+    marginTop: 12,
+    lineHeight: 22,
     maxWidth: 320,
+  },
+  actionsContainer: {
+    width: '100%',
+    paddingBottom: 8,
   },
   primaryButton: {
     width: '100%',
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12,
   },
-  primaryButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  secondaryButton: {
+    width: '100%',
+    paddingVertical: 15,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  secondaryButtonText: {
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  footerText: {
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
 });

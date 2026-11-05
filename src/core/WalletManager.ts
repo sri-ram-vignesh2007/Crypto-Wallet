@@ -25,7 +25,7 @@ export class WalletManager {
     return await SecureKeyManager.importWallet(mnemonic);
   }
 
-  static async getWalletInfo(chainKey: string = 'sepolia'): Promise<WalletInfo | null> {
+  static async getWalletInfo(chainKey: string = 'ethereum'): Promise<WalletInfo | null> {
     const address = await SecureKeyManager.getAddress();
     if (!address) return null;
 
@@ -34,14 +34,14 @@ export class WalletManager {
     return {
       address,
       balance,
-      chain: CHAINS[chainKey].name,
+      chain: (CHAINS[chainKey] || CHAINS.ethereum).name,
     };
   }
 
   static async sendCrypto(
     toAddress: string,
     amount: string,
-    chainKey: string = 'sepolia',
+    chainKey: string = 'ethereum',
     token?: Token
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     try {
@@ -49,56 +49,16 @@ export class WalletManager {
         return { success: false, error: 'Invalid recipient address' };
       }
 
-      const fromAddress = await SecureKeyManager.getAddress();
-      if (!fromAddress) {
-        return { success: false, error: 'No wallet found' };
+      const privateKey = await SecureKeyManager.getPrivateKey();
+      if (!privateKey) {
+        return { success: false, error: 'Private key not accessible. Please verify wallet security.' };
       }
-
-      const chain = CHAINS[chainKey];
-      const provider = rpcManager.getProvider(chainKey);
-      const feeData = await rpcManager.getFeeData(chainKey);
-
-      let txRequest: ethers.TransactionRequest;
 
       if (!token || token.isNative) {
-        // Send native coin (ETH, BNB, MATIC, etc.)
-        txRequest = {
-          to: toAddress,
-          from: fromAddress,
-          value: ethers.parseUnits(amount, chain.decimals),
-          chainId: chain.id,
-          maxFeePerGas: feeData.maxFeePerGas || undefined,
-          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
-          type: 2,
-        };
+        return await rpcManager.sendNative(privateKey, toAddress, amount, chainKey);
       } else {
-        // Send ERC-20 token
-        const ERC20_ABI = ['function transfer(address to, uint256 amount) returns (bool)'];
-        const contract = new ethers.Contract(token.address, ERC20_ABI, provider);
-        const parsedAmount = ethers.parseUnits(amount, token.decimals);
-        const data = contract.interface.encodeFunctionData('transfer', [toAddress, parsedAmount]);
-
-        txRequest = {
-          to: token.address,
-          from: fromAddress,
-          data: data,
-          chainId: chain.id,
-          maxFeePerGas: feeData.maxFeePerGas || undefined,
-          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
-          type: 2,
-        };
+        return await rpcManager.sendERC20(privateKey, toAddress, amount, token, chainKey);
       }
-
-      const nonce = await rpcManager.getTransactionCount(fromAddress, chainKey);
-      txRequest.nonce = nonce;
-
-      const gasLimit = await provider.estimateGas(txRequest);
-      txRequest.gasLimit = gasLimit;
-
-      const signedTx = await SecureKeyManager.signTransaction(txRequest);
-      const txHash = await rpcManager.broadcastTransaction(signedTx, chainKey);
-
-      return { success: true, txHash };
     } catch (error: any) {
       return { success: false, error: error.message || 'Transaction failed' };
     }
@@ -116,7 +76,6 @@ export class WalletManager {
     return await SecureKeyManager.getAddress();
   }
 
-  // Exposed for walletStore.ts to use directly if needed
   static async signTransaction(txRequest: ethers.TransactionRequest): Promise<string> {
     return await SecureKeyManager.signTransaction(txRequest);
   }

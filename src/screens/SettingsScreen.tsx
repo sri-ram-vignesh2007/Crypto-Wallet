@@ -1,313 +1,507 @@
-// src/screens/SettingsScreen.tsx - Apple Style Settings
+// src/screens/SettingsScreen.tsx - Trust Wallet Style Settings & Key Management
 
 import React, { useState } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, Switch,
-  SafeAreaView, StatusBar, Alert,
+  SafeAreaView, StatusBar, Alert, Modal,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Line } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
-import { useProfileStore } from '../store/profileStore';
 import { useWalletStore } from '../store/walletStore';
 import { useAppLock } from '../hooks/useAppLock';
-import { ClayButton } from '../components/ClayButton';
+import { SecureKeyManager } from '../core/SecureKeyManager';
+import { CHAINS } from '../core/ChainConfig';
 
-const ChevronRightIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; size?: number }) => (
+const ChevronRightIcon = ({ color = '#94A3B8', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
-const SectionIcons = {
-  wallet: (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-      <Path d="M3 5v14a2 2 0 0 0 2 2h14v-4" />
-    </Svg>
-  ),
-  security: (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <Path d="M9 12l2 2 4-4" />
-    </Svg>
-  ),
-  ai: (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M6 8l4 4 4-4M6 12l4 4 4-4M6 16l4 4 4-4" />
-      <Circle cx="18" cy="18" r="5" />
-    </Svg>
-  ),
-  networks: (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M2 12h20M12 2a20 20 0 1 0 0 40 20 20 0 0 0 0-40z" />
-    </Svg>
-  ),
-  appearance: (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <Circle cx="12" cy="12" r="5" />
-      <Path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-    </Svg>
-  ),
-  support: (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <Circle cx="12" cy="12" r="10" />
-      <Path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-      <Path d="M12 17h.01" />
-    </Svg>
-  ),
-};
+const KeyIcon = ({ color = '#0500FF', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="7.5" cy="15.5" r="4.5" />
+    <Path d="M10.5 12.5L20 3M16 7l2 2M18 5l2 2" />
+  </Svg>
+);
 
-const SETTINGS_SECTIONS = [
-  {
-    id: 'wallet',
-    title: 'Wallet',
-    icon: SectionIcons.wallet,
-    items: [
-      { id: 'manage', label: 'Manage Wallets', action: () => {} },
-      { id: 'connect', label: 'Connect Hardware Wallet', action: () => {} },
-      { id: 'export', label: 'Export Private Keys', action: () => Alert.alert('Security', 'Requires biometric authentication') },
-    ],
-  },
-  {
-    id: 'security',
-    title: 'Security',
-    icon: SectionIcons.security,
-    items: [
-      { id: 'biometric', label: 'Biometric Lock', type: 'switch', value: true },
-      { id: 'auto-lock', label: 'Auto-lock Timer', value: '1 minute' },
-      { id: 'change-pin', label: 'Change PIN', action: () => {} },
-    ],
-  },
-  {
-    id: 'ai',
-    title: 'AI Assistant',
-    icon: SectionIcons.ai,
-    items: [
-      { id: 'enable-ai', label: 'Enable AI Insights', type: 'switch', value: true },
-      { id: 'risk-level', label: 'Risk Sensitivity', value: 'Balanced' },
-      { id: 'data-sharing', label: 'Share Analytics', type: 'switch', value: false },
-    ],
-  },
-  {
-    id: 'networks',
-    title: 'Networks',
-    icon: SectionIcons.networks,
-    items: [
-      { id: 'default', label: 'Default Network', value: 'Ethereum' },
-      { id: 'manage', label: 'Manage Networks', action: () => {} },
-      { id: 'rpc', label: 'Custom RPC', action: () => {} },
-    ],
-  },
-  {
-    id: 'appearance',
-    title: 'Appearance',
-    icon: SectionIcons.appearance,
-    items: [
-      { id: 'theme', label: 'Theme', value: 'System' },
-      { id: 'currency', label: 'Currency', value: 'USD' },
-      { id: 'language', label: 'Language', value: 'English' },
-    ],
-  },
-  {
-    id: 'support',
-    title: 'Support',
-    icon: SectionIcons.support,
-    items: [
-      { id: 'help', label: 'Help Center', action: () => {} },
-      { id: 'feedback', label: 'Send Feedback', action: () => {} },
-      { id: 'terms', label: 'Terms of Service', action: () => {} },
-      { id: 'privacy', label: 'Privacy Policy', action: () => {} },
-      { id: 'version', label: 'Version', value: '1.0.0' },
-    ],
-  },
-];
+const ShieldIcon = ({ color = '#10B981', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </Svg>
+);
+
+const GlobeIcon = ({ color = '#3B82F6', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20z" />
+  </Svg>
+);
 
 export default function SettingsScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
-  const { isUnlocked } = useAppLock();
-  const { hasWallet } = useWalletStore();
-  const { name, avatar } = useProfileStore();
+
+  const { address, selectedChain, resetWallet } = useWalletStore();
+  const [biometricEnabled, setBiometricEnabled] = useState(true);
+
+  const [revealedSecret, setRevealedSecret] = useState<{ type: 'phrase' | 'key' | 'address'; value: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const displayAddress = address || '0x0000000000000000000000000000000000000000';
+
+  const viewPublicAddress = () => {
+    setRevealedSecret({
+      type: 'address',
+      value: displayAddress,
+    });
+  };
+
+  const viewSecretPhrase = async () => {
+    Alert.alert(
+      'Security Warning',
+      'Never share your secret recovery phrase. Anyone with these 12 words has full control of your assets.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reveal Phrase',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const phrase = await SecureKeyManager.getMnemonic();
+              if (phrase) {
+                setRevealedSecret({ type: 'phrase', value: phrase });
+              } else {
+                Alert.alert('Not Found', 'Seed phrase not stored on this device.');
+              }
+            } catch (e: any) {
+              Alert.alert('Error', e?.message || 'Authentication failed');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const viewPrivateKey = async () => {
+    Alert.alert(
+      'Extreme Caution',
+      'Your private key gives direct access to all funds on-chain. Never enter it on any website or send to anyone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reveal Key',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const pk = await SecureKeyManager.getPrivateKey();
+              if (pk) {
+                setRevealedSecret({ type: 'key', value: pk });
+              } else {
+                Alert.alert('Not Found', 'Private key not accessible.');
+              }
+            } catch (e: any) {
+              Alert.alert('Error', e?.message || 'Authentication failed');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const copySecret = async () => {
+    if (!revealedSecret) return;
+    try {
+      await Clipboard.setStringAsync(revealedSecret.value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  const handleResetWallet = () => {
+    Alert.alert(
+      'Reset Wallet',
+      'Are you sure you want to delete this wallet from this device? Make sure you have your secret recovery phrase backed up.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset Wallet',
+          style: 'destructive',
+          onPress: async () => {
+            await resetWallet();
+          },
+        },
+      ]
+    );
+  };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
 
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Settings</Text>
+      </View>
+
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: Math.max(30, insets.bottom + 20) }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile Header */}
-        <View style={[styles.profileHeader, { backgroundColor: colors.primary.muted, borderColor: colors.primary.DEFAULT }]}>
-          <View style={[
-            styles.avatar,
-            { backgroundColor: colors.primary.DEFAULT },
-          ]}>
-            <Text style={styles.avatarText}>{avatar || 'U'}</Text>
+        {/* Wallet Overview Card */}
+        <View style={[styles.walletCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+          <View style={styles.walletHeader}>
+            <View>
+              <Text style={[styles.walletName, { color: colors.text.primary }]}>Main Wallet 1</Text>
+              <Text style={[styles.walletAddr, { color: colors.text.muted }]}>
+                {displayAddress.slice(0, 10)}...{displayAddress.slice(-8)}
+              </Text>
+            </View>
+            <View style={[styles.activeBadge, { backgroundColor: isDark ? '#064E3B' : '#ECFDF5' }]}>
+              <Text style={styles.activeBadgeText}>Active</Text>
+            </View>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{name || 'User'}</Text>
-            <Text style={styles.profileStatus}>
-              {hasWallet ? 'Wallet Active' : 'No Wallet'}
-            </Text>
+
+          {/* Quick Key Action Pills */}
+          <View style={styles.keyActionsRow}>
+            <TouchableOpacity
+              onPress={viewPublicAddress}
+              style={[styles.keyActionBtn, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.keyActionText, { color: colors.text.primary }]}>Public Address</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={viewSecretPhrase}
+              style={[styles.keyActionBtn, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.keyActionText, { color: colors.text.primary }]}>Secret Phrase</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={viewPrivateKey}
+              style={[styles.keyActionBtn, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.keyActionText, { color: '#EF4444' }]}>Private Key</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
-            <Text style={styles.editText}>Edit</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Settings Sections */}
-        {SETTINGS_SECTIONS.map((section) => (
-          <View key={section.id} style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionIconWrapper}>
-                {section.icon}
-              </View>
-              <Text style={styles.sectionTitle}>{section.title}</Text>
+        {/* Security Section */}
+        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>Security</Text>
+        <View style={[styles.sectionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+          <View style={styles.settingRow}>
+            <View style={styles.settingLeft}>
+              <ShieldIcon color="#10B981" size={18} />
+              <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Biometric Authentication</Text>
             </View>
-            <View style={styles.sectionList}>
-              {section.items.map((item, index) => (
-                <TouchableOpacity
-                  key={`${section.id}-${item.id}`}
-                  style={[
-                    styles.item,
-                    index === section.items.length - 1 ? styles.itemLast : null,
-                    { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },
-                  ]}
-                  onPress={item.action}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.itemLeft}>
-                    <Text style={[
-                      styles.itemLabel,
-                      { color: colors.text.primary },
-                    ]}>
-                      {item.label}
-                    </Text>
-                    {item.value && (
-                      <Text style={[styles.itemValue, { color: colors.text.muted }]}>{item.value}</Text>
-                    )}
-                  </View>
-                  <View style={styles.itemRight}>
-                    {item.type === 'switch' && (
-                      <Switch
-                        value={item.value}
-                        onValueChange={() => {}}
-                        thumbColor={item.value ? colors.primary.DEFAULT : colors.text.muted}
-                        trackColor={{ false: colors.border.DEFAULT, true: colors.primary.muted }}
-                      />
-                    )}
-                    {!item.type && !item.value && <ChevronRightIcon color={colors.text.muted} size={20} />}
-                    {item.value && !item.type && !item.action && (
-                      <Text style={[styles.itemValue, { color: colors.text.muted }]}>{item.value}</Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Switch
+              value={biometricEnabled}
+              onValueChange={setBiometricEnabled}
+              trackColor={{ false: colors.border.DEFAULT, true: colors.primary.DEFAULT }}
+              thumbColor="#FFFFFF"
+            />
           </View>
-        ))}
+        </View>
 
-        {/* Danger Zone */}
-        <View style={styles.dangerSection}>
+        {/* Networks Section */}
+        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>Networks</Text>
+        <View style={[styles.sectionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
           <TouchableOpacity
-            style={[styles.dangerButton, { backgroundColor: colors.danger.muted, borderColor: colors.danger.DEFAULT }]}
-            onPress={() => Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Sign Out', style: 'destructive' },
-            ])}
-            activeOpacity={0.85}
+            onPress={() => navigation.navigate('NetworkSettings')}
+            style={styles.settingRowClickable}
+            activeOpacity={0.7}
           >
-            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.danger.DEFAULT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-            </Svg>
-            <Text style={[styles.dangerText, { color: colors.danger.DEFAULT }]}>Sign Out</Text>
+            <View style={styles.settingLeft}>
+              <GlobeIcon color={colors.primary.DEFAULT} size={18} />
+              <View>
+                <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Public RPC Networks</Text>
+                <Text style={[styles.settingSub, { color: colors.text.muted }]}>
+                  {Object.keys(CHAINS).length} Free High-Speed Blockchains
+                </Text>
+              </View>
+            </View>
+            <ChevronRightIcon color={colors.text.muted} size={18} />
           </TouchableOpacity>
         </View>
 
-        {/* App Version */}
-        <View style={styles.version}>
-          <Text style={styles.versionText}>Crypto Wallet v1.0.0</Text>
+        {/* App Info & Reset */}
+        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>App & Account</Text>
+        <View style={[styles.sectionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('About')}
+            style={styles.settingRowClickable}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.settingLabel, { color: colors.text.primary }]}>About Crypto Wallet</Text>
+            <Text style={[styles.settingValue, { color: colors.text.muted }]}>v1.0.0</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleResetWallet}
+            style={[styles.settingRowClickable, { borderTopWidth: 0.5, borderTopColor: colors.border.subtle }]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.settingLabel, { color: '#EF4444' }]}>Reset / Delete Wallet</Text>
+            <ChevronRightIcon color="#EF4444" size={18} />
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Secret / Key Viewer Modal */}
+      <Modal
+        visible={!!revealedSecret}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setRevealedSecret(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.secretSheet, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+            <Text style={[styles.secretTitle, { color: colors.text.primary }]}>
+              {revealedSecret?.type === 'address' && 'Public Address'}
+              {revealedSecret?.type === 'phrase' && 'Secret Recovery Phrase'}
+              {revealedSecret?.type === 'key' && 'Private Key'}
+            </Text>
+
+            <Text style={[styles.secretWarning, { color: revealedSecret?.type === 'key' ? '#EF4444' : colors.text.secondary }]}>
+              {revealedSecret?.type === 'address' && 'Safe to share with anyone to receive coins.'}
+              {revealedSecret?.type === 'phrase' && 'Never share these 12 words with anyone. Store them offline.'}
+              {revealedSecret?.type === 'key' && 'CRITICAL: Anyone with this private key can take your funds permanently.'}
+            </Text>
+
+            {revealedSecret?.type === 'phrase' ? (
+              <View style={[styles.wordsGrid, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}>
+                {revealedSecret.value.split(' ').map((w, idx) => (
+                  <View key={idx} style={[styles.wordItem, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+                    <Text style={[styles.wordNum, { color: colors.text.muted }]}>{idx + 1}.</Text>
+                    <Text style={[styles.wordText, { color: colors.text.primary }]}>{w}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={[styles.keyBox, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}>
+                <Text style={[styles.keyText, { color: colors.text.primary }]} selectable>
+                  {revealedSecret?.value}
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              onPress={copySecret}
+              style={[styles.modalCopyBtn, { backgroundColor: colors.primary.DEFAULT }]}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.modalCopyBtnText}>
+                {copied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setRevealedSecret(null)}
+              style={[styles.modalCloseBtn, { borderColor: colors.border.subtle }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.modalCloseBtnText, { color: colors.text.primary }]}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    padding: 20,
-    borderRadius: 16,
+  root: { flex: 1 },
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  walletCard: {
+    padding: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    marginBottom: 28,
+    marginBottom: 24,
   },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
-  profileInfo: { flex: 1, gap: 4 },
-  profileName: { fontSize: 18, fontWeight: '600', color: '#0F172A' },
-  profileStatus: { fontSize: 13, fontWeight: '500', color: '#16A34A' },
-  editButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-  },
-  editText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
-  section: { marginBottom: 24 },
-  sectionHeader: {
+  walletHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  sectionIconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#F8FAFC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: '#0F172A' },
-  sectionList: { gap: 0 },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderWidth: 1,
-    borderRadius: 12,
-    gap: 12,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  itemLast: { borderBottomWidth: 1 },
-  itemLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  itemLabel: { fontSize: 15, fontWeight: '500' },
-  itemValue: { fontSize: 14, fontWeight: '500' },
-  itemRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dangerSection: { marginTop: 16, marginBottom: 24 },
-  dangerButton: {
+  walletName: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  walletAddr: {
+    fontSize: 13,
+  },
+  activeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  activeBadgeText: {
+    color: '#10B981',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  keyActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  keyActionBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginHorizontal: 3,
+  },
+  keyActionText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  sectionCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  settingRowClickable: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
   },
-  dangerText: { fontSize: 15, fontWeight: '600' },
-  version: { alignItems: 'center', paddingTop: 16, paddingBottom: 32 },
-  versionText: { fontSize: 12, fontWeight: '500', color: '#94A3B8' },
+  settingLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginLeft: 12,
+  },
+  settingSub: {
+    fontSize: 12,
+    marginLeft: 12,
+    marginTop: 2,
+  },
+  settingValue: {
+    fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  secretSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    borderTopWidth: 1,
+  },
+  secretTitle: {
+    fontSize: 19,
+    fontWeight: '800',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  secretWarning: {
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center',
+    marginBottom: 18,
+    paddingHorizontal: 8,
+  },
+  wordsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  wordItem: {
+    width: '48%',
+    flexDirection: 'row',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  wordNum: {
+    width: 24,
+    fontSize: 12,
+  },
+  wordText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  keyBox: {
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  keyText: {
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  modalCopyBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalCopyBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  modalCloseBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  modalCloseBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
 });
