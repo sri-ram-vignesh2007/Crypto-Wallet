@@ -84,7 +84,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <ScrollView
         contentContainerStyle={styles.content}

@@ -126,7 +126,7 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Apple Navigation Header */}
       <View style={[styles.header, { paddingTop: insets.top + 6 }]}>

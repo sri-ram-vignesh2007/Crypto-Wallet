@@ -225,7 +225,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#000000' : '#F2F2F7'} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Apple Navigation Bar */}
       <View style={[styles.navBar, { paddingTop: insets.top + 4 }]}>

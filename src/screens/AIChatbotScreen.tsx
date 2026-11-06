@@ -44,7 +44,7 @@ export default function AIChatbotScreen() {
   ]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<any>(null);
   const cancelRef = useRef(false);
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function AIChatbotScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}

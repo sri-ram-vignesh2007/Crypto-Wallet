@@ -42,7 +42,7 @@ export default function ProfileSetupScreen({ navigation }: { navigation: any }) 
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <View style={styles.content}>
         <Text style={[styles.step, { color: colors.primary.DEFAULT }]}>Step 4 of 4</Text>

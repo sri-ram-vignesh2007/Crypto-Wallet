@@ -23,7 +23,7 @@ export default function OTPScreen({ route, navigation }: any) {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [error, setError] = useState('');
-  const inputRefs = useRef<(RNTextInput | null)[]>([]);
+  const inputRefs = useRef<(any | null)[]>([]);
   const { setEmailVerified } = useProfileStore();
 
   const colors = useColors();

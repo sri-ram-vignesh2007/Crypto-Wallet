@@ -32,7 +32,7 @@ export default function LockScreen({ onRetry }: Props) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#070A12" />
+      <StatusBar barStyle="light-content" />
 
       {/* Ambient background glow */}
       <View style={styles.glow} />

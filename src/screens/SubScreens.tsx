@@ -20,7 +20,7 @@ export function ConnectedAppsScreen({ navigation }: { navigation?: any }) {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas, paddingTop: insets.top }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text.primary }]}>Connected dApps</Text>
         <Text style={[styles.subtitle, { color: colors.text.secondary }]}>WalletConnect & dApp sessions</Text>
@@ -45,7 +45,7 @@ export function WalletsScreen({ navigation }: { navigation?: any }) {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas, paddingTop: insets.top }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text.primary }]}>Manage Wallets</Text>
         <Text style={[styles.subtitle, { color: colors.text.secondary }]}>Your active multi-chain accounts</Text>
@@ -83,7 +83,7 @@ export function PrivacySettingsScreen({ navigation }: { navigation?: any }) {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas, paddingTop: insets.top }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text.primary }]}>Privacy & Security</Text>
         <Text style={[styles.subtitle, { color: colors.text.secondary }]}>Zero-knowledge & telemetry settings</Text>
@@ -107,7 +107,7 @@ export function NetworkSettingsScreen({ navigation }: { navigation?: any }) {
 
   return (
     <ScrollView style={[styles.root, { backgroundColor: colors.bg.canvas }]} contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: 40, paddingHorizontal: 20 }}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text.primary }]}>Public RPC Networks</Text>
         <Text style={[styles.subtitle, { color: colors.text.secondary }]}>High-availability multi-endpoint failover</Text>

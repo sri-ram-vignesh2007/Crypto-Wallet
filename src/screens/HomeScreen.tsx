@@ -260,7 +260,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Dynamic Toast Pill (Apple Island Style) */}
       {copiedToast && (

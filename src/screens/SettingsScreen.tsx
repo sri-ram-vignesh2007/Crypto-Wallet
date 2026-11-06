@@ -199,7 +199,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#000000' : '#F2F2F7'} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Apple Large Title Navigation Header */}
       <View style={[styles.largeHeader, { paddingTop: insets.top + 10 }]}>
