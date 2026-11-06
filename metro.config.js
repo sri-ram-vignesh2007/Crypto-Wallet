@@ -9,8 +9,8 @@ const config = getDefaultConfig(__dirname);
 config.resolver.sourceExts.push('cjs');
 config.resolver.sourceExts.push('mjs');
 
-// Disable package exports warning fallback for legacy subpath imports like @noble/hashes/crypto.js
-config.resolver.unstable_enablePackageExports = false;
+// Enable package exports required for React Native 0.88+ subpaths
+config.resolver.unstable_enablePackageExports = true;
 
 module.exports = config;
 
