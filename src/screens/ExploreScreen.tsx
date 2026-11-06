@@ -259,16 +259,16 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   styles.chainCard,
                   { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },
                 ]}
-                onPress={() => navigation.navigate('ChainDetail', { chain: { id: chain.toLowerCase(), name: chain, symbol: chain.slice(0, 3).toUpperCase(), color: '#2563EB', tvl: '$' + (Math.random() * 10 + 1).toFixed(1) + 'B', dapps: Math.floor(Math.random() * 500 + 50) + '+' } })}
+                onPress={() => navigation.navigate('ChainDetail', { chain: { id: chain.toLowerCase(), name: chain, symbol: chain.slice(0, 3).toUpperCase(), color: '#007AFF', tvl: '$' + (Math.random() * 10 + 1).toFixed(1) + 'B', dapps: Math.floor(Math.random() * 500 + 50) + '+' } })}
                 activeOpacity={0.85}
               >
                 <View style={[
                   styles.chainAvatar,
-                  { backgroundColor: ['#627EEA15', '#8247E515', '#F3BA2F15', '#28A0F015', '#0052FF15', '#FF042015', '#E8414215', '#1969FF15', '#14F19515'][i] },
+                  { backgroundColor: ['#627EEA15', '#8247E515', '#F3BA2F15', '#28A0F015', '#007AFF15', '#FF3B3015', '#E8414215', '#5856D615', '#AF52DE15'][i] },
                 ]}>
                   <Text style={[
                     styles.chainAvatarText,
-                    { color: ['#627EEA', '#8247E5', '#F3BA2F', '#28A0F0', '#0052FF', '#FF0420', '#E84142', '#1969FF', '#14F195'][i] },
+                    { color: ['#627EEA', '#8247E5', '#F3BA2F', '#28A0F0', '#007AFF', '#FF3B30', '#E84142', '#5856D6', '#AF52DE'][i] },
                   ]}>
                     {chain.slice(0, 2).toUpperCase()}
                   </Text>

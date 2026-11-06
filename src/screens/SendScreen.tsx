@@ -1,23 +1,84 @@
-// src/screens/SendScreen.tsx - Trust Wallet Style Send Screen
+// src/screens/SendScreen.tsx - Apple iPhone Native Style Send Screen
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
+  View, ScrollView, Text, StyleSheet, TextInput,
   SafeAreaView, StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
-  ActivityIndicator, Linking,
+  ActivityIndicator, Linking, Animated, Pressable,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 import { ethers } from 'ethers';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
-import { CHAINS, Chain, Token } from '../core/ChainConfig';
+import { CHAINS } from '../core/ChainConfig';
 import { rpcManager } from '../core/RPCManager';
 
-const ChevronDownIcon = ({ color = '#94A3B8', size = 16 }: { color?: string; size?: number }) => (
+// Smooth iOS Spring Button Component
+function SpringButton({
+  children,
+  onPress,
+  disabled = false,
+  style,
+  activeScale = 0.96,
+}: {
+  children: React.ReactNode;
+  onPress?: () => void;
+  disabled?: boolean;
+  style?: any;
+  activeScale?: number;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    if (disabled) return;
+    Animated.spring(scale, {
+      toValue: activeScale,
+      damping: 18,
+      stiffness: 260,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      damping: 18,
+      stiffness: 260,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      disabled={disabled}
+    >
+      <Animated.View style={[{ transform: [{ scale }] }, style]}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+const ChevronDownIcon = ({ color = '#8E8E93', size = 16 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M6 9l6 6 6-6" />
+  </Svg>
+);
+
+const BackChevronIcon = ({ color = '#007AFF', size = 24 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M15 18l-6-6 6-6" />
+  </Svg>
+);
+
+const CheckIcon = ({ color = '#FFFFFF', size = 28 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M20 6L9 17l-5-5" />
   </Svg>
 );
 
@@ -109,7 +170,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
       return;
     }
     if (!ethers.isAddress(cleanRecipient)) {
-      Alert.alert('Invalid Address', 'Please enter a valid Ethereum / EVM address (starts with 0x).');
+      Alert.alert('Invalid Address', 'Please enter a valid EVM address (starts with 0x).');
       return;
     }
     const sendNum = parseFloat(amount);
@@ -158,23 +219,22 @@ export default function SendScreen({ navigation }: { navigation: any }) {
     Linking.openURL(url).catch(() => {});
   };
 
-  return (
-    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+  const primaryBlue = isDark ? '#0A84FF' : '#007AFF';
+  const cardBg = isDark ? '#1C1C1E' : '#FFFFFF';
+  const hairline = isDark ? '#2C2C2E' : '#E5E5EA';
 
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-          style={styles.backButton}
-        >
-          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-            <Path d="M19 12H5M12 19l-7-7 7-7" />
-          </Svg>
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Send Crypto</Text>
-        <View style={{ width: 40 }} />
+  return (
+    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#000000' : '#F2F2F7'} />
+
+      {/* Apple Navigation Bar */}
+      <View style={[styles.navBar, { paddingTop: insets.top + 4 }]}>
+        <SpringButton onPress={() => navigation.goBack()} style={styles.navBackBtn}>
+          <BackChevronIcon color={primaryBlue} size={24} />
+          <Text style={[styles.navBackText, { color: primaryBlue }]}>Wallet</Text>
+        </SpringButton>
+        <Text style={[styles.navTitle, { color: colors.text.primary }]}>Send</Text>
+        <View style={{ width: 60 }} />
       </View>
 
       <KeyboardAvoidingView
@@ -182,228 +242,226 @@ export default function SendScreen({ navigation }: { navigation: any }) {
         style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={[styles.content, { paddingBottom: Math.max(30, insets.bottom + 20) }]}
+          contentContainerStyle={[styles.content, { paddingBottom: Math.max(34, insets.bottom + 24) }]}
           showsVerticalScrollIndicator={false}
         >
-          {/* Asset Selector Row */}
-          <TouchableOpacity
-            onPress={() => setShowTokenSelector(true)}
-            activeOpacity={0.75}
-            style={[styles.assetSelector, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
-          >
-            <View style={styles.assetLeft}>
-              <View style={[styles.tokenLogoCircle, { backgroundColor: colors.primary.muted }]}>
-                <Text style={[styles.tokenLogoText, { color: colors.primary.DEFAULT }]}>
-                  {currentSelectedBalance.token.symbol.slice(0, 3)}
-                </Text>
+          {/* Section: Asset Picker (Apple Inset Grouped Row) */}
+          <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>ASSET</Text>
+          <SpringButton onPress={() => setShowTokenSelector(true)} style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+            <View style={styles.assetRow}>
+              <View style={[styles.assetIconCircle, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+                <Text style={styles.assetIconEmoji}>{currentSelectedBalance.token.logo || '🪙'}</Text>
               </View>
-              <View>
-                <Text style={[styles.assetName, { color: colors.text.primary }]}>
-                  {currentSelectedBalance.token.name}
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.assetSymbol, { color: colors.text.primary }]}>
+                  {currentSelectedBalance.token.symbol}
                 </Text>
-                <Text style={[styles.assetChain, { color: colors.text.muted }]}>
+                <Text style={[styles.assetSub, { color: colors.text.muted }]}>
                   {currentChainObj.name} • Available: {parseFloat(currentSelectedBalance.balance).toFixed(4)}
                 </Text>
               </View>
+              <View style={styles.assetSelectorTag}>
+                <Text style={[styles.assetSelectorTagText, { color: colors.text.secondary }]}>Change</Text>
+                <ChevronDownIcon color={colors.text.muted} size={14} />
+              </View>
             </View>
-            <ChevronDownIcon color={colors.text.muted} size={18} />
-          </TouchableOpacity>
+          </SpringButton>
 
-          {/* Recipient Address Input */}
-          <View style={[styles.inputGroup, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>Recipient Address</Text>
-            <View style={styles.inputRow}>
+          {/* Section: Recipient Address */}
+          <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>RECIPIENT</Text>
+          <View style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+            <View style={styles.inputInnerRow}>
               <TextInput
                 style={[styles.addressInput, { color: colors.text.primary }]}
-                placeholder="Paste EVM address (0x...)"
+                placeholder="EVM address (0x...)"
                 placeholderTextColor={colors.text.muted}
                 value={recipient}
                 onChangeText={setRecipient}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <TouchableOpacity
-                onPress={handlePaste}
-                style={[styles.pasteBtn, { backgroundColor: colors.primary.muted }]}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.pasteBtnText, { color: colors.primary.DEFAULT }]}>Paste</Text>
-              </TouchableOpacity>
+              <SpringButton onPress={handlePaste} style={[styles.pastePill, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+                <Text style={[styles.pastePillText, { color: primaryBlue }]}>Paste</Text>
+              </SpringButton>
             </View>
           </View>
 
-          {/* Amount Input */}
-          <View style={[styles.inputGroup, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <View style={styles.amountHeader}>
-              <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>Amount</Text>
-              <TouchableOpacity onPress={handleMaxAmount} activeOpacity={0.7}>
-                <Text style={[styles.maxBtnText, { color: colors.primary.DEFAULT }]}>Use Max</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.inputRow}>
+          {/* Section: Amount */}
+          <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>AMOUNT</Text>
+          <View style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+            <View style={styles.amountInputRow}>
               <TextInput
                 style={[styles.amountInput, { color: colors.text.primary }]}
-                placeholder="0.00"
+                placeholder="0"
                 placeholderTextColor={colors.text.muted}
                 value={amount}
                 onChangeText={setAmount}
                 keyboardType="decimal-pad"
               />
-              <Text style={[styles.currencyLabel, { color: colors.text.primary }]}>
-                {currentSelectedBalance.token.symbol}
-              </Text>
+              <View style={styles.amountRightGroup}>
+                <Text style={[styles.amountSymbol, { color: colors.text.primary }]}>
+                  {currentSelectedBalance.token.symbol}
+                </Text>
+                <SpringButton onPress={handleMaxAmount} style={[styles.maxPill, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+                  <Text style={[styles.maxPillText, { color: primaryBlue }]}>MAX</Text>
+                </SpringButton>
+              </View>
+            </View>
+
+            <View style={[styles.dividerHairline, { backgroundColor: hairline }]} />
+
+            <View style={styles.feeInfoRow}>
+              <Text style={[styles.feeLabel, { color: colors.text.secondary }]}>Network Fee (Est.)</Text>
+              <Text style={[styles.feeValue, { color: colors.text.primary }]}>{gasFeeEstimate}</Text>
             </View>
           </View>
 
-          {/* Network Fee Estimate */}
-          <View style={[styles.feeRow, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Text style={[styles.feeLabel, { color: colors.text.secondary }]}>Estimated Network Fee</Text>
-            <Text style={[styles.feeValue, { color: colors.text.primary }]}>{gasFeeEstimate}</Text>
-          </View>
-
-          {/* Send Button */}
-          <TouchableOpacity
+          {/* Apple Style Send Button */}
+          <SpringButton
             onPress={handleSendPress}
             disabled={loading}
-            activeOpacity={0.88}
-            style={[styles.primaryBtn, { backgroundColor: colors.primary.DEFAULT }]}
+            style={[styles.primaryActionBtn, { backgroundColor: primaryBlue }]}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.primaryBtnText}>Preview Send</Text>
+              <Text style={styles.primaryActionBtnText}>Review Transaction</Text>
             )}
-          </TouchableOpacity>
+          </SpringButton>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Confirmation Modal */}
+      {/* Apple Inset Confirmation Sheet Modal */}
       <Modal
         visible={showConfirm}
         transparent
         animationType="slide"
         onRequestClose={() => setShowConfirm(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.confirmSheet, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Text style={[styles.confirmTitle, { color: colors.text.primary }]}>Confirm Transaction</Text>
-            
-            <View style={styles.confirmRow}>
-              <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>Sending</Text>
-              <Text style={[styles.confirmVal, { color: colors.text.primary }]}>{amount} {currentSelectedBalance.token.symbol}</Text>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline }]}>
+            {/* iOS Sheet Grabber */}
+            <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
+
+            <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary }]}>Review Details</Text>
+            <Text style={[styles.confirmHeaderSubtitle, { color: colors.text.muted }]}>
+              Verify transaction parameters before broadcast
+            </Text>
+
+            <View style={[styles.confirmGroupCard, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}>
+              <View style={styles.confirmItemRow}>
+                <Text style={[styles.confirmItemLabel, { color: colors.text.secondary }]}>Send Amount</Text>
+                <Text style={[styles.confirmItemVal, { color: colors.text.primary, fontWeight: '700' }]}>
+                  {amount} {currentSelectedBalance.token.symbol}
+                </Text>
+              </View>
+              <View style={[styles.confirmDivider, { backgroundColor: hairline }]} />
+
+              <View style={styles.confirmItemRow}>
+                <Text style={[styles.confirmItemLabel, { color: colors.text.secondary }]}>To Address</Text>
+                <Text style={[styles.confirmItemVal, { color: colors.text.primary }]} numberOfLines={1}>
+                  {recipient.slice(0, 8)}...{recipient.slice(-6)}
+                </Text>
+              </View>
+              <View style={[styles.confirmDivider, { backgroundColor: hairline }]} />
+
+              <View style={styles.confirmItemRow}>
+                <Text style={[styles.confirmItemLabel, { color: colors.text.secondary }]}>Network</Text>
+                <Text style={[styles.confirmItemVal, { color: colors.text.primary }]}>{currentChainObj.name}</Text>
+              </View>
+              <View style={[styles.confirmDivider, { backgroundColor: hairline }]} />
+
+              <View style={styles.confirmItemRow}>
+                <Text style={[styles.confirmItemLabel, { color: colors.text.secondary }]}>Est. Gas Fee</Text>
+                <Text style={[styles.confirmItemVal, { color: colors.text.primary }]}>{gasFeeEstimate}</Text>
+              </View>
             </View>
 
-            <View style={styles.confirmRow}>
-              <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>To</Text>
-              <Text style={[styles.confirmVal, { color: colors.text.primary }]} numberOfLines={1}>
-                {recipient.slice(0, 10)}...{recipient.slice(-8)}
-              </Text>
-            </View>
-
-            <View style={styles.confirmRow}>
-              <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>Network</Text>
-              <Text style={[styles.confirmVal, { color: colors.text.primary }]}>{currentChainObj.name}</Text>
-            </View>
-
-            <View style={styles.confirmRow}>
-              <Text style={[styles.confirmLabel, { color: colors.text.secondary }]}>Est. Gas</Text>
-              <Text style={[styles.confirmVal, { color: colors.text.primary }]}>{gasFeeEstimate}</Text>
-            </View>
-
-            <View style={styles.confirmActions}>
-              <TouchableOpacity
+            <View style={styles.sheetActionsRow}>
+              <SpringButton
                 onPress={() => setShowConfirm(false)}
-                style={[styles.cancelBtn, { borderColor: colors.border.subtle }]}
+                style={[styles.sheetCancelBtn, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
               >
-                <Text style={[styles.cancelBtnText, { color: colors.text.secondary }]}>Cancel</Text>
-              </TouchableOpacity>
+                <Text style={[styles.sheetCancelBtnText, { color: colors.text.primary }]}>Cancel</Text>
+              </SpringButton>
 
-              <TouchableOpacity
+              <SpringButton
                 onPress={executeSend}
                 disabled={loading}
-                style={[styles.confirmBtn, { backgroundColor: colors.primary.DEFAULT }]}
+                style={[styles.sheetConfirmBtn, { backgroundColor: primaryBlue }]}
               >
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.confirmBtnText}>Confirm & Send</Text>
+                  <Text style={styles.sheetConfirmBtnText}>Confirm & Send</Text>
                 )}
-              </TouchableOpacity>
+              </SpringButton>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Success Transaction Modal */}
+      {/* Apple Success Modal */}
       <Modal
         visible={!!txSuccessHash}
         transparent
         animationType="fade"
         onRequestClose={() => setTxSuccessHash(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.successBox, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <View style={[styles.successCheckCircle, { backgroundColor: '#10B981' }]}>
-              <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                <Path d="M20 6L9 17l-5-5" />
-              </Svg>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.successModalCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+            <View style={[styles.successCircle, { backgroundColor: isDark ? '#30D158' : '#34C759' }]}>
+              <CheckIcon color="#FFFFFF" size={26} />
             </View>
-            <Text style={[styles.successTitle, { color: colors.text.primary }]}>Transaction Broadcast!</Text>
-            <Text style={[styles.successSubtitle, { color: colors.text.secondary }]}>
-              Your transaction has been submitted to {currentChainObj.name} via free public RPC.
-            </Text>
-            <Text style={[styles.successHash, { color: colors.text.muted }]} numberOfLines={1}>
-              Hash: {txSuccessHash}
+            <Text style={[styles.successHeading, { color: colors.text.primary }]}>Transaction Sent</Text>
+            <Text style={[styles.successBody, { color: colors.text.secondary }]}>
+              Successfully submitted to {currentChainObj.name} RPC node.
             </Text>
 
-            <TouchableOpacity
+            <SpringButton
               onPress={() => txSuccessHash && openExplorer(txSuccessHash)}
-              style={[styles.explorerBtn, { backgroundColor: colors.primary.muted }]}
+              style={[styles.explorerPill, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
             >
-              <Text style={[styles.explorerBtnText, { color: colors.primary.DEFAULT }]}>View on Explorer</Text>
-            </TouchableOpacity>
+              <Text style={[styles.explorerPillText, { color: primaryBlue }]}>View on Explorer ↗</Text>
+            </SpringButton>
 
-            <TouchableOpacity
+            <SpringButton
               onPress={() => setTxSuccessHash(null)}
-              style={[styles.doneBtn, { backgroundColor: colors.primary.DEFAULT }]}
+              style={[styles.successDoneBtn, { backgroundColor: primaryBlue }]}
             >
-              <Text style={styles.doneBtnText}>Done</Text>
-            </TouchableOpacity>
+              <Text style={styles.successDoneBtnText}>Done</Text>
+            </SpringButton>
           </View>
         </View>
       </Modal>
 
-      {/* Token Selector Modal */}
+      {/* Asset Selector Sheet Modal */}
       <Modal
         visible={showTokenSelector}
         transparent
         animationType="slide"
         onRequestClose={() => setShowTokenSelector(false)}
       >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={{ flex: 1 }}
-            activeOpacity={1}
-            onPress={() => setShowTokenSelector(false)}
-          />
-          <View style={[styles.tokenSheet, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Select Asset</Text>
-            <ScrollView style={{ maxHeight: 280 }}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline }]}>
+            <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
+            <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary }]}>Select Token</Text>
+            <ScrollView style={{ maxHeight: 300, marginTop: 12 }}>
               {availableTokens.map((item, idx) => (
-                <TouchableOpacity
+                <SpringButton
                   key={`${item.token.symbol}-${idx}`}
                   onPress={() => {
                     setSelectedTokenSymbol(item.token.symbol);
                     setShowTokenSelector(false);
                   }}
-                  style={[styles.tokenSelectItem, { borderBottomColor: colors.border.subtle }]}
+                  style={[styles.tokenListRow, { borderBottomColor: hairline }]}
                 >
                   <View>
-                    <Text style={[styles.tokenSelectSymbol, { color: colors.text.primary }]}>{item.token.symbol}</Text>
-                    <Text style={[styles.tokenSelectName, { color: colors.text.muted }]}>{item.token.name}</Text>
+                    <Text style={[styles.tokenListSymbol, { color: colors.text.primary }]}>{item.token.symbol}</Text>
+                    <Text style={[styles.tokenListName, { color: colors.text.muted }]}>{item.token.name}</Text>
                   </View>
-                  <Text style={[styles.tokenSelectBal, { color: colors.text.primary }]}>{item.balance}</Text>
-                </TouchableOpacity>
+                  <Text style={[styles.tokenListBal, { color: colors.text.primary }]}>{item.balance}</Text>
+                </SpringButton>
               ))}
             </ScrollView>
           </View>
@@ -414,120 +472,141 @@ export default function SendScreen({ navigation }: { navigation: any }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  header: {
+  root: {
+    flex: 1,
+  },
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 10,
   },
-  backButton: {
-    width: 40,
-    height: 40,
+  navBackBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+  navBackText: {
+    fontSize: 17,
+    fontWeight: '400',
+    marginLeft: -4,
+  },
+  navTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    letterSpacing: -0.3,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingTop: 10,
   },
-  assetSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
+  sectionHeader: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+    marginLeft: 12,
+    marginTop: 12,
+  },
+  insetCard: {
     borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 16,
+    borderWidth: 0.5,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 10,
   },
-  assetLeft: {
+  assetRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  tokenLogoCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  assetIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
   },
-  tokenLogoText: {
-    fontSize: 14,
-    fontWeight: '800',
+  assetIconEmoji: {
+    fontSize: 20,
   },
-  assetName: {
-    fontSize: 15,
+  assetSymbol: {
+    fontSize: 17,
     fontWeight: '700',
+    letterSpacing: -0.3,
   },
-  assetChain: {
+  assetSub: {
     fontSize: 12,
     marginTop: 2,
   },
-  inputGroup: {
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  inputRow: {
+  assetSelectorTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 4,
+  },
+  assetSelectorTagText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  inputInnerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   addressInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     paddingVertical: 6,
-    marginRight: 8,
   },
-  pasteBtn: {
+  pastePill: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 12,
+    marginLeft: 8,
   },
-  pasteBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
+  pastePillText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
-  amountHeader: {
+  amountInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  maxBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
+    paddingVertical: 4,
   },
   amountInput: {
     flex: 1,
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: '700',
-    paddingVertical: 4,
+    letterSpacing: -0.5,
+    paddingVertical: 0,
   },
-  currencyLabel: {
-    fontSize: 16,
+  amountRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  amountSymbol: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  maxPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  maxPillText: {
+    fontSize: 12,
     fontWeight: '700',
   },
-  feeRow: {
+  dividerHairline: {
+    height: 0.5,
+    marginVertical: 12,
+  },
+  feeInfoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 24,
   },
   feeLabel: {
     fontSize: 13,
@@ -536,161 +615,168 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  primaryBtn: {
-    width: '100%',
+  primaryActionBtn: {
+    borderRadius: 16,
     paddingVertical: 16,
-    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  primaryActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderTopWidth: 0.5,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 40,
+  },
+  sheetGrabber: {
+    width: 36,
+    height: 5,
+    borderRadius: 2.5,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  confirmHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: -0.4,
+  },
+  confirmHeaderSubtitle: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 18,
+  },
+  confirmGroupCard: {
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 20,
+  },
+  confirmItemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  confirmItemLabel: {
+    fontSize: 14,
+  },
+  confirmItemVal: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  confirmDivider: {
+    height: 0.5,
+  },
+  sheetActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  sheetCancelBtn: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  primaryBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  sheetCancelBtnText: {
     fontSize: 16,
+    fontWeight: '600',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  confirmSheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    borderTopWidth: 1,
-  },
-  confirmTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 18,
-    textAlign: 'center',
-  },
-  confirmRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#E2E8F0',
-  },
-  confirmLabel: {
-    fontSize: 13,
-  },
-  confirmVal: {
-    fontSize: 14,
-    fontWeight: '700',
-    maxWidth: 200,
-  },
-  confirmActions: {
-    flexDirection: 'row',
-    marginTop: 20,
-    justifyContent: 'space-between',
-  },
-  cancelBtn: {
-    flex: 1,
+  sheetConfirmBtn: {
+    flex: 2,
+    borderRadius: 14,
     paddingVertical: 14,
-    borderRadius: 20,
-    borderWidth: 1,
     alignItems: 'center',
-    marginRight: 8,
+    justifyContent: 'center',
   },
-  cancelBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  confirmBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 20,
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  confirmBtnText: {
+  sheetConfirmBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  successBox: {
-    margin: 20,
-    padding: 24,
+  successModalCard: {
+    marginHorizontal: 24,
+    marginBottom: 'auto',
+    marginTop: 'auto',
     borderRadius: 24,
-    borderWidth: 1,
+    borderWidth: 0.5,
+    padding: 24,
     alignItems: 'center',
-    alignSelf: 'center',
-    width: '90%',
   },
-  successCheckCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  successCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
-  successTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 8,
+  successHeading: {
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: -0.4,
   },
-  successSubtitle: {
-    fontSize: 13,
+  successBody: {
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 12,
+    marginTop: 6,
+    lineHeight: 20,
   },
-  successHash: {
-    fontSize: 11,
+  explorerPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginTop: 16,
     marginBottom: 18,
   },
-  explorerBtn: {
-    width: '100%',
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  explorerBtnText: {
+  explorerPillText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  doneBtn: {
+  successDoneBtn: {
     width: '100%',
     paddingVertical: 14,
-    borderRadius: 20,
+    borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  doneBtnText: {
+  successDoneBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  tokenSheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    borderTopWidth: 1,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 12,
-  },
-  tokenSelectItem: {
+  tokenListRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 0.5,
   },
-  tokenSelectSymbol: {
-    fontSize: 15,
+  tokenListSymbol: {
+    fontSize: 16,
     fontWeight: '700',
   },
-  tokenSelectName: {
-    fontSize: 12,
+  tokenListName: {
+    fontSize: 13,
     marginTop: 2,
   },
-  tokenSelectBal: {
-    fontSize: 14,
+  tokenListBal: {
+    fontSize: 15,
     fontWeight: '600',
   },
 });

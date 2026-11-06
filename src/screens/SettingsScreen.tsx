@@ -1,42 +1,97 @@
-// src/screens/SettingsScreen.tsx - Trust Wallet Style Settings & Key Management
+// src/screens/SettingsScreen.tsx - Apple iPhone iOS Settings Style & Key Management
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
-  View, ScrollView, Text, StyleSheet, TouchableOpacity, Switch,
-  SafeAreaView, StatusBar, Alert, Modal,
+  View, ScrollView, Text, StyleSheet, Switch,
+  SafeAreaView, StatusBar, Alert, Modal, Animated, Pressable, Platform,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useWalletStore } from '../store/walletStore';
-import { useAppLock } from '../hooks/useAppLock';
 import { SecureKeyManager } from '../core/SecureKeyManager';
 import { CHAINS } from '../core/ChainConfig';
 
-const ChevronRightIcon = ({ color = '#94A3B8', size = 18 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+// Smooth iOS Spring Button Component
+function SpringButton({
+  children,
+  onPress,
+  disabled = false,
+  style,
+  activeScale = 0.97,
+}: {
+  children: React.ReactNode;
+  onPress?: () => void;
+  disabled?: boolean;
+  style?: any;
+  activeScale?: number;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    if (disabled) return;
+    Animated.spring(scale, {
+      toValue: activeScale,
+      damping: 18,
+      stiffness: 260,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      damping: 18,
+      stiffness: 260,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      disabled={disabled}
+    >
+      <Animated.View style={[{ transform: [{ scale }] }, style]}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+const ChevronRightIcon = ({ color = '#8E8E93', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
-const KeyIcon = ({ color = '#0500FF', size = 20 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+const KeyIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="7.5" cy="15.5" r="4.5" />
     <Path d="M10.5 12.5L20 3M16 7l2 2M18 5l2 2" />
   </Svg>
 );
 
-const ShieldIcon = ({ color = '#10B981', size = 20 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+const ShieldIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </Svg>
 );
 
-const GlobeIcon = ({ color = '#3B82F6', size = 20 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+const GlobeIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="12" cy="12" r="10" />
     <Path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20z" />
+  </Svg>
+);
+
+const InfoIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M12 16v-4M12 8h.01" />
   </Svg>
 );
 
@@ -62,8 +117,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
   const viewSecretPhrase = async () => {
     Alert.alert(
-      'Security Warning',
-      'Never share your secret recovery phrase. Anyone with these 12 words has full control of your assets.',
+      'Secret Recovery Phrase',
+      'Never share your secret recovery phrase. Anyone with these 12 words has complete access to your funds.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -88,8 +143,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
   const viewPrivateKey = async () => {
     Alert.alert(
-      'Extreme Caution',
-      'Your private key gives direct access to all funds on-chain. Never enter it on any website or send to anyone.',
+      'Export Private Key',
+      'Your private key gives direct and irreversible control over this address on-chain. Keep it strictly private.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -123,12 +178,12 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
   const handleResetWallet = () => {
     Alert.alert(
-      'Reset Wallet',
-      'Are you sure you want to delete this wallet from this device? Make sure you have your secret recovery phrase backed up.',
+      'Remove Wallet',
+      'Are you sure you want to remove this wallet from this device? Ensure you have your recovery phrase backed up securely.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Reset Wallet',
+          text: 'Remove Wallet',
           style: 'destructive',
           onPress: async () => {
             await resetWallet();
@@ -138,177 +193,190 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
     );
   };
 
-  return (
-    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
+  const primaryBlue = isDark ? '#0A84FF' : '#007AFF';
+  const cardBg = isDark ? '#1C1C1E' : '#FFFFFF';
+  const hairline = isDark ? '#2C2C2E' : '#E5E5EA';
 
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Settings</Text>
+  return (
+    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={isDark ? '#000000' : '#F2F2F7'} />
+
+      {/* Apple Large Title Navigation Header */}
+      <View style={[styles.largeHeader, { paddingTop: insets.top + 10 }]}>
+        <Text style={[styles.largeTitle, { color: colors.text.primary }]}>Settings</Text>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: Math.max(30, insets.bottom + 20) }]}
+        contentContainerStyle={[styles.content, { paddingBottom: Math.max(34, insets.bottom + 24) }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Wallet Overview Card */}
-        <View style={[styles.walletCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <View style={styles.walletHeader}>
-            <View>
-              <Text style={[styles.walletName, { color: colors.text.primary }]}>Main Wallet 1</Text>
-              <Text style={[styles.walletAddr, { color: colors.text.muted }]}>
-                {displayAddress.slice(0, 10)}...{displayAddress.slice(-8)}
+        {/* Apple Inset Wallet Profile Card */}
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <View style={styles.walletProfileRow}>
+            <View style={[styles.walletAvatar, { backgroundColor: primaryBlue }]}>
+              <Text style={styles.walletAvatarEmoji}>💎</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <Text style={[styles.walletTitle, { color: colors.text.primary }]}>Crypto Wallet</Text>
+              <Text style={[styles.walletSubtitle, { color: colors.text.muted }]}>
+                {displayAddress.slice(0, 8)}...{displayAddress.slice(-6)}
               </Text>
             </View>
-            <View style={[styles.activeBadge, { backgroundColor: isDark ? '#064E3B' : '#ECFDF5' }]}>
-              <Text style={styles.activeBadgeText}>Active</Text>
+            <View style={[styles.activeCapsule, { backgroundColor: isDark ? 'rgba(48,209,88,0.18)' : '#E8F8EE' }]}>
+              <Text style={[styles.activeCapsuleText, { color: isDark ? '#30D158' : '#34C759' }]}>Active</Text>
             </View>
           </View>
 
-          {/* Quick Key Action Pills */}
-          <View style={styles.keyActionsRow}>
-            <TouchableOpacity
+          <View style={[styles.rowDivider, { backgroundColor: hairline, marginLeft: 0 }]} />
+
+          {/* Quick Key Export Buttons */}
+          <View style={styles.keyActionsContainer}>
+            <SpringButton
               onPress={viewPublicAddress}
-              style={[styles.keyActionBtn, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}
-              activeOpacity={0.7}
+              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}
             >
-              <Text style={[styles.keyActionText, { color: colors.text.primary }]}>Public Address</Text>
-            </TouchableOpacity>
+              <Text style={[styles.keyPillBtnText, { color: primaryBlue }]}>Public Address</Text>
+            </SpringButton>
 
-            <TouchableOpacity
+            <SpringButton
               onPress={viewSecretPhrase}
-              style={[styles.keyActionBtn, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}
-              activeOpacity={0.7}
+              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}
             >
-              <Text style={[styles.keyActionText, { color: colors.text.primary }]}>Secret Phrase</Text>
-            </TouchableOpacity>
+              <Text style={[styles.keyPillBtnText, { color: isDark ? '#FF9F0A' : '#FF9500' }]}>Seed Phrase</Text>
+            </SpringButton>
 
-            <TouchableOpacity
+            <SpringButton
               onPress={viewPrivateKey}
-              style={[styles.keyActionBtn, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}
-              activeOpacity={0.7}
+              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}
             >
-              <Text style={[styles.keyActionText, { color: '#EF4444' }]}>Private Key</Text>
-            </TouchableOpacity>
+              <Text style={[styles.keyPillBtnText, { color: isDark ? '#FF453A' : '#FF3B30' }]}>Private Key</Text>
+            </SpringButton>
           </View>
         </View>
 
-        {/* Security Section */}
-        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>Security</Text>
-        <View style={[styles.sectionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <View style={styles.settingRow}>
-            <View style={styles.settingLeft}>
-              <ShieldIcon color="#10B981" size={18} />
-              <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Biometric Authentication</Text>
+        {/* Section: Security */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>SECURITY</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <View style={styles.settingsRow}>
+            <View style={[styles.iconCapsule, { backgroundColor: isDark ? '#30D158' : '#34C759' }]}>
+              <ShieldIcon color="#FFFFFF" size={17} />
             </View>
+            <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Face ID / Biometrics</Text>
             <Switch
               value={biometricEnabled}
               onValueChange={setBiometricEnabled}
-              trackColor={{ false: colors.border.DEFAULT, true: colors.primary.DEFAULT }}
+              trackColor={{ false: isDark ? '#3A3A3C' : '#E5E5EA', true: isDark ? '#30D158' : '#34C759' }}
               thumbColor="#FFFFFF"
             />
           </View>
         </View>
 
-        {/* Networks Section */}
-        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>Networks</Text>
-        <View style={[styles.sectionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <TouchableOpacity
+        {/* Section: Network & Nodes */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>NETWORK CONNECTIONS</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <SpringButton
             onPress={() => navigation.navigate('NetworkSettings')}
-            style={styles.settingRowClickable}
-            activeOpacity={0.7}
+            style={styles.settingsRow}
           >
-            <View style={styles.settingLeft}>
-              <GlobeIcon color={colors.primary.DEFAULT} size={18} />
-              <View>
-                <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Public RPC Networks</Text>
-                <Text style={[styles.settingSub, { color: colors.text.muted }]}>
-                  {Object.keys(CHAINS).length} Free High-Speed Blockchains
-                </Text>
-              </View>
+            <View style={[styles.iconCapsule, { backgroundColor: primaryBlue }]}>
+              <GlobeIcon color="#FFFFFF" size={17} />
             </View>
-            <ChevronRightIcon color={colors.text.muted} size={18} />
-          </TouchableOpacity>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                RPC Blockchains
+              </Text>
+              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                {Object.keys(CHAINS).length} Free Public Endpoints
+              </Text>
+            </View>
+            <ChevronRightIcon color={colors.text.muted} size={15} />
+          </SpringButton>
         </View>
 
-        {/* App Info & Reset */}
-        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>App & Account</Text>
-        <View style={[styles.sectionCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <TouchableOpacity
+        {/* Section: General */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>GENERAL</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <SpringButton
             onPress={() => navigation.navigate('About')}
-            style={styles.settingRowClickable}
-            activeOpacity={0.7}
+            style={styles.settingsRow}
           >
-            <Text style={[styles.settingLabel, { color: colors.text.primary }]}>About Crypto Wallet</Text>
-            <Text style={[styles.settingValue, { color: colors.text.muted }]}>v1.0.0</Text>
-          </TouchableOpacity>
+            <View style={[styles.iconCapsule, { backgroundColor: '#8E8E93' }]}>
+              <InfoIcon color="#FFFFFF" size={17} />
+            </View>
+            <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>About Crypto Wallet</Text>
+            <Text style={[styles.settingsValue, { color: colors.text.muted }]}>v1.0.0</Text>
+            <ChevronRightIcon color={colors.text.muted} size={15} />
+          </SpringButton>
 
-          <TouchableOpacity
+          <View style={[styles.rowDivider, { backgroundColor: hairline }]} />
+
+          <SpringButton
             onPress={handleResetWallet}
-            style={[styles.settingRowClickable, { borderTopWidth: 0.5, borderTopColor: colors.border.subtle }]}
-            activeOpacity={0.7}
+            style={styles.settingsRow}
           >
-            <Text style={[styles.settingLabel, { color: '#EF4444' }]}>Reset / Delete Wallet</Text>
-            <ChevronRightIcon color="#EF4444" size={18} />
-          </TouchableOpacity>
+            <Text style={[styles.settingsLabel, { color: isDark ? '#FF453A' : '#FF3B30', marginLeft: 4 }]}>
+              Remove Wallet
+            </Text>
+            <ChevronRightIcon color={isDark ? '#FF453A' : '#FF3B30'} size={15} />
+          </SpringButton>
         </View>
       </ScrollView>
 
-      {/* Secret / Key Viewer Modal */}
+      {/* Secret / Key Viewer Sheet Modal */}
       <Modal
         visible={!!revealedSecret}
         transparent
         animationType="slide"
         onRequestClose={() => setRevealedSecret(null)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.secretSheet, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Text style={[styles.secretTitle, { color: colors.text.primary }]}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline }]}>
+            <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
+
+            <Text style={[styles.modalSheetTitle, { color: colors.text.primary }]}>
               {revealedSecret?.type === 'address' && 'Public Address'}
               {revealedSecret?.type === 'phrase' && 'Secret Recovery Phrase'}
               {revealedSecret?.type === 'key' && 'Private Key'}
             </Text>
 
-            <Text style={[styles.secretWarning, { color: revealedSecret?.type === 'key' ? '#EF4444' : colors.text.secondary }]}>
-              {revealedSecret?.type === 'address' && 'Safe to share with anyone to receive coins.'}
-              {revealedSecret?.type === 'phrase' && 'Never share these 12 words with anyone. Store them offline.'}
-              {revealedSecret?.type === 'key' && 'CRITICAL: Anyone with this private key can take your funds permanently.'}
+            <Text style={[styles.modalSheetSubtitle, { color: revealedSecret?.type === 'key' ? (isDark ? '#FF453A' : '#FF3B30') : colors.text.secondary }]}>
+              {revealedSecret?.type === 'address' && 'Share this public address with anyone to receive coins.'}
+              {revealedSecret?.type === 'phrase' && 'Never share these 12 words with anyone. Keep them offline in a safe place.'}
+              {revealedSecret?.type === 'key' && 'WARNING: Anyone with your private key can immediately steal all funds on-chain.'}
             </Text>
 
             {revealedSecret?.type === 'phrase' ? (
-              <View style={[styles.wordsGrid, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}>
+              <View style={[styles.wordsGridCard, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}>
                 {revealedSecret.value.split(' ').map((w, idx) => (
-                  <View key={idx} style={[styles.wordItem, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-                    <Text style={[styles.wordNum, { color: colors.text.muted }]}>{idx + 1}.</Text>
+                  <View key={idx} style={[styles.wordChip, { backgroundColor: cardBg, borderColor: hairline }]}>
+                    <Text style={[styles.wordNumber, { color: colors.text.muted }]}>{idx + 1}</Text>
                     <Text style={[styles.wordText, { color: colors.text.primary }]}>{w}</Text>
                   </View>
                 ))}
               </View>
             ) : (
-              <View style={[styles.keyBox, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}>
-                <Text style={[styles.keyText, { color: colors.text.primary }]} selectable>
+              <View style={[styles.secretBox, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}>
+                <Text style={[styles.secretBoxText, { color: colors.text.primary }]} selectable>
                   {revealedSecret?.value}
                 </Text>
               </View>
             )}
 
-            <TouchableOpacity
+            <SpringButton
               onPress={copySecret}
-              style={[styles.modalCopyBtn, { backgroundColor: colors.primary.DEFAULT }]}
-              activeOpacity={0.85}
+              style={[styles.primarySheetBtn, { backgroundColor: primaryBlue }]}
             >
-              <Text style={styles.modalCopyBtnText}>
-                {copied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
+              <Text style={styles.primarySheetBtnText}>
+                {copied ? 'Copied to Clipboard' : 'Copy to Clipboard'}
               </Text>
-            </TouchableOpacity>
+            </SpringButton>
 
-            <TouchableOpacity
+            <SpringButton
               onPress={() => setRevealedSecret(null)}
-              style={[styles.modalCloseBtn, { borderColor: colors.border.subtle }]}
-              activeOpacity={0.7}
+              style={[styles.secondarySheetBtn, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
             >
-              <Text style={[styles.modalCloseBtnText, { color: colors.text.primary }]}>Close</Text>
-            </TouchableOpacity>
+              <Text style={[styles.secondarySheetBtnText, { color: colors.text.primary }]}>Done</Text>
+            </SpringButton>
           </View>
         </View>
       </Modal>
@@ -317,191 +385,210 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 12,
+  root: {
+    flex: 1,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '800',
+  largeHeader: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  largeTitle: {
+    fontSize: 34,
+    fontWeight: '700',
+    letterSpacing: -0.8,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingTop: 6,
   },
-  walletCard: {
-    padding: 18,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginBottom: 24,
-  },
-  walletHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  walletName: {
-    fontSize: 17,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  walletAddr: {
-    fontSize: 13,
-  },
-  activeBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  activeBadgeText: {
-    color: '#10B981',
+  sectionHeader: {
     fontSize: 12,
-    fontWeight: '700',
-  },
-  keyActionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  keyActionBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    marginHorizontal: 3,
-  },
-  keyActionText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
+    fontWeight: '600',
     letterSpacing: 0.8,
-    marginBottom: 8,
-    marginLeft: 4,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+    marginLeft: 14,
+    marginTop: 18,
   },
-  sectionCard: {
+  insetGroupCard: {
     borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 24,
+    borderWidth: 0.5,
     overflow: 'hidden',
   },
-  settingRow: {
+  walletProfileRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
   },
-  settingRowClickable: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  walletAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
-    padding: 16,
+    justifyContent: 'center',
   },
-  settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  walletAvatarEmoji: {
+    fontSize: 22,
   },
-  settingLabel: {
-    fontSize: 15,
+  walletTitle: {
+    fontSize: 17,
     fontWeight: '600',
-    marginLeft: 12,
+    letterSpacing: -0.3,
   },
-  settingSub: {
-    fontSize: 12,
-    marginLeft: 12,
+  walletSubtitle: {
+    fontSize: 13,
     marginTop: 2,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  settingValue: {
-    fontSize: 14,
+  activeCapsule: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
-  modalOverlay: {
+  activeCapsuleText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  keyActionsContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    gap: 8,
+  },
+  keyPillBtn: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingVertical: 9,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  keyPillBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  settingsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+  },
+  iconCapsule: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  settingsLabel: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '400',
+    marginLeft: 12,
+    letterSpacing: -0.2,
+  },
+  settingsSubtext: {
+    fontSize: 12,
+    marginTop: 1,
+  },
+  settingsValue: {
+    fontSize: 15,
+    marginRight: 6,
+  },
+  rowDivider: {
+    height: 0.5,
+    marginLeft: 56,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'flex-end',
   },
-  secretSheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    borderTopWidth: 1,
+  modalSheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderTopWidth: 0.5,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 40,
   },
-  secretTitle: {
-    fontSize: 19,
-    fontWeight: '800',
-    marginBottom: 8,
-    textAlign: 'center',
+  sheetGrabber: {
+    width: 36,
+    height: 5,
+    borderRadius: 2.5,
+    alignSelf: 'center',
+    marginBottom: 16,
   },
-  secretWarning: {
-    fontSize: 12,
-    lineHeight: 18,
+  modalSheetTitle: {
+    fontSize: 20,
+    fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: -0.4,
+  },
+  modalSheetSubtitle: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 6,
     marginBottom: 18,
-    paddingHorizontal: 8,
+    lineHeight: 18,
+    paddingHorizontal: 10,
   },
-  wordsGrid: {
+  wordsGridCard: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    padding: 10,
+    padding: 12,
     borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 18,
   },
-  wordItem: {
+  wordChip: {
     width: '48%',
     flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0.5,
     marginBottom: 8,
   },
-  wordNum: {
-    width: 24,
+  wordNumber: {
+    width: 22,
     fontSize: 12,
+    fontWeight: '500',
   },
   wordText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
   },
-  keyBox: {
+  secretBox: {
     padding: 16,
     borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 18,
   },
-  keyText: {
-    fontSize: 13,
-    fontWeight: '600',
-    lineHeight: 20,
+  secretBoxText: {
+    fontSize: 14,
+    lineHeight: 22,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     textAlign: 'center',
   },
-  modalCopyBtn: {
-    width: '100%',
+  primarySheetBtn: {
+    borderRadius: 14,
     paddingVertical: 14,
-    borderRadius: 20,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
   },
-  modalCopyBtnText: {
+  primarySheetBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  modalCloseBtn: {
-    width: '100%',
+  secondarySheetBtn: {
+    borderRadius: 14,
     paddingVertical: 14,
-    borderRadius: 20,
-    borderWidth: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  modalCloseBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
+  secondarySheetBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

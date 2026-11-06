@@ -22,7 +22,7 @@ const ChevronRightIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; si
   </Svg>
 );
 
-const SwapArrowIcon = ({ color = '#2563EB', size = 24 }: { color?: string; size?: number }) => (
+const SwapArrowIcon = ({ color = '#007AFF', size = 24 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M7 16h10l-4-4M17 14H3l4 4" />
   </Svg>
@@ -44,8 +44,8 @@ const TokenLogos: Record<string, React.ReactElement> = {
   ),
   SOL: (
     <Svg width={32} height={32} viewBox="0 0 24 24" fill="none">
-      <Circle cx="12" cy="12" r="11" fill="#14F195" />
-      <Path d="M17 9.5L12 5 7 9.5l5 4.5 5-4.5z" fill="#9945FF" />
+      <Circle cx="12" cy="12" r="11" fill="#AF52DE" />
+      <Path d="M17 9.5L12 5 7 9.5l5 4.5 5-4.5z" fill="#FFFFFF" />
     </Svg>
   ),
   BTC: (

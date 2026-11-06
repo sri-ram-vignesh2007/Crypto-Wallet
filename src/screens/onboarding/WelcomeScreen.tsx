@@ -1,9 +1,8 @@
-// src/screens/onboarding/WelcomeScreen.tsx
-// Trust Wallet Minimalist Welcome Screen
+// src/screens/onboarding/WelcomeScreen.tsx - Apple iPhone Style Minimalist Onboarding
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView,
+  View, Text, StyleSheet, StatusBar, SafeAreaView, Animated, Pressable,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useColors, useIsDark } from '../../theme/ThemeContext';
@@ -16,10 +15,64 @@ try {
   }
 } catch (e) {}
 
+// Apple Spring Pressable
+const AppleButton: React.FC<{
+  onPress: () => void;
+  style?: any;
+  children: React.ReactNode;
+}> = ({ onPress, style, children }) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={() => {
+        Animated.spring(scale, {
+          toValue: 0.96,
+          useNativeDriver: true,
+          damping: 18,
+          stiffness: 260,
+        }).start();
+      }}
+      onPressOut={() => {
+        Animated.spring(scale, {
+          toValue: 1,
+          useNativeDriver: true,
+          damping: 18,
+          stiffness: 260,
+        }).start();
+      }}
+    >
+      <Animated.View style={[style, { transform: [{ scale }] }]}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+};
+
 export default function WelcomeScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        damping: 20,
+        stiffness: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
 
   const handleCreate = () => {
     navigation.navigate('SeedPhrase', { mode: 'create' });
@@ -33,11 +86,21 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg.canvas} />
 
-      <View style={[styles.content, { paddingTop: Math.max(30, insets.top + 20), paddingBottom: Math.max(20, insets.bottom + 16) }]}>
-        {/* Brand Shield Logo */}
+      <Animated.View
+        style={[
+          styles.content,
+          {
+            paddingTop: Math.max(30, insets.top + 20),
+            paddingBottom: Math.max(20, insets.bottom + 16),
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        {/* Apple Centered Brand Emblem */}
         <View style={styles.centerContainer}>
           <View style={[styles.shieldContainer, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Svg width={76} height={76} viewBox="0 0 24 24" fill="none">
+            <Svg width={72} height={72} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z"
                 fill={colors.primary.DEFAULT}
@@ -45,7 +108,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
               <Path
                 d="M9 12L11 14L15 10"
                 stroke="#FFFFFF"
-                strokeWidth={2.5}
+                strokeWidth={2.4}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -53,36 +116,34 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
           </View>
 
           <Text style={[styles.title, { color: colors.text.primary }]}>
-            The Most Trusted & Secure Crypto Wallet
+            Crypto Wallet
           </Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-            Store, send, and swap your crypto across major blockchains with non-custodial security.
+            Self-custody crypto on Ethereum, BNB Chain, Polygon, and more with Apple-grade security.
           </Text>
         </View>
 
-        {/* Action Buttons */}
+        {/* Apple Style Action Buttons */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity
+          <AppleButton
             onPress={handleCreate}
-            activeOpacity={0.88}
             style={[styles.primaryButton, { backgroundColor: colors.primary.DEFAULT }]}
           >
-            <Text style={styles.primaryButtonText}>Create a new wallet</Text>
-          </TouchableOpacity>
+            <Text style={styles.primaryButtonText}>Create a New Wallet</Text>
+          </AppleButton>
 
-          <TouchableOpacity
+          <AppleButton
             onPress={handleImport}
-            activeOpacity={0.8}
             style={[styles.secondaryButton, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
           >
-            <Text style={[styles.secondaryButtonText, { color: colors.text.primary }]}>I already have a wallet</Text>
-          </TouchableOpacity>
+            <Text style={[styles.secondaryButtonText, { color: colors.text.primary }]}>I Already Have a Wallet</Text>
+          </AppleButton>
 
           <Text style={[styles.footerText, { color: colors.text.muted }]}>
-            By continuing, you agree to our Terms of Service & Privacy Policy
+            By continuing, you agree to the Terms of Service & Privacy Policy
           </Text>
         </View>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -91,36 +152,42 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
   },
   shieldContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    marginBottom: 28,
+    borderWidth: 0.5,
+    marginBottom: 26,
+    shadowColor: '#007AFF',
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize: 32,
+    fontWeight: '700',
     textAlign: 'center',
-    letterSpacing: -0.6,
-    lineHeight: 34,
+    letterSpacing: -0.8,
+    lineHeight: 38,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 15,
     textAlign: 'center',
     marginTop: 12,
     lineHeight: 22,
+    letterSpacing: -0.2,
     maxWidth: 320,
   },
   actionsContainer: {
@@ -130,32 +197,40 @@ const styles = StyleSheet.create({
   primaryButton: {
     width: '100%',
     paddingVertical: 16,
-    borderRadius: 24,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    shadowColor: '#007AFF',
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 16,
+    letterSpacing: -0.3,
   },
   secondaryButton: {
     width: '100%',
     paddingVertical: 15,
-    borderRadius: 24,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: 0.5,
     marginBottom: 16,
   },
   secondaryButtonText: {
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 16,
+    letterSpacing: -0.3,
   },
   footerText: {
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 18,
+    letterSpacing: -0.1,
   },
 });

@@ -267,13 +267,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   activePill: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: 'rgba(52, 199, 89, 0.15)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   activeText: {
-    color: '#16A34A',
+    color: '#34C759',
     fontSize: 12,
     fontWeight: '700',
   },

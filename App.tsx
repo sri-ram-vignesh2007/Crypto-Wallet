@@ -136,18 +136,19 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary.DEFAULT,
-        tabBarInactiveTintColor: colors.text.muted,
+        tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
           backgroundColor: colors.bg.surface,
           borderTopColor: colors.border.subtle,
-          borderTopWidth: 1,
-          height: 60,
+          borderTopWidth: 0.5,
+          height: 64,
           paddingBottom: 8,
           paddingTop: 6,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          letterSpacing: -0.2,
         },
       }}
     >
