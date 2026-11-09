@@ -166,7 +166,7 @@ export default function SeedPhraseScreen({ navigation, route }: Props) {
   };
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Apple Navigation Header */}
@@ -257,13 +257,13 @@ export default function SeedPhraseScreen({ navigation, route }: Props) {
               disabled={loading || !hasBackedUp}
               style={[
                 styles.primaryBtn,
-                { backgroundColor: hasBackedUp ? colors.primary.DEFAULT : (isDark ? '#2C2C2E' : '#E5E5EA') }
+                { backgroundColor: hasBackedUp ? (isDark ? '#FFFFFF' : '#000000') : (isDark ? '#2C2C2E' : '#E5E5EA') }
               ]}
             >
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={isDark ? '#000000' : '#FFFFFF'} />
               ) : (
-                <Text style={[styles.primaryBtnText, { color: hasBackedUp ? '#FFFFFF' : colors.text.muted }]}>Continue</Text>
+                <Text style={[styles.primaryBtnText, { color: hasBackedUp ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted }]}>Continue</Text>
               )}
             </AppleButton>
           </>
@@ -309,13 +309,13 @@ export default function SeedPhraseScreen({ navigation, route }: Props) {
               disabled={loading || !mnemonicInput.trim()}
               style={[
                 styles.primaryBtn,
-                { backgroundColor: mnemonicInput.trim() ? colors.primary.DEFAULT : (isDark ? '#2C2C2E' : '#E5E5EA'), marginTop: 24 }
+                { backgroundColor: mnemonicInput.trim() ? (isDark ? '#FFFFFF' : '#000000') : (isDark ? '#2C2C2E' : '#E5E5EA'), marginTop: 24 }
               ]}
             >
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={isDark ? '#000000' : '#FFFFFF'} />
               ) : (
-                <Text style={[styles.primaryBtnText, { color: mnemonicInput.trim() ? '#FFFFFF' : colors.text.muted }]}>Import Wallet</Text>
+                <Text style={[styles.primaryBtnText, { color: mnemonicInput.trim() ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted }]}>Import Wallet</Text>
               )}
             </AppleButton>
           </>

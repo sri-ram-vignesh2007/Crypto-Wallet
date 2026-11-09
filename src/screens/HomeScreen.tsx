@@ -1,9 +1,9 @@
-// src/screens/HomeScreen.tsx - Apple iPhone Native Minimalist Dashboard
+// src/screens/HomeScreen.tsx - Apple Pay / Apple Wallet Executive Dashboard
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, ScrollView, TouchableOpacity, Text, StyleSheet, RefreshControl,
-  SafeAreaView, StatusBar, Modal, Animated, Pressable, Platform,
+  SafeAreaView, StatusBar, Modal, Animated, Pressable, Platform, Dimensions,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,8 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Reusable Apple Spring Scale Button
 interface SpringButtonProps {
@@ -24,7 +26,7 @@ const SpringButton: React.FC<SpringButtonProps> = ({
   onPress,
   style,
   children,
-  activeScale = 0.94,
+  activeScale = 0.95,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -85,21 +87,21 @@ const BuyIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: numb
   </Svg>
 );
 
-const QrScanIcon = ({ color = '#8E8E93', size = 20 }: { color?: string; size?: number }) => (
+const QrScanIcon = ({ color = '#8E8E93', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
     <Rect x="7" y="7" width="10" height="10" rx="2" />
   </Svg>
 );
 
-const CopyIcon = ({ color = '#8E8E93', size = 13 }: { color?: string; size?: number }) => (
+const CopyIcon = ({ color = '#8E8E93', size = 12 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Rect x="9" y="9" width="13" height="13" rx="2.5" />
     <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
   </Svg>
 );
 
-const ChevronDownIcon = ({ color = '#8E8E93', size = 13 }: { color?: string; size?: number }) => (
+const ChevronDownIcon = ({ color = '#8E8E93', size = 12 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M6 9l6 6 6-6" />
   </Svg>
@@ -111,7 +113,14 @@ const CheckIcon = ({ color = '#34C759', size = 18 }: { color?: string; size?: nu
   </Svg>
 );
 
-// Apple Style Clean Token Logos
+// Apple Contactless Wave Symbol
+const ContactlessIcon = ({ color = '#8E8E93', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M8.5 16.5a5 5 0 0 1 0-7M12 19a8.5 8.5 0 0 0 0-14M15.5 21.5a12 12 0 0 0 0-19" />
+  </Svg>
+);
+
+// Apple Style Clean Token Logos (Solid True Colors, No Neon)
 const EthLogo = () => (
   <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#627EEA" />
@@ -125,64 +134,63 @@ const EthLogo = () => (
 const BtcLogo = () => (
   <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#F7931A" />
-    <Path d="M14.5 10.5c.6-.4 1-.9 1-1.6 0-1.4-1.1-2-2.7-2.1V5h-1.3v1.7h-.9V5h-1.3v1.8H7.5v1.4h1.1c.3 0 .5.2.5.5v6.6c0 .3-.2.5-.5.5H7.5v1.4h1.8v1.8h1.3v-1.7h.9v1.7h1.3v-1.8c1.9-.1 3.2-.8 3.2-2.4 0-1.1-.6-1.9-1.5-2.3zm-3.2-2.1h1.4c.8 0 1.4.3 1.4 1s-.6 1-1.4 1h-1.4V8.4zm1.7 5.2h-1.7v-2.2h1.7c.9 0 1.6.4 1.6 1.1s-.7 1.1-1.6 1.1z" fill="#FFFFFF" />
-  </Svg>
-);
-
-const BnbLogo = () => (
-  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="#F0B90B" />
-    <Path d="M12 6.5l2.2 2.2-1 1-1.2-1.2-1.2 1.2-1-1L12 6.5zm-3.2 3.2l1 1-2.2 2.2-1-1 2.2-2.2zm6.4 0l2.2 2.2-1 1-2.2-2.2 1-1zm-4.3 1.1l1.1 1.1 1.1-1.1 1.1 1.1-1.1 1.1 1.1 1.1-1.1 1.1-1.1-1.1-1.1 1.1-1.1-1.1 1.1-1.1-1.1-1.1 1.1-1.1zm-2.1 3.2l1 1-1 1-1-1 1-1zm6.4 0l1 1-1 1-1-1 1-1zm-4.3 3.2l1.2 1.2 1-1 1 1-2.2 2.2-2.2-2.2 1-1 1.2-1.2z" fill="#FFFFFF" />
-  </Svg>
-);
-
-const PolygonLogo = () => (
-  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="#8247E5" />
-    <Path d="M12 4L6 7.5v9L12 20l6-3.5v-9L12 4zm0 2.3l4 2.3v4.6l-4 2.3-4-2.3V8.6l4-2.3z" fill="#FFFFFF" />
-  </Svg>
-);
-
-const SolLogo = () => (
-  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="#805AD5" />
-    <Path d="M7 15.5l1.8-1.8h8.2l-1.8 1.8H7zm0-5l1.8-1.8h8.2l-1.8 1.8H7zm1.8-5h8.2l-1.8 1.8H7l1.8-1.8z" fill="#FFFFFF" />
-  </Svg>
-);
-
-const UsdtLogo = () => (
-  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="#26A17B" />
-    <Path d="M13.2 11.2v-1.4h3.6V7.5H7.2v2.3h3.6v1.4c-3.1.2-5.4.9-5.4 1.8 0 .8 2.3 1.6 5.4 1.8v3.7h2.4v-3.7c3.1-.2 5.4-.9 5.4-1.8 0-.9-2.3-1.6-5.4-1.8zm0 2.2c-2.3.1-4.2-.4-4.2-.9s1.9-1 4.2-.9v1.8z" fill="#FFFFFF" />
+    <Path
+      d="M14.5 10.5c.8-.4 1.2-1.1 1.2-2 0-1.6-1.3-2.5-3.2-2.5H9v9h3.8c2 0 3.4-1 3.4-2.7 0-1-.6-1.6-1.7-1.8zm-3.5-3h1.2c.9 0 1.5.4 1.5 1.2s-.6 1.2-1.5 1.2H11v-2.4zm1.5 6H11v-2.6h1.5c1 0 1.6.4 1.6 1.3 0 .8-.6 1.3-1.6 1.3z"
+      fill="#FFFFFF"
+    />
   </Svg>
 );
 
 const UsdcLogo = () => (
   <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="11" fill="#2775CA" />
-    <Path d="M12 6.5c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5zm.7 8.8v.9h-1.4v-.9c-1.1-.1-1.9-.7-2-1.6h1.2c.1.5.5.8 1.2.8.7 0 1.1-.3 1.1-.7 0-.5-.4-.6-1.1-.8-1.3-.3-2.1-.7-2.1-1.7 0-.8.6-1.4 1.7-1.5v-.9h1.4v.9c.9.1 1.6.6 1.8 1.4h-1.2c-.1-.4-.4-.7-1-.7-.6 0-1 .3-1 .6s.4.6 1.1.8c1.3.3 2.1.7 2.1 1.7 0 .9-.7 1.5-1.8 1.6z" fill="#FFFFFF" />
+    <Path
+      d="M12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10.5c-2.5 0-4.5-2-4.5-4.5S9.5 7.5 12 7.5s4.5 2 4.5 4.5-2 4.5-4.5 4.5z"
+      fill="#FFFFFF"
+    />
+    <Path d="M11 9h2v6h-2z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const SolLogo = () => (
+  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#AF52DE" />
+    <Path d="M6.5 15.5l2-2h9l-2 2h-9zM6.5 12.5l2-2h9l-2 2h-9zM6.5 9.5l2-2h9l-2 2h-9z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const PolygonLogo = () => (
+  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#8247E5" />
+    <Path d="M12 6L7 9v6l5 3 5-3V9l-5-3zm0 2.2l3 1.8v3.6l-3 1.8-3-1.8v-3.6l3-1.8z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const ArbLogo = () => (
+  <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#28A0F0" />
+    <Path d="M12 6l-6 10h3l3-5 3 5h3l-6-10z" fill="#FFFFFF" />
   </Svg>
 );
 
 const TOKEN_LOGOS: Record<string, () => React.ReactElement> = {
   ETH: EthLogo,
   BTC: BtcLogo,
-  BNB: BnbLogo,
-  MATIC: PolygonLogo,
-  POL: PolygonLogo,
-  SOL: SolLogo,
-  USDT: UsdtLogo,
   USDC: UsdcLogo,
+  SOL: SolLogo,
+  POL: PolygonLogo,
+  MATIC: PolygonLogo,
+  ARB: ArbLogo,
 };
 
+// Default tokens with solid market metrics
 const DEFAULT_TOKENS = [
-  { symbol: 'ETH', name: 'Ethereum', price: '$3,485.20', change: '+2.4%', positive: true, balance: '0.00', usd: '$0.00' },
-  { symbol: 'BTC', name: 'Bitcoin', price: '$68,240.00', change: '+1.8%', positive: true, balance: '0.00', usd: '$0.00' },
-  { symbol: 'BNB', name: 'BNB Chain', price: '$718.50', change: '+0.5%', positive: true, balance: '0.00', usd: '$0.00' },
-  { symbol: 'POL', name: 'Polygon', price: '$0.82', change: '-1.1%', positive: false, balance: '0.00', usd: '$0.00' },
-  { symbol: 'SOL', name: 'Solana', price: '$184.30', change: '+3.9%', positive: true, balance: '0.00', usd: '$0.00' },
-  { symbol: 'USDT', name: 'Tether USD', price: '$1.00', change: '0.0%', positive: true, balance: '0.00', usd: '$0.00' },
-  { symbol: 'USDC', name: 'USD Coin', price: '$1.00', change: '0.0%', positive: true, balance: '0.00', usd: '$0.00' },
+  { symbol: 'ETH', name: 'Ethereum', balance: '0.00', price: '$3,420.50', change: '+2.4%', positive: true, usd: '$0.00' },
+  { symbol: 'BTC', name: 'Bitcoin', balance: '0.00', price: '$67,540.00', change: '+3.1%', positive: true, usd: '$0.00' },
+  { symbol: 'USDC', name: 'USD Coin', balance: '0.00', price: '$1.00', change: '0.0%', positive: true, usd: '$0.00' },
+  { symbol: 'SOL', name: 'Solana', balance: '0.00', price: '$168.20', change: '-0.8%', positive: false, usd: '$0.00' },
+  { symbol: 'POL', name: 'Polygon', balance: '0.00', price: '$0.85', change: '+1.5%', positive: true, usd: '$0.00' },
+  { symbol: 'ARB', name: 'Arbitrum', balance: '0.00', price: '$1.24', change: '+4.2%', positive: true, usd: '$0.00' },
 ];
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
@@ -190,13 +198,21 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const colors = useColors();
   const isDark = useIsDark();
 
-  const { address, totalValueUsd, balances, selectedChain, setSelectedChain, refreshBalances } = useWalletStore();
-  const [refreshing, setRefreshing] = useState(false);
-  const [showNetworkModal, setShowNetworkModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'crypto' | 'nfts'>('crypto');
-  const [copiedToast, setCopiedToast] = useState(false);
+  const {
+    address,
+    selectedChain,
+    balances,
+    totalValueUsd,
+    refreshBalances,
+    setSelectedChain,
+  } = useWalletStore();
 
-  // Animations
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'crypto' | 'nfts' | 'activity'>('crypto');
+  const [copiedToast, setCopiedToast] = useState(false);
+  const [showNetworkModal, setShowNetworkModal] = useState(false);
+
+  // Smooth Animations
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const toastAnim = useRef(new Animated.Value(-60)).current;
   const tabSliderAnim = useRef(new Animated.Value(0)).current;
@@ -232,10 +248,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     } catch {}
   };
 
-  const switchTab = (tab: 'crypto' | 'nfts') => {
+  const switchTab = (tab: 'crypto' | 'nfts' | 'activity') => {
     setActiveTab(tab);
+    const target = tab === 'crypto' ? 0 : tab === 'nfts' ? 1 : 2;
     Animated.spring(tabSliderAnim, {
-      toValue: tab === 'crypto' ? 0 : 1,
+      toValue: target,
       useNativeDriver: true,
       damping: 20,
       stiffness: 220,
@@ -258,154 +275,201 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     return dt;
   });
 
+  const cardWidth = SCREEN_WIDTH - 32;
+  const sliderWidth = (cardWidth - 8) / 3;
+
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Dynamic Toast Pill (Apple Island Style) */}
       {copiedToast && (
         <Animated.View style={[styles.toastContainer, { transform: [{ translateY: toastAnim }] }]}>
-          <View style={[styles.toastPill, { backgroundColor: isDark ? '#2C2C2E' : '#1C1C1E', borderColor: colors.border.subtle }]}>
-            <CheckIcon color="#34C759" size={14} />
+          <View style={[styles.toastPill, { backgroundColor: '#1C1C1E', borderColor: 'rgba(255,255,255,0.1)' }]}>
+            <CheckIcon color="#30D158" size={14} />
             <Text style={styles.toastText}>Address copied to clipboard</Text>
           </View>
         </Animated.View>
       )}
 
-      {/* Apple Navigation Header */}
+      {/* Apple Navigation Bar */}
       <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
-        {/* Address Pill */}
-        <SpringButton onPress={copyAddress} style={[styles.addressPill, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <Text style={[styles.addressText, { color: colors.text.primary }]}>
-            {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '0x...'}
-          </Text>
-          <CopyIcon color={colors.text.muted} size={12} />
-        </SpringButton>
+        <View style={styles.headerLeft}>
+          <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Wallet</Text>
+        </View>
 
-        {/* Network Selector Pill */}
-        <SpringButton onPress={() => setShowNetworkModal(true)} style={[styles.networkPill, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <View style={[styles.networkDot, { backgroundColor: colors.primary.DEFAULT }]} />
-          <Text style={[styles.networkName, { color: colors.text.primary }]}>{currentChainObj.name}</Text>
-          <ChevronDownIcon color={colors.text.muted} size={12} />
-        </SpringButton>
+        <View style={styles.headerRight}>
+          {/* Network Selector Capsule */}
+          <SpringButton
+            onPress={() => setShowNetworkModal(true)}
+            style={[styles.networkCapsule, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
+          >
+            <View style={[styles.networkDot, { backgroundColor: isDark ? '#0A84FF' : '#007AFF' }]} />
+            <Text style={[styles.networkName, { color: colors.text.primary }]}>{currentChainObj.name}</Text>
+            <ChevronDownIcon color={colors.text.muted} size={11} />
+          </SpringButton>
 
-        {/* QR Scan Button */}
-        <SpringButton onPress={() => navigation.navigate('Receive')} style={[styles.iconButton, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <QrScanIcon color={colors.text.primary} size={18} />
-        </SpringButton>
+          {/* QR Scan Button */}
+          <SpringButton
+            onPress={() => navigation.navigate('Receive')}
+            style={[styles.iconButton, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
+          >
+            <QrScanIcon color={colors.text.primary} size={17} />
+          </SpringButton>
+        </View>
       </View>
 
       <Animated.ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
         style={{ opacity: screenFadeAnim }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.primary.DEFAULT}
+            tintColor={isDark ? '#FFFFFF' : '#007AFF'}
           />
         }
       >
-        {/* Apple Balance Hero Section */}
-        <View style={styles.heroSection}>
-          <Text style={[styles.balanceSub, { color: colors.text.secondary }]}>Total Balance</Text>
-          <Text style={[styles.balanceAmount, { color: colors.text.primary }]}>
-            ${totalValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </Text>
-          <View style={[styles.changeBadge, { backgroundColor: isDark ? 'rgba(48, 209, 88, 0.12)' : 'rgba(52, 199, 89, 0.12)' }]}>
-            <Text style={[styles.changeBadgeText, { color: isDark ? '#30D158' : '#34C759' }]}>+0.00% past 24h</Text>
+        {/* ======================================================== */}
+        {/* TITANIUM OBSIDIAN APPLE CARD HERO (Apple Pay Card Aesthetic) */}
+        {/* ======================================================== */}
+        <View style={styles.appleCardOuter}>
+          <View style={[styles.appleCard, { backgroundColor: isDark ? '#161618' : '#1C1C1E' }]}>
+            {/* Specular Ambient Edge */}
+            <View style={styles.cardSpecularEdge} />
+
+            {/* Top Row: Spaced Brand & Contactless Icon */}
+            <View style={styles.cardTopRow}>
+              <View style={styles.cardBrandBadge}>
+                <Text style={styles.cardBrandText}>CRYPTO VAULT</Text>
+              </View>
+              <View style={styles.cardTopRight}>
+                <Text style={styles.cardPassText}>{currentChainObj.name.toUpperCase()}</Text>
+                <ContactlessIcon color="rgba(255,255,255,0.4)" size={18} />
+              </View>
+            </View>
+
+            {/* Middle: Bold Balance */}
+            <View style={styles.cardMiddle}>
+              <Text style={styles.cardBalanceLabel}>Total Balance</Text>
+              <Text style={styles.cardBalanceValue}>
+                ${totalValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
+
+              <View style={styles.gainPill}>
+                <Text style={styles.gainPillText}>+2.45% 24h</Text>
+              </View>
+            </View>
+
+            {/* Bottom Row: Address Capsule & Chip */}
+            <View style={styles.cardBottomRow}>
+              <SpringButton onPress={copyAddress} style={styles.cardAddressCapsule}>
+                <Text style={styles.cardAddressText}>
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '0x...'}
+                </Text>
+                <CopyIcon color="rgba(255,255,255,0.7)" size={11} />
+              </SpringButton>
+
+              <Text style={styles.cardSecuredText}>BIP-39 SECURED</Text>
+            </View>
           </View>
         </View>
 
-        {/* 4 Apple Action Circles (Send, Receive, Buy, Swap) */}
+        {/* ======================================================== */}
+        {/* 4 SOLID APPLE PAY CIRCLE ACTION BUTTONS                    */}
+        {/* ======================================================== */}
         <View style={styles.actionsRow}>
-          <View style={styles.actionItem}>
+          <View style={styles.actionCol}>
             <SpringButton
               onPress={() => navigation.navigate('Send')}
-              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+              style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
             >
-              <SendIcon color="#FFFFFF" size={22} />
+              <SendIcon color={isDark ? '#FFFFFF' : '#000000'} size={21} />
             </SpringButton>
             <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Send</Text>
           </View>
 
-          <View style={styles.actionItem}>
+          <View style={styles.actionCol}>
             <SpringButton
               onPress={() => navigation.navigate('Receive')}
-              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+              style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
             >
-              <ReceiveIcon color="#FFFFFF" size={22} />
+              <ReceiveIcon color={isDark ? '#FFFFFF' : '#000000'} size={21} />
             </SpringButton>
             <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Receive</Text>
           </View>
 
-          <View style={styles.actionItem}>
+          <View style={styles.actionCol}>
             <SpringButton
               onPress={() => navigation.navigate('Buy')}
-              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+              style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
             >
-              <BuyIcon color="#FFFFFF" size={20} />
+              <BuyIcon color={isDark ? '#FFFFFF' : '#000000'} size={19} />
             </SpringButton>
             <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Buy</Text>
           </View>
 
-          <View style={styles.actionItem}>
+          <View style={styles.actionCol}>
             <SpringButton
               onPress={() => navigation.navigate('Swap')}
-              style={[styles.actionCircle, { backgroundColor: colors.primary.DEFAULT }]}
+              style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
             >
-              <SwapIcon color="#FFFFFF" size={22} />
+              <SwapIcon color={isDark ? '#FFFFFF' : '#000000'} size={21} />
             </SpringButton>
             <Text style={[styles.actionLabel, { color: colors.text.primary }]}>Swap</Text>
           </View>
         </View>
 
-        {/* Apple iOS Segmented Control */}
+        {/* ======================================================== */}
+        {/* APPLE SEGMENTED CONTROL (Tokens | NFTs | Activity)        */}
+        {/* ======================================================== */}
         <View style={styles.segmentedContainer}>
           <View style={[styles.segmentedTrack, { backgroundColor: isDark ? '#1C1C1E' : '#E5E5EA' }]}>
             <Animated.View
               style={[
                 styles.segmentedSlider,
                 {
+                  width: sliderWidth,
                   backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
                   transform: [
                     {
                       translateX: tabSliderAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [2, 166],
+                        inputRange: [0, 1, 2],
+                        outputRange: [2, sliderWidth + 2, sliderWidth * 2 + 2],
                       }),
                     },
                   ],
                 },
               ]}
             />
-            <TouchableOpacity
-              onPress={() => switchTab('crypto')}
-              activeOpacity={0.8}
-              style={styles.segmentedButton}
-            >
+            <TouchableOpacity onPress={() => switchTab('crypto')} activeOpacity={0.8} style={styles.segmentedBtn}>
               <Text style={[styles.segmentedLabel, { color: colors.text.primary, fontWeight: activeTab === 'crypto' ? '600' : '400' }]}>
                 Tokens
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => switchTab('nfts')}
-              activeOpacity={0.8}
-              style={styles.segmentedButton}
-            >
+            <TouchableOpacity onPress={() => switchTab('nfts')} activeOpacity={0.8} style={styles.segmentedBtn}>
               <Text style={[styles.segmentedLabel, { color: colors.text.primary, fontWeight: activeTab === 'nfts' ? '600' : '400' }]}>
                 NFTs
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => switchTab('activity')} activeOpacity={0.8} style={styles.segmentedBtn}>
+              <Text style={[styles.segmentedLabel, { color: colors.text.primary, fontWeight: activeTab === 'activity' ? '600' : '400' }]}>
+                Activity
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Apple Inset Grouped Table (Tokens List) */}
-        {activeTab === 'crypto' ? (
+        {/* ======================================================== */}
+        {/* INSET GROUPED TABLE VIEW                                  */}
+        {/* ======================================================== */}
+        {activeTab === 'crypto' && (
           <View style={styles.insetGroupContainer}>
-            <View style={[styles.insetGroupCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+            <Text style={[styles.sectionHeading, { color: colors.text.secondary }]}>ASSETS</Text>
+            <View style={[styles.insetGroupCard, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
               {tokenList.map((token, index) => {
                 const Logo = TOKEN_LOGOS[token.symbol] || EthLogo;
                 const isLast = index === tokenList.length - 1;
@@ -429,33 +493,67 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                         <Text style={[styles.tokenUsd, { color: colors.text.muted }]}>{token.usd}</Text>
                       </View>
                     </View>
-                    {!isLast && <View style={[styles.hairlineDivider, { backgroundColor: colors.border.subtle }]} />}
+                    {!isLast && <View style={[styles.hairlineDivider, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]} />}
                   </SpringButton>
                 );
               })}
             </View>
           </View>
-        ) : (
+        )}
+
+        {activeTab === 'nfts' && (
           <View style={styles.insetGroupContainer}>
-            <View style={[styles.emptyNftBox, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-              <Text style={[styles.emptyNftTitle, { color: colors.text.primary }]}>No Collectibles</Text>
-              <Text style={[styles.emptyNftSub, { color: colors.text.muted }]}>
-                NFTs you purchase or receive on {currentChainObj.name} will appear here.
+            <Text style={[styles.sectionHeading, { color: colors.text.secondary }]}>COLLECTIBLES</Text>
+            <View style={[styles.emptyBox, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+              <Text style={[styles.emptyBoxTitle, { color: colors.text.primary }]}>No Collectibles</Text>
+              <Text style={[styles.emptyBoxSub, { color: colors.text.muted }]}>
+                NFTs minted or held on {currentChainObj.name} will appear here.
               </Text>
             </View>
           </View>
         )}
 
-        {/* Inset Action: Manage Tokens */}
+        {activeTab === 'activity' && (
+          <View style={styles.insetGroupContainer}>
+            <Text style={[styles.sectionHeading, { color: colors.text.secondary }]}>RECENT ACTIVITY</Text>
+            <View style={[styles.insetGroupCard, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+              <View style={styles.activityItemRow}>
+                <View style={[styles.activityIconCircle, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+                  <SendIcon color={colors.text.primary} size={15} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={[styles.activityTitle, { color: colors.text.primary }]}>Sent ETH</Text>
+                  <Text style={[styles.activitySub, { color: colors.text.muted }]}>To 0x8a3f...1c9d • Confirmed</Text>
+                </View>
+                <Text style={[styles.activityAmount, { color: colors.text.primary }]}>-0.05 ETH</Text>
+              </View>
+
+              <View style={[styles.hairlineDivider, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]} />
+
+              <View style={styles.activityItemRow}>
+                <View style={[styles.activityIconCircle, { backgroundColor: isDark ? 'rgba(48,209,88,0.15)' : '#E8F8EE' }]}>
+                  <ReceiveIcon color={isDark ? '#30D158' : '#34C759'} size={15} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={[styles.activityTitle, { color: colors.text.primary }]}>Received USDC</Text>
+                  <Text style={[styles.activitySub, { color: colors.text.muted }]}>From 0x742d...8f32 • Confirmed</Text>
+                </View>
+                <Text style={[styles.activityAmount, { color: isDark ? '#30D158' : '#34C759' }]}>+250.00 USDC</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Manage Tokens Link */}
         <SpringButton
           onPress={() => navigation.navigate('CustomToken')}
-          style={[styles.manageTokensBtn, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+          style={[styles.manageTokensBtn, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
         >
-          <Text style={[styles.manageTokensText, { color: colors.primary.DEFAULT }]}>+ Manage Tokens</Text>
+          <Text style={[styles.manageTokensText, { color: isDark ? '#0A84FF' : '#007AFF' }]}>+ Import Token</Text>
         </SpringButton>
       </Animated.ScrollView>
 
-      {/* Network Switcher Modal Sheet */}
+      {/* Network Switcher Bottom Sheet */}
       <Modal
         visible={showNetworkModal}
         transparent
@@ -468,13 +566,13 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             activeOpacity={1}
             onPress={() => setShowNetworkModal(false)}
           />
-          <View style={[styles.modalSheet, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+          <View style={[styles.modalSheet, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
             <View style={[styles.modalHandle, { backgroundColor: isDark ? '#38383A' : '#D1D1D6' }]} />
             <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Select Network</Text>
             <Text style={[styles.modalSubtitle, { color: colors.text.secondary }]}>Free Public RPC Endpoints</Text>
 
             <ScrollView style={{ maxHeight: 360 }} showsVerticalScrollIndicator={false}>
-              <View style={[styles.modalGroupCard, { backgroundColor: colors.bg.canvas, borderColor: colors.border.subtle }]}>
+              <View style={[styles.modalGroupCard, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7', borderColor: isDark ? '#38383A' : '#E5E5EA' }]}>
                 {Object.entries(CHAINS).map(([key, chain], idx, arr) => {
                   const isSelected = selectedChain === key;
                   const isLast = idx === arr.length - 1;
@@ -486,10 +584,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                         setShowNetworkModal(false);
                       }}
                       activeScale={0.98}
-                      style={[styles.chainItem, isSelected && { backgroundColor: isDark ? '#2C2C2E' : '#E5F1FF' }]}
+                      style={[styles.chainItem, isSelected && { backgroundColor: isDark ? '#3A3A3C' : '#E5F1FF' }]}
                     >
                       <View style={styles.chainItemLeft}>
-                        <View style={[styles.chainLogoCircle, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
+                        <View style={[styles.chainLogoCircle, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#38383A' : '#E5E5EA' }]}>
                           <Text style={[styles.chainLogoText, { color: colors.text.primary }]}>{chain.logo}</Text>
                         </View>
                         <View>
@@ -499,8 +597,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                           </Text>
                         </View>
                       </View>
-                      {isSelected && <CheckIcon color={colors.primary.DEFAULT} size={20} />}
-                      {!isLast && <View style={[styles.chainDivider, { backgroundColor: colors.border.subtle }]} />}
+                      {isSelected && <CheckIcon color={isDark ? '#0A84FF' : '#007AFF'} size={20} />}
+                      {!isLast && <View style={[styles.chainDivider, { backgroundColor: isDark ? '#38383A' : '#E5E5EA' }]} />}
                     </SpringButton>
                   );
                 })}
@@ -522,38 +620,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  addressPill: {
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: -0.6,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  networkCapsule: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 0.5,
-  },
-  addressText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginRight: 6,
-    letterSpacing: -0.2,
-  },
-  networkPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 0.5,
+    gap: 6,
   },
   networkDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    marginRight: 6,
   },
   networkName: {
     fontSize: 13,
     fontWeight: '600',
-    marginRight: 5,
     letterSpacing: -0.2,
   },
   iconButton: {
@@ -564,97 +661,155 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 0.5,
   },
-  toastContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 999,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
   },
-  toastPill: {
+  // Apple Titanium Card Style
+  appleCardOuter: {
+    marginBottom: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  appleCard: {
+    width: '100%',
+    height: 204,
+    borderRadius: 22,
+    padding: 20,
+    justifyContent: 'space-between',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    overflow: 'hidden',
+  },
+  cardSpecularEdge: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardBrandBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  cardBrandText: {
+    color: '#D1D1D6',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+  },
+  cardTopRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 24,
-    borderWidth: 0.5,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    gap: 8,
   },
-  toastText: {
-    color: '#FFFFFF',
-    fontSize: 13,
+  cardPassText: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 10,
     fontWeight: '600',
-    marginLeft: 8,
-    letterSpacing: -0.2,
+    letterSpacing: 0.8,
   },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  heroSection: {
+  cardMiddle: {
     alignItems: 'center',
-    paddingTop: 18,
-    paddingBottom: 22,
+    marginVertical: 4,
   },
-  balanceSub: {
-    fontSize: 13,
+  cardBalanceLabel: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 12,
     fontWeight: '500',
-    letterSpacing: -0.1,
+    letterSpacing: 0.2,
     marginBottom: 4,
   },
-  balanceAmount: {
-    fontSize: 38,
+  cardBalanceValue: {
+    color: '#FFFFFF',
+    fontSize: 34,
     fontWeight: '700',
-    letterSpacing: -1.2,
+    letterSpacing: -1,
   },
-  changeBadge: {
+  gainPill: {
     marginTop: 8,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 12,
+    backgroundColor: 'rgba(48, 209, 88, 0.16)',
   },
-  changeBadgeText: {
-    fontSize: 12,
+  gainPillText: {
+    color: '#30D158',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  cardBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardAddressCapsule: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    gap: 6,
+  },
+  cardAddressText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     fontWeight: '600',
   },
+  cardSecuredText: {
+    color: 'rgba(255, 255, 255, 0.35)',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+  },
+  // Actions
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
     marginBottom: 24,
+    paddingHorizontal: 8,
   },
-  actionItem: {
+  actionCol: {
     alignItems: 'center',
   },
-  actionCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  actionButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 0.5,
     marginBottom: 7,
-    shadowColor: '#007AFF',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   actionLabel: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
     letterSpacing: -0.2,
   },
+  // Segmented Control
   segmentedContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 16,
     marginBottom: 16,
   },
   segmentedTrack: {
-    width: 338,
     height: 36,
     borderRadius: 10,
     flexDirection: 'row',
@@ -664,28 +819,34 @@ const styles = StyleSheet.create({
   segmentedSlider: {
     position: 'absolute',
     top: 2,
-    left: 0,
-    width: 166,
-    height: 32,
+    bottom: 2,
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
     elevation: 2,
   },
-  segmentedButton: {
+  segmentedBtn: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 2,
+    zIndex: 1,
   },
   segmentedLabel: {
     fontSize: 13,
-    letterSpacing: -0.2,
   },
+  // Inset Grouped Table
   insetGroupContainer: {
-    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  sectionHeading: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+    marginLeft: 12,
   },
   insetGroupCard: {
     borderRadius: 18,
@@ -695,15 +856,15 @@ const styles = StyleSheet.create({
   tokenRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
     paddingHorizontal: 16,
+    paddingVertical: 13,
     position: 'relative',
   },
   tokenContent: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginLeft: 14,
   },
   tokenMeta: {
@@ -713,11 +874,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: -0.3,
-    marginBottom: 2,
   },
   tokenSubtext: {
-    fontSize: 13,
-    letterSpacing: -0.2,
+    fontSize: 12,
+    marginTop: 2,
   },
   tokenBalanceCol: {
     alignItems: 'flex-end',
@@ -726,11 +886,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: -0.3,
-    marginBottom: 2,
   },
   tokenUsd: {
-    fontSize: 13,
-    letterSpacing: -0.2,
+    fontSize: 12,
+    marginTop: 2,
   },
   hairlineDivider: {
     position: 'absolute',
@@ -739,70 +898,122 @@ const styles = StyleSheet.create({
     right: 0,
     height: 0.5,
   },
-  emptyNftBox: {
-    padding: 36,
+  emptyBox: {
     borderRadius: 18,
     borderWidth: 0.5,
+    padding: 32,
     alignItems: 'center',
   },
-  emptyNftTitle: {
-    fontSize: 16,
+  emptyBoxTitle: {
+    fontSize: 17,
     fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 4,
   },
-  emptyNftSub: {
+  emptyBoxSub: {
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 18,
   },
-  manageTokensBtn: {
-    marginHorizontal: 16,
-    marginTop: 18,
+  activityItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 0.5,
+  },
+  activityIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  manageTokensText: {
-    fontSize: 14,
+  activityTitle: {
+    fontSize: 15,
     fontWeight: '600',
-    letterSpacing: -0.2,
   },
+  activitySub: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  activityAmount: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  manageTokensBtn: {
+    borderRadius: 14,
+    borderWidth: 0.5,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  manageTokensText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  // Toast
+  toastContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    alignItems: 'center',
+  },
+  toastPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 24,
+    borderWidth: 0.5,
+    gap: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     justifyContent: 'flex-end',
   },
   modalDismissArea: {
     flex: 1,
   },
   modalSheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 34,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderTopWidth: 0.5,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 36,
   },
   modalHandle: {
     width: 36,
     height: 5,
-    borderRadius: 3,
+    borderRadius: 2.5,
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   modalTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '700',
     letterSpacing: -0.4,
-    paddingHorizontal: 4,
+    textAlign: 'center',
   },
   modalSubtitle: {
     fontSize: 13,
-    marginBottom: 14,
+    textAlign: 'center',
     marginTop: 2,
-    paddingHorizontal: 4,
+    marginBottom: 16,
   },
   modalGroupCard: {
     borderRadius: 16,
@@ -813,35 +1024,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 14,
     paddingVertical: 12,
-    paddingHorizontal: 16,
     position: 'relative',
   },
   chainItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+    flex: 1,
   },
   chainLogoCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 0.5,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    borderWidth: 0.5,
   },
   chainLogoText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
   },
   chainItemName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   chainItemRpc: {
-    fontSize: 12,
+    fontSize: 11,
     marginTop: 1,
+    maxWidth: 200,
   },
   chainDivider: {
     position: 'absolute',

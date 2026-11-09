@@ -1,11 +1,13 @@
-// src/screens/onboarding/WelcomeScreen.tsx - Apple iPhone Style Minimalist Onboarding
+// src/screens/onboarding/WelcomeScreen.tsx - Apple Pay / Apple Card Executive Onboarding
 
 import React, { useRef, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, StatusBar, SafeAreaView, Animated, Pressable,
+  View, Text, StyleSheet, StatusBar, SafeAreaView, Animated, Pressable, Dimensions, Platform,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../../theme/ThemeContext';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 let useSafeAreaInsets = () => ({ top: 0, bottom: 0, left: 0, right: 0 });
 try {
@@ -15,7 +17,7 @@ try {
   }
 } catch (e) {}
 
-// Apple Spring Pressable
+// Apple Spring Scale Button
 const AppleButton: React.FC<{
   onPress: () => void;
   style?: any;
@@ -50,13 +52,21 @@ const AppleButton: React.FC<{
   );
 };
 
+// Apple Contactless NFC Waves
+const ContactlessIcon = ({ color = 'rgba(255,255,255,0.6)', size = 24 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M8.5 16.5a5 5 0 0 1 0-7M12 19a8.5 8.5 0 0 0 0-14M15.5 21.5a12 12 0 0 0 0-19" />
+  </Svg>
+);
+
 export default function WelcomeScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
+  const slideAnim = useRef(new Animated.Value(24)).current;
+  const cardScaleAnim = useRef(new Animated.Value(0.92)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -67,12 +77,18 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
       }),
       Animated.spring(slideAnim, {
         toValue: 0,
-        damping: 20,
-        stiffness: 200,
+        damping: 18,
+        stiffness: 220,
+        useNativeDriver: true,
+      }),
+      Animated.spring(cardScaleAnim, {
+        toValue: 1,
+        damping: 16,
+        stiffness: 180,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [fadeAnim, slideAnim]);
+  }, [fadeAnim, slideAnim, cardScaleAnim]);
 
   const handleCreate = () => {
     navigation.navigate('SeedPhrase', { mode: 'create' });
@@ -83,65 +99,99 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       <Animated.View
         style={[
           styles.content,
           {
-            paddingTop: Math.max(30, insets.top + 20),
-            paddingBottom: Math.max(20, insets.bottom + 16),
+            paddingTop: insets.top + 20,
+            paddingBottom: Math.max(24, insets.bottom + 16),
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           },
         ]}
       >
-        {/* Apple Centered Brand Emblem */}
-        <View style={styles.centerContainer}>
-          <View style={[styles.shieldContainer, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Svg width={72} height={72} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z"
-                fill={colors.primary.DEFAULT}
-              />
-              <Path
-                d="M9 12L11 14L15 10"
-                stroke="#FFFFFF"
-                strokeWidth={2.4}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-          </View>
+        {/* ======================================================== */}
+        {/* TITANIUM APPLE CARD PREVIEW (Apple Pay Presentation)      */}
+        {/* ======================================================== */}
+        <Animated.View style={[styles.cardContainer, { transform: [{ scale: cardScaleAnim }] }]}>
+          <View style={[styles.titaniumCard, { backgroundColor: '#161618' }]}>
+            <View style={styles.cardSpecularLine} />
 
+            <View style={styles.cardTopRow}>
+              <Text style={styles.cardBrandText}>CRYPTO VAULT</Text>
+              <ContactlessIcon size={20} />
+            </View>
+
+            <View style={styles.cardMiddle}>
+              <View style={styles.cardChip}>
+                <View style={styles.chipInner} />
+              </View>
+              <Text style={styles.cardPassType}>TITANIUM PASS</Text>
+            </View>
+
+            <View style={styles.cardBottomRow}>
+              <Text style={styles.cardholderText}>SELF-CUSTODY</Text>
+              <Text style={styles.cardNetworkText}>EVM & MULTI-CHAIN</Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Title & Subtitle */}
+        <View style={styles.headingSection}>
           <Text style={[styles.title, { color: colors.text.primary }]}>
-            Crypto Wallet
+            Crypto Vault
           </Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-            Self-custody crypto on Ethereum, BNB Chain, Polygon, and more with Apple-grade security.
+            Engineered for high-speed, self-custody crypto payments with Apple-grade security.
           </Text>
         </View>
 
-        {/* Apple Style Action Buttons */}
+        {/* Apple Inset Highlights Group */}
+        <View style={[styles.highlightsCard, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBullet}>🔐</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>Hardware Security Enclave</Text>
+              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>Protected by biometric authentication on your device.</Text>
+            </View>
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]} />
+
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBullet}>⚡</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>Free Multi-Chain RPC</Text>
+              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>Direct failover on Ethereum, Polygon, BSC, Base, and Arbitrum.</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Solid Apple Pay Style Action Buttons */}
         <View style={styles.actionsContainer}>
           <AppleButton
             onPress={handleCreate}
-            style={[styles.primaryButton, { backgroundColor: colors.primary.DEFAULT }]}
+            style={[
+              styles.primaryButton,
+              { backgroundColor: isDark ? '#FFFFFF' : '#000000' },
+            ]}
           >
-            <Text style={styles.primaryButtonText}>Create a New Wallet</Text>
+            <Text style={[styles.primaryButtonText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+              Create a New Wallet
+            </Text>
           </AppleButton>
 
           <AppleButton
             onPress={handleImport}
-            style={[styles.secondaryButton, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+            style={[styles.secondaryButton, { backgroundColor: isDark ? '#1C1C1E' : '#E5E5EA' }]}
           >
-            <Text style={[styles.secondaryButtonText, { color: colors.text.primary }]}>I Already Have a Wallet</Text>
+            <Text style={[styles.secondaryButtonText, { color: colors.text.primary }]}>
+              I Already Have a Wallet
+            </Text>
           </AppleButton>
-
-          <Text style={[styles.footerText, { color: colors.text.muted }]}>
-            By continuing, you agree to the Terms of Service & Privacy Policy
-          </Text>
         </View>
       </Animated.View>
     </SafeAreaView>
@@ -149,50 +199,148 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: {
+    flex: 1,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  cardContainer: {
     alignItems: 'center',
-    paddingHorizontal: 16,
+    marginVertical: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    elevation: 10,
   },
-  shieldContainer: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    alignItems: 'center',
-    justifyContent: 'center',
+  titaniumCard: {
+    width: SCREEN_WIDTH - 48,
+    height: 195,
+    borderRadius: 20,
+    padding: 20,
+    justifyContent: 'space-between',
     borderWidth: 0.5,
-    marginBottom: 26,
-    shadowColor: '#007AFF',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    overflow: 'hidden',
+  },
+  cardSpecularLine: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    right: 20,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardBrandText: {
+    color: '#D1D1D6',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+  },
+  cardMiddle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardChip: {
+    width: 36,
+    height: 26,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipInner: {
+    width: 20,
+    height: 14,
+    borderRadius: 3,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  cardPassType: {
+    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+  },
+  cardBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardholderText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  cardNetworkText: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  headingSection: {
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    marginVertical: 12,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
+    letterSpacing: -0.6,
     textAlign: 'center',
-    letterSpacing: -0.8,
-    lineHeight: 38,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 14,
+    lineHeight: 20,
     textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 22,
+  },
+  highlightsCard: {
+    borderRadius: 16,
+    borderWidth: 0.5,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginVertical: 10,
+  },
+  highlightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    gap: 12,
+  },
+  highlightBullet: {
+    fontSize: 20,
+  },
+  highlightTitle: {
+    fontSize: 14,
+    fontWeight: '600',
     letterSpacing: -0.2,
-    maxWidth: 320,
+  },
+  highlightSub: {
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  divider: {
+    height: 0.5,
+    marginVertical: 6,
+    marginLeft: 32,
   },
   actionsContainer: {
-    width: '100%',
-    paddingBottom: 8,
+    gap: 10,
+    marginTop: 10,
   },
   primaryButton: {
     width: '100%',
@@ -200,37 +348,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: '#007AFF',
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
     fontSize: 16,
+    fontWeight: '700',
     letterSpacing: -0.3,
   },
   secondaryButton: {
     width: '100%',
-    paddingVertical: 15,
+    paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 0.5,
-    marginBottom: 16,
   },
   secondaryButtonText: {
+    fontSize: 15,
     fontWeight: '600',
-    fontSize: 16,
-    letterSpacing: -0.3,
-  },
-  footerText: {
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 18,
-    letterSpacing: -0.1,
+    letterSpacing: -0.2,
   },
 });
