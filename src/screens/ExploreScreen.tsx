@@ -101,7 +101,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-1',
     orgName: 'Enterprise Desk',
-    orgHandle: '@enterprise_desk',
+    orgHandle: '@enterprisedesk',
     orgLogoInitial: 'E',
     orgCategory: 'Business',
     isVerified: true,
@@ -115,7 +115,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-2',
     orgName: 'Crypto & Bitcoin Desk',
-    orgHandle: '@crypto_desk',
+    orgHandle: '@cryptodesk',
     orgLogoInitial: 'B',
     orgCategory: 'Crypto',
     isVerified: true,
@@ -129,7 +129,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-3',
     orgName: 'DeFi Engine Desk',
-    orgHandle: '@defi_desk',
+    orgHandle: '@defidesk',
     orgLogoInitial: 'D',
     orgCategory: 'DeFi',
     isVerified: true,
@@ -143,7 +143,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-4',
     orgName: 'Layer 1 Systems Desk',
-    orgHandle: '@l1_systems',
+    orgHandle: '@l1systems',
     orgLogoInitial: 'S',
     orgCategory: 'Layer 1',
     isVerified: true,
@@ -157,7 +157,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-5',
     orgName: 'Rollup & Scaling Desk',
-    orgHandle: '@rollup_desk',
+    orgHandle: '@rollupdesk',
     orgLogoInitial: 'R',
     orgCategory: 'Layer 2',
     isVerified: true,
@@ -171,7 +171,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-6',
     orgName: 'Tokenized Assets Desk',
-    orgHandle: '@rwa_desk',
+    orgHandle: '@rwadesk',
     orgLogoInitial: 'T',
     orgCategory: 'RWA',
     isVerified: true,
@@ -185,7 +185,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-7',
     orgName: 'Interoperability Desk',
-    orgHandle: '@crosschain_desk',
+    orgHandle: '@crosschaindesk',
     orgLogoInitial: 'C',
     orgCategory: 'Cross-Chain',
     isVerified: true,
@@ -199,7 +199,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-8',
     orgName: 'Security & Enclave Desk',
-    orgHandle: '@security_desk',
+    orgHandle: '@securitydesk',
     orgLogoInitial: 'K',
     orgCategory: 'Security',
     isVerified: true,
@@ -213,7 +213,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-9',
     orgName: 'Agentic Compute Desk',
-    orgHandle: '@compute_desk',
+    orgHandle: '@computedesk',
     orgLogoInitial: 'A',
     orgCategory: 'AI Compute',
     isVerified: true,
@@ -227,7 +227,7 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-10',
     orgName: 'Macro & Policy Desk',
-    orgHandle: '@macro_desk',
+    orgHandle: '@macrodesk',
     orgLogoInitial: 'M',
     orgCategory: 'Macro',
     isVerified: true,
@@ -392,13 +392,13 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
 
   // Save Username
   const handleSaveUsername = () => {
-    const clean = newUsernameInput.trim().replace(/^@/, '');
+    const clean = newUsernameInput.trim().replace(/^@/, '').replace(/_/g, '');
     if (!clean || clean.length < 3) {
       setUsernameError('Username must be at least 3 characters');
       return;
     }
-    if (!/^[a-zA-Z0-9_]+$/.test(clean)) {
-      setUsernameError('Only letters, numbers, and underscores allowed');
+    if (!/^[a-zA-Z0-9]+$/.test(clean)) {
+      setUsernameError('Only letters and numbers allowed (no underscores)');
       return;
     }
     setUsername(clean);
@@ -528,7 +528,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       const newBroadcast: LiveDeskBroadcast = {
         id: `broadcast-org-${Date.now()}`,
         orgName: orgNameInput.trim(),
-        orgHandle: `@${orgNameInput.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+        orgHandle: `@${orgNameInput.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}`,
         orgLogoInitial: orgNameInput.trim().charAt(0).toUpperCase(),
         orgCategory: orgCategoryInput,
         isVerified: true,
@@ -748,7 +748,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                           )}
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                          <Text style={styles.orgHandleText}>{broadcast.orgHandle}</Text>
+                          <Text style={styles.orgHandleText}>{broadcast.orgHandle.replace(/_/g, '')}</Text>
                           <Text style={styles.dotDivider}>•</Text>
                           <Text style={styles.timeAgoText}>{broadcast.timeAgo}</Text>
                         </View>

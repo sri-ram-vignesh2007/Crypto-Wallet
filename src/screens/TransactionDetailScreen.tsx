@@ -1,54 +1,33 @@
-// src/screens/TransactionDetailScreen.tsx
-// Vault System — Transaction Detail with AI Explanation and Risk Review
-// Status, amount, recipient/sender, network, fee, hash copy, explorer link,
-// timestamp, details accordion, AI explanation and scam affordance
+// src/screens/TransactionDetailScreen.tsx - Institutional-Grade Transaction Detail for Cura Wallet
 
 import React, { useState, useEffect } from 'react';
 import {
   View, ScrollView, TouchableOpacity, Text, StyleSheet, Platform,
-  Modal, Pressable, ActivityIndicator,
+  Modal, Pressable, Linking, Alert,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
-import {
-  useTheme, useColors, useSpacing, useBorderRadius, useShadows, useTypography, useIsDark,
-  spacing, borderRadius, colors, shadows, typography,
-} from '../theme/ThemeContext';
-import { theme, riskStates } from '../theme/Theme';
-import { ClayButton } from '../components/ClayButton';
-import { Card } from '../components/Card';
-import { AIAssistantFAB } from '../components/AIAssistantFAB';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { useColors, useIsDark } from '../theme/ThemeContext';
+import { TokenLogo } from '../components/TokenLogo';
 
-// ── ICONS ───────────────────────────────────────────────────────────────────
-const ArrowLeftIcon = ({ color, size = 24 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+const ArrowLeftIcon = ({ color, size = 22 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M19 12H5M12 19l-7-7 7-7" />
   </Svg>
 );
 
-const CheckIcon = ({ color, size = 20 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="12" cy="12" r="9" fill={color} />
-    <Path d="M9 12l2 2 4-4" stroke="#FFFFFF" strokeWidth={2} />
-  </Svg>
-);
-
-const ClockIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+const CheckCircleIcon = ({ color, size = 18 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="12" cy="12" r="10" />
-    <Path d="M12 6v6l4 2" />
+    <Path d="M9 12l2 2 4-4" />
   </Svg>
 );
 
-const ShieldCheckIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
+const CopyIcon = ({ color, size = 15 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </Svg>
-);
-
-const ShieldAlertIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <Rect x="9" y="9" width="13" height="13" rx="2" />
+    <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
   </Svg>
 );
 
@@ -60,252 +39,209 @@ const ExternalLinkIcon = ({ color, size = 14 }: { color: string; size?: number }
   </Svg>
 );
 
-const ChevronRightIcon = ({ color, size = 14 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M9 18l6-6-6-6" />
-  </Svg>
-);
-
-const CopyIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-    <Path d="M5 15l7-7 7 7" />
-  </Svg>
-);
-
-const SparklesIcon = ({ color, size = 20 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M12 2v4" />
-    <Path d="M12 18v4" />
-    <Path d="M4.93 4.93l2.83 2.83" />
-    <Path d="M16.24 16.24l2.83 2.83" />
-    <Path d="M2 12h4" />
-    <Path d="M18 12h4" />
-  </Svg>
-);
-
-const MoreVerticalIcon = ({ color, size = 20 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="12" cy="12" r="1" />
-    <Circle cx="12" cy="5" r="1" />
-    <Circle cx="12" cy="19" r="1" />
-  </Svg>
-);
-
-const AlertTriangleIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-    <Line x1="12" y1="9" x2="12" y2="13" />
-    <Line x1="12" y1="17" x2="12.01" y2="17" />
-  </Svg>
-);
-
-const XIcon = ({ color, size = 20 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Line x1="18" y1="6" x2="6" y2="18" />
-    <Line x1="6" y1="18" x2="18" y2="6" />
-  </Svg>
-);
-
 interface Props {
   navigation?: any;
-  route?: { params?: { transaction?: any } };
+  route?: { params?: { tx?: any; transaction?: any } };
 }
 
 export default function TransactionDetailScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
-  const spacing = useSpacing();
-  const borderRadius = useBorderRadius();
-  const shadows = useShadows();
-  const typography = useTypography();
   const isDark = useIsDark();
-  const tx = route?.params?.transaction;
 
-  const [showRiskReview, setShowRiskReview] = useState(false);
-  const [riskState, setRiskState] = useState<'normal' | 'attention' | 'high'>('normal');
-  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const tx = route?.params?.tx || route?.params?.transaction;
+  const [copiedHash, setCopiedHash] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
 
-  useEffect(() => {
-    if (tx?.risk && (tx.risk === 'normal' || tx.risk === 'attention' || tx.risk === 'high')) {
-      setRiskState(tx.risk);
-    }
-  }, [tx]);
-
-  const handleRiskAcknowledge = () => {
-    setShowRiskReview(false);
-  };
-
-  const handleConfirm = () => {
-    navigation?.goBack();
-  };
+  const cardBg = isDark ? '#171717' : '#FFFFFF';
+  const cardBorder = isDark ? '#303030' : '#E5E5E5';
+  const monoPrimary = isDark ? '#FFFFFF' : '#111111';
+  const monoMutedSurface = isDark ? '#202020' : '#F2F2F2';
 
   if (!tx) {
     return (
       <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation?.goBack()} style={[styles.backButton, { backgroundColor: monoMutedSurface }]}>
+            <ArrowLeftIcon color={colors.text.primary} size={20} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Transaction</Text>
+          <View style={{ width: 36 }} />
+        </View>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>Transaction Details</Text>
-          <Text style={styles.emptySubtitle}>No transaction selected</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No Transaction Selected</Text>
+          <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>Select a transaction to inspect on-chain details.</Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  const assetSymbol = (tx.asset || 'ETH').split(' ')[0].replace('→', '').trim();
+  const isConfirmed = tx.status === 'confirmed' || tx.status === 'success';
+  const isPending = tx.status === 'pending';
+  const txHash = tx.hash || '0xabc1234567890abcdef1234567890abcdef1234';
+  const targetAddress = tx.to || tx.from || '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+
+  const copyToClipboard = async (text: string, type: 'hash' | 'addr') => {
+    try {
+      await Clipboard.setStringAsync(text);
+      if (type === 'hash') {
+        setCopiedHash(true);
+        setTimeout(() => setCopiedHash(false), 2000);
+      } else {
+        setCopiedAddress(true);
+        setTimeout(() => setCopiedAddress(false), 2000);
+      }
+    } catch {}
+  };
+
+  const openExplorer = () => {
+    const explorerBase = tx.explorer || 'https://etherscan.io/tx/';
+    const url = explorerBase.includes('http') ? (explorerBase.endsWith('/') ? `${explorerBase}${txHash}` : explorerBase) : `https://etherscan.io/tx/${txHash}`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Explorer Link', url);
+    });
+  };
+
   return (
-    <SafeAreaView style={[
-      styles.root,
-      { backgroundColor: colors.bg.canvas },
-    ]}>
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={navigation?.goBack} activeOpacity={0.8} style={styles.backButton} accessibilityLabel="Go back">
-          <ArrowLeftIcon color={colors.text.primary} size={24} />
+    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
+      {/* Top Header */}
+      <View style={[styles.headerRow, { paddingTop: insets.top + 6 }]}>
+        <TouchableOpacity
+          onPress={() => navigation?.goBack()}
+          style={[styles.backButton, { backgroundColor: monoMutedSurface }]}
+          activeOpacity={0.7}
+        >
+          <ArrowLeftIcon color={colors.text.primary} size={20} />
         </TouchableOpacity>
-        <View style={styles.headerSpacer} />
-        <TouchableOpacity activeOpacity={0.8} style={styles.moreButton} accessibilityLabel="More options">
-          <MoreVerticalIcon color={colors.text.primary} size={24} />
-        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Transaction Detail</Text>
+        <View style={{ width: 36 }} />
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingTop: spacing.md,
-          paddingBottom: Math.max(100, insets.bottom + 80),
-          paddingHorizontal: spacing.screenPaddingHorizontal,
-        }}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Transaction Overview */}
-        <View style={[styles.overviewCard, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-          <View style={styles.overviewHeader}>
-            <Text style={[styles.overviewTitle, { color: colors.text.primary }]}>Transaction Details</Text>
+        {/* Hero Card */}
+        <View style={[styles.heroCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          <View style={styles.heroLogoRow}>
+            <TokenLogo symbol={assetSymbol} size={50} />
           </View>
+          <Text style={[styles.heroAmount, { color: colors.text.primary }]}>
+            {tx.type === 'received' ? '+' : tx.type === 'swap' ? '' : '-'}{tx.amount} {tx.asset}
+          </Text>
+          <Text style={[styles.heroUsd, { color: colors.text.muted }]}>
+            {tx.value || '$0.00'}
+          </Text>
 
-          {/* Status */}
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Status</Text>
-            <View style={styles.statusChip}>
-              {tx.status === 'success' ? (
-                <CheckIcon color={colors.success.DEFAULT} size={16} />
-              ) : tx.status === 'failed' ? (
-                <ExternalLinkIcon color={colors.danger.DEFAULT} size={16} />
-              ) : (
-                <ClockIcon color={colors.warning.DEFAULT} size={16} />
-              )}
-              <Text style={[styles.statusText, { color: colors.text.primary }]}>{tx.status}</Text>
-            </View>
+          <View style={[
+            styles.statusPill,
+            {
+              backgroundColor: isConfirmed
+                ? 'rgba(34, 197, 94, 0.15)'
+                : isPending
+                ? 'rgba(234, 179, 8, 0.15)'
+                : 'rgba(239, 68, 68, 0.15)',
+            },
+          ]}>
+            <CheckCircleIcon
+              color={isConfirmed ? '#22C55E' : isPending ? '#EAB308' : '#EF4444'}
+              size={14}
+            />
+            <Text style={[
+              styles.statusPillText,
+              { color: isConfirmed ? '#22C55E' : isPending ? '#EAB308' : '#EF4444' },
+            ]}>
+              {tx.status || 'Confirmed'}
+            </Text>
           </View>
+        </View>
 
-          {/* Basic info rows */}
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Amount</Text>
-            <Text style={[styles.detailValue, { color: colors.text.primary }]}>{tx.amount || 'N/A'}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Network</Text>
-            <Text style={[styles.detailValue, { color: colors.text.primary }]}>{tx.network || 'N/A'}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Timestamp</Text>
-            <Text style={[styles.detailValue, { color: colors.text.primary }]}>{tx.time || 'N/A'}</Text>
-          </View>
-
-          {/* Transaction Hash */}
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>Transaction Hash</Text>
-            <Text style={[styles.detailValue, { color: colors.text.primary }]} numberOfLines={1}>
-              {tx.hash || 'N/A'}
+        {/* Breakdown Card */}
+        <View style={[styles.detailsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: colors.text.muted }]}>Transaction Type</Text>
+            <Text style={[styles.value, { color: colors.text.primary, textTransform: 'capitalize' }]}>
+              {tx.type || 'Transfer'}
             </Text>
           </View>
 
-          {/* Explorer Link */}
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.text.secondary }]}>View on Explorer</Text>
-            <TouchableOpacity activeOpacity={0.8} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <ExternalLinkIcon color={colors.primary.DEFAULT} size={14} />
-              <Text style={{ color: colors.primary.DEFAULT, fontSize: 13, fontWeight: '600' }}>Explorer</Text>
+          <View style={[styles.divider, { backgroundColor: cardBorder }]} />
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: colors.text.muted }]}>Timestamp</Text>
+            <Text style={[styles.value, { color: colors.text.primary }]}>
+              {tx.time || 'Just now'}
+            </Text>
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: cardBorder }]} />
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: colors.text.muted }]}>Network</Text>
+            <Text style={[styles.value, { color: colors.text.primary }]}>
+              {tx.network || 'Ethereum Mainnet'}
+            </Text>
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: cardBorder }]} />
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: colors.text.muted }]}>
+              {tx.type === 'received' ? 'Sender' : 'Recipient'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => copyToClipboard(targetAddress, 'addr')}
+              style={styles.copyRow}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.valueMono, { color: colors.text.primary }]}>
+                {targetAddress.slice(0, 8)}...{targetAddress.slice(-6)}
+              </Text>
+              <CopyIcon color={colors.text.muted} size={14} />
+              {copiedAddress && <Text style={styles.copiedText}>Copied</Text>}
             </TouchableOpacity>
           </View>
 
-          {/* AI Risk Explanation */}
-          {(() => {
-            const stateColor = riskState === 'high' ? colors.danger.DEFAULT : riskState === 'attention' ? colors.warning.DEFAULT : colors.success.DEFAULT;
-            const stateBg = riskState === 'high' ? colors.danger.muted : riskState === 'attention' ? colors.warning.muted : colors.success.muted;
-            const riskData = riskStates[riskState];
+          <View style={[styles.divider, { backgroundColor: cardBorder }]} />
 
-            return (
-              <>
-                <View style={[
-                  styles.aiExplanationCard,
-                  {
-                    backgroundColor: stateBg,
-                    borderColor: stateColor,
-                    borderWidth: 1,
-                    borderRadius: borderRadius.md,
-                    marginTop: spacing.lg,
-                  },
-                ]}
-                >
-                  <View style={styles.aiExplanationContent}>
-                    <SparklesIcon color={stateColor} size={16} />
-                    <Text style={[
-                      styles.aiExplanationText,
-                      { color: stateColor },
-                    ]}>
-                      {riskData.primaryActionLabel === 'I understand, continue'
-                        ? 'This transaction sends funds to a new address. Blockchain transfers cannot be reversed.'
-                        : riskData.primaryActionLabel === 'Continue'
-                          ? 'This transaction has attention points. Please review the details carefully before continuing.'
-                          : 'This transaction appears safe. No known risks identified.'}
-                    </Text>
-                  </View>
-                </View>
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: colors.text.muted }]}>Network Gas Fee</Text>
+            <Text style={[styles.value, { color: colors.text.primary }]}>
+              {tx.fee || '~0.0004 ETH ($1.38)'}
+            </Text>
+          </View>
 
-                {/* Risk Review Bottom Sheet */}
-                {showRiskReview && (
-                  <View style={[styles.riskSheet, { backgroundColor: colors.bg.surface }]}>
-                    <View style={styles.riskSheetHeader}>
-                      <Text style={[styles.riskSheetTitle, { color: colors.text.primary }]}>Risk Assessment</Text>
-                      <TouchableOpacity onPress={() => setShowRiskReview(false)} activeOpacity={0.8} style={styles.riskSheetClose}>
-                        <XIcon color={colors.text.muted} size={20} />
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.riskSheetContent}>
-                      <SparklesIcon color={stateColor} size={20} />
-                      <Text style={[styles.riskSheetTitleText, { color: colors.text.primary }]}>
-                        {riskState.toUpperCase()} Risk
-                      </Text>
-                      <View style={styles.riskSheetMessage}>
-                        {riskData.findings.map((f: string, i: number) => (
-                          <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                            <AlertTriangleIcon color={stateColor} size={12} />
-                            <Text style={{ color: colors.text.primary, fontSize: 13 }}>{f}</Text>
-                          </View>
-                        ))}
-                      </View>
-                      {'requiresExplicitConfirm' in riskData && riskData.requiresExplicitConfirm && (
-                        <TouchableOpacity onPress={handleRiskAcknowledge} activeOpacity={0.8} style={[styles.riskAcknowledgeButton, { borderColor: colors.border.subtle }]}>
-                          <Text style={[styles.riskAcknowledgeText, { color: colors.text.primary }]}>{riskData.primaryActionLabel}</Text>
-                        </TouchableOpacity>
-                      )}
-                      <TouchableOpacity onPress={handleConfirm} activeOpacity={0.8} style={[styles.riskConfirmButton, { backgroundColor: colors.primary.DEFAULT }]}>
-                        <Text style={[styles.riskConfirmButtonText, { color: colors.text.onPrimary }]}>{riskData.primaryActionLabel}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              </>
-            );
-          })()}
+          <View style={[styles.divider, { backgroundColor: cardBorder }]} />
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: colors.text.muted }]}>Transaction Hash</Text>
+            <TouchableOpacity
+              onPress={() => copyToClipboard(txHash, 'hash')}
+              style={styles.copyRow}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.valueMono, { color: colors.text.primary }]}>
+                {txHash.slice(0, 10)}...{txHash.slice(-8)}
+              </Text>
+              <CopyIcon color={colors.text.muted} size={14} />
+              {copiedHash && <Text style={styles.copiedText}>Copied</Text>}
+            </TouchableOpacity>
+          </View>
         </View>
-      </ScrollView>
 
-      {/* AI Assistant FAB */}
-      <AIAssistantFAB
-        onPress={() => navigation?.navigate?.('AIAssistant', { context: 'transaction', tx })}
-        visible={true}
-        position="bottom"
-      />
+        {/* View on Explorer Button */}
+        <TouchableOpacity
+          onPress={openExplorer}
+          style={[styles.explorerBtn, { backgroundColor: monoPrimary }]}
+          activeOpacity={0.8}
+        >
+          <ExternalLinkIcon color={isDark ? '#000000' : '#FFFFFF'} size={16} />
+          <Text style={[styles.explorerBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+            View on Blockchain Explorer
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -316,149 +252,126 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.screenPaddingHorizontal,
-    paddingTop: theme.spacing.sm,
-    paddingBottom: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 10,
   },
   backButton: {
-    padding: theme.spacing.sm,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  headerSpacer: {
-    width: 44,
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
-  moreButton: {
-    padding: theme.spacing.sm,
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  heroCard: {
+    borderRadius: 20,
+    borderWidth: 0.5,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  heroLogoRow: {
+    marginBottom: 14,
+  },
+  heroAmount: {
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  heroUsd: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 14,
+  },
+  statusPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
+  detailsCard: {
+    borderRadius: 20,
+    borderWidth: 0.5,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+  },
+  label: {
+    fontSize: 13.5,
+    fontWeight: '500',
+  },
+  value: {
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  valueMono: {
+    fontSize: 13,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  copyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  copiedText: {
+    fontSize: 11,
+    color: '#22C55E',
+    fontWeight: '700',
+    marginLeft: 2,
+  },
+  divider: {
+    height: 0.5,
+  },
+  explorerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 15,
+    borderRadius: 16,
+  },
+  explorerBtnText: {
+    fontSize: 14.5,
+    fontWeight: '700',
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.xxl,
+    padding: 32,
   },
   emptyTitle: {
-    fontWeight: '700',
     fontSize: 18,
-    color: '#0B1220',
+    fontWeight: '700',
+    marginBottom: 8,
   },
   emptySubtitle: {
-    color: '#64748B',
-    marginTop: theme.spacing.sm,
     fontSize: 14,
-  },
-  overviewCard: {
-    borderRadius: theme.borderRadius.cardLarge,
-    padding: theme.spacing.cardPadding,
-    marginBottom: theme.spacing.lg,
-    borderWidth: 1,
-  },
-  overviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.lg,
-  },
-  overviewTitle: {
-    fontWeight: '700',
-    fontSize: 18,
-  },
-  statusChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  statusText: {
-    fontWeight: '600',
-    fontSize: 13,
-    textTransform: 'capitalize',
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  detailLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  detailValue: {
-    fontSize: 13,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'right',
-  },
-  aiExplanationCard: {
-    padding: theme.spacing.cardPadding,
-    marginBottom: theme.spacing.md,
-  },
-  aiExplanationContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: theme.spacing.sm,
-  },
-  aiExplanationText: {
-    lineHeight: 18,
-    fontSize: 13,
-    flex: 1,
-  },
-  riskSheet: {
-    marginTop: theme.spacing.lg,
-    borderRadius: theme.borderRadius.modal,
-    padding: theme.spacing.md,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  riskSheetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  riskSheetTitle: {
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  riskSheetClose: {
-    padding: theme.spacing.xs,
-  },
-  riskSheetContent: {
-    paddingTop: theme.spacing.sm,
-    gap: theme.spacing.sm,
-  },
-  riskSheetTitleText: {
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  riskSheetMessage: {
-    marginVertical: theme.spacing.xs,
-  },
-  riskAcknowledgeButton: {
-    width: '100%',
-    paddingVertical: theme.spacing.md,
-    borderWidth: 1,
-    borderRadius: theme.borderRadius.button,
-    alignItems: 'center',
-  },
-  riskAcknowledgeText: {
-    fontWeight: '600',
-  },
-  riskConfirmButton: {
-    width: '100%',
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.button,
-    alignItems: 'center',
-  },
-  riskConfirmButtonText: {
-    fontWeight: '600',
+    textAlign: 'center',
   },
 });
-
-export { TransactionDetailScreen };

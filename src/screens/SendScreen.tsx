@@ -9,6 +9,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { ethers } from 'ethers';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
@@ -106,6 +107,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showTokenSelector, setShowTokenSelector] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [gasSpeed, setGasSpeed] = useState<'economy' | 'standard' | 'instant'>('standard');
   const [gasFeeEstimate, setGasFeeEstimate] = useState<string>('~0.0004 ' + currentChainObj.symbol);
   const [txSuccessHash, setTxSuccessHash] = useState<string | null>(null);
@@ -580,25 +582,76 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline, paddingBottom: 28 }]}>
             <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
             <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary }]}>Scan Recipient Address</Text>
-            <Text style={[styles.confirmHeaderSubtitle, { color: colors.text.muted, marginBottom: 14 }]}>
+            <Text style={[styles.confirmHeaderSubtitle, { color: colors.text.muted, marginBottom: 12 }]}>
               Align recipient QR code within the camera frame
             </Text>
 
-            {/* Viewfinder frame */}
-            <View style={{ alignItems: 'center', marginVertical: 10 }}>
-              <View style={{
-                width: 200,
-                height: 200,
-                borderRadius: 18,
-                borderWidth: 2,
-                borderColor: primaryBtnBg,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: isDark ? '#101010' : '#F7F7F7',
-              }}>
-                <ScanQrIcon color={colors.text.primary} size={44} />
-                <Text style={{ fontSize: 11, color: colors.text.muted, marginTop: 8 }}>Camera Optical Viewfinder</Text>
-              </View>
+            {/* Live Camera Viewfinder or Permission Prompt */}
+            <View style={{ alignItems: 'center', marginVertical: 8 }}>
+              {cameraPermission?.granted ? (
+                <View style={{
+                  width: '100%',
+                  height: 280,
+                  borderRadius: 18,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  backgroundColor: '#000000',
+                }}>
+                  <CameraView
+                    style={StyleSheet.absoluteFill}
+                    facing="back"
+                    barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                    onBarcodeScanned={(result) => {
+                      if (result?.data) {
+                        let scanned = result.data.trim();
+                        if (scanned.includes(':')) {
+                          scanned = scanned.split(':')[1].split('?')[0];
+                        }
+                        setRecipient(scanned);
+                        setShowScannerModal(false);
+                      }
+                    }}
+                  />
+                  {/* Subtle viewfinder targeting reticle */}
+                  <View style={{
+                    position: 'absolute',
+                    top: 40,
+                    bottom: 40,
+                    left: 40,
+                    right: 40,
+                    borderWidth: 2,
+                    borderColor: '#FFFFFF',
+                    borderRadius: 14,
+                    backgroundColor: 'rgba(255,255,255,0.04)',
+                  }} />
+                </View>
+              ) : (
+                <View style={{
+                  width: '100%',
+                  height: 220,
+                  borderRadius: 18,
+                  borderWidth: 1,
+                  borderColor: hairline,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: monoMuted,
+                  padding: 20,
+                }}>
+                  <ScanQrIcon color={colors.text.primary} size={40} />
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text.primary, marginTop: 10 }}>
+                    Camera Access Required
+                  </Text>
+                  <Text style={{ fontSize: 11, color: colors.text.muted, textAlign: 'center', marginTop: 4, marginBottom: 14 }}>
+                    Enable camera to automatically scan EVM recipient addresses
+                  </Text>
+                  <TouchableOpacity
+                    onPress={requestCameraPermission}
+                    style={{ backgroundColor: primaryBtnBg, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: primaryBtnText }}>Grant Permission</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
             {/* Fast selection options for testing/demo */}

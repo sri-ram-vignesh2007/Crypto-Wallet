@@ -1,7 +1,7 @@
 // src/components/TokenLogo.tsx - Consistent Institutional Vector Badges for Cura Wallet
 
 import React from 'react';
-import Svg, { Circle, Path, Rect, Polygon, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Path, Polygon, Text as SvgText } from 'react-native-svg';
 
 interface TokenLogoProps {
   symbol: string;
@@ -129,10 +129,66 @@ export const TokenLogo: React.FC<TokenLogoProps> = ({ symbol, size = 36 }) => {
           <Polygon
             points="18,10 24.5,14 24.5,22 18,26 11.5,22 11.5,14"
             stroke="#FFFFFF"
-            strokeWidth="2.4"
+            strokeWidth={2.4}
             fill="none"
           />
           <Circle cx="18" cy="18" r="2.8" fill="#FFFFFF" />
+        </Svg>
+      );
+
+    case 'BNB':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 36 36" fill="none">
+          <Circle cx="18" cy="18" r="18" fill="#F3BA2F" />
+          <Path
+            d="M18 10l3.5 3.5-3.5 3.5-3.5-3.5L18 10zm-6 6l2.3 2.3-2.3 2.3-2.3-2.3L12 16zm12 0l2.3 2.3-2.3 2.3-2.3-2.3L24 16zm-6 6l3.5 3.5-3.5 3.5-3.5-3.5L18 22z"
+            fill="#FFFFFF"
+          />
+        </Svg>
+      );
+
+    case 'USDT':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 36 36" fill="none">
+          <Circle cx="18" cy="18" r="18" fill="#26A17B" />
+          <Path
+            d="M13 13h10v3h-3.5v9h-3v-9H13v-3z"
+            fill="#FFFFFF"
+          />
+          <Circle cx="18" cy="18" r="8.5" stroke="#FFFFFF" strokeWidth="1.6" fill="none" />
+        </Svg>
+      );
+
+    case 'DOGE':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 36 36" fill="none">
+          <Circle cx="18" cy="18" r="18" fill="#C2A633" />
+          <SvgText x="18" y="24" fontSize="18" fontWeight="900" fill="#FFFFFF" textAnchor="middle">
+            Ð
+          </SvgText>
+        </Svg>
+      );
+
+    case 'ADA':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 36 36" fill="none">
+          <Circle cx="18" cy="18" r="18" fill="#0033AD" />
+          <Circle cx="18" cy="18" r="4" fill="#FFFFFF" />
+          <Circle cx="18" cy="10" r="1.8" fill="#FFFFFF" />
+          <Circle cx="18" cy="26" r="1.8" fill="#FFFFFF" />
+          <Circle cx="10" cy="18" r="1.8" fill="#FFFFFF" />
+          <Circle cx="26" cy="18" r="1.8" fill="#FFFFFF" />
+        </Svg>
+      );
+
+    case 'XRP':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 36 36" fill="none">
+          <Circle cx="18" cy="18" r="18" fill="#23292F" />
+          <Path
+            d="M11 12l3.5 3.5L21.5 8H25l-7 7-7-7h-3zm14 12l-3.5-3.5L14.5 28H11l7-7 7 7h3z"
+            fill="#FFFFFF"
+          />
         </Svg>
       );
 
@@ -154,4 +210,3 @@ export const TokenLogo: React.FC<TokenLogoProps> = ({ symbol, size = 36 }) => {
       );
   }
 };
-

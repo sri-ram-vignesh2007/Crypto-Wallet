@@ -3,7 +3,7 @@ import './src/polyfills';
 
 import React, { useEffect } from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { PaperProvider } from 'react-native-paper';
@@ -21,6 +21,7 @@ import LockScreen from './src/screens/LockScreen';
 
 // Main app screens
 import HomeScreen from './src/screens/HomeScreen';
+import PortfolioScreen from './src/screens/PortfolioScreen';
 import ExploreScreen from './src/screens/ExploreScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
@@ -54,6 +55,7 @@ type RootStackParamList = {
   Welcome: undefined;
   SeedPhrase: { mode: 'create' | 'import' } | undefined;
   Main: undefined;
+  Portfolio: { initialTab?: 'assets' | 'transactions' } | undefined;
   LiveDesk: undefined;
   Community: undefined;
   Explore: undefined;
@@ -63,6 +65,7 @@ type RootStackParamList = {
   Swap: undefined;
   Buy: undefined;
   History: undefined;
+  Activity: undefined;
   AssetDetail: { asset: any };
   TransactionDetail: { tx: any };
   RiskReview: { tx: any };
@@ -85,9 +88,9 @@ type RootStackParamList = {
 
 type TabParamList = {
   Home: undefined;
-  Community: undefined;
+  Portfolio: { initialTab?: 'assets' | 'transactions' } | undefined;
   Swap: undefined;
-  Activity: undefined;
+  Community: undefined;
   Settings: undefined;
 };
 
@@ -105,6 +108,13 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
     Community: (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
         <Path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+      </Svg>
+    ),
+    Portfolio: (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <Path d="M2 17l10 5 10-5" />
+        <Path d="M2 12l10 5 10-5" />
       </Svg>
     ),
     Assets: (
@@ -219,11 +229,11 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Community"
-        component={ExploreScreen}
+        name="Portfolio"
+        component={PortfolioScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} />,
-          tabBarLabel: 'Community',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Portfolio" focused={focused} color={color} />,
+          tabBarLabel: 'Portfolio',
         }}
       />
       <Tab.Screen
@@ -235,11 +245,11 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Activity"
-        component={ActivityScreen}
+        name="Community"
+        component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Activity" focused={focused} color={color} />,
-          tabBarLabel: 'Activity',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} />,
+          tabBarLabel: 'Community',
         }}
       />
       <Tab.Screen
@@ -268,13 +278,30 @@ function AppContent() {
     loadWallet();
   }, [loadProfile, loadWallet]);
 
+  const baseNavTheme = theme.isDark ? DarkTheme : DefaultTheme;
+  const navTheme = {
+    ...baseNavTheme,
+    dark: theme.isDark,
+    colors: {
+      ...baseNavTheme.colors,
+      primary: theme.colors.primary.DEFAULT,
+      background: theme.colors.bg.canvas,
+      card: theme.colors.bg.surface,
+      text: theme.colors.text.primary,
+      border: theme.colors.border.subtle,
+      notification: theme.colors.primary.DEFAULT,
+    },
+  };
+
   return (
     <PaperProvider theme={{ colors: { primary: theme.colors.primary.DEFAULT, background: theme.colors.bg.canvas } }}>
-      <NavigationContainer>
+      <NavigationContainer theme={navTheme}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: theme.colors.bg.canvas },
+            animation: 'slide_from_right',
+            animationDuration: 220,
             gestureEnabled: true,
           }}
         >
@@ -288,6 +315,7 @@ function AppContent() {
           ) : (
             <>
               <Stack.Screen name="Main" component={MainTabs} />
+              <Stack.Screen name="Portfolio" component={PortfolioScreen} options={{ title: 'Portfolio' }} />
               <Stack.Screen name="LiveDesk" component={ExploreScreen} options={{ title: 'Live Desk' }} />
               <Stack.Screen name="Community" component={ExploreScreen} options={{ title: 'Live Desk' }} />
               <Stack.Screen name="Explore" component={ExploreScreen} options={{ title: 'Explore' }} />

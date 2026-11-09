@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useTransactionStore } from '../store/transactionStore';
+import { TokenLogo } from '../components/TokenLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -328,7 +329,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                   style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
                   activeOpacity={0.7}
                 >
-                  <FromLogo />
+                  <TokenLogo symbol={fromAsset.symbol} size={24} />
                   <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
                     {fromAsset.symbol}
                   </Text>
@@ -382,7 +383,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                   style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
                   activeOpacity={0.7}
                 >
-                  <ToLogo />
+                  <TokenLogo symbol={toAsset.symbol} size={24} />
                   <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
                     {toAsset.symbol}
                   </Text>
@@ -517,7 +518,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                     activeOpacity={0.7}
                   >
                     <View style={styles.tokenItemLeft}>
-                      <Logo />
+                      <TokenLogo symbol={asset.symbol} size={30} />
                       <View style={{ marginLeft: 12 }}>
                         <Text style={[styles.tokenItemSymbol, { color: colors.text.primary }]}>
                           {asset.symbol}

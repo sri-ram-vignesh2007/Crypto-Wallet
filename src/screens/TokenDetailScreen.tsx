@@ -51,25 +51,25 @@ const ShareIcon = ({ color, size = 18 }: { color: string; size?: number }) => (
   </Svg>
 );
 
-const ArrowUpRightIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
+const ArrowUpRightIcon = ({ color, size = 19 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M7 17L17 7M17 7H7M17 7v10" />
   </Svg>
 );
 
-const ArrowDownLeftIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
+const ArrowDownLeftIcon = ({ color, size = 19 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M17 7L7 17M7 17h10M7 17V7" />
   </Svg>
 );
 
-const SwapIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
+const SwapIcon = ({ color, size = 19 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M16 3l4 4-4 4M8 21l-4-4 4-4M4 17h16M20 7H4" />
   </Svg>
 );
 
-const PlusIcon = ({ color, size = 16 }: { color: string; size?: number }) => (
+const PlusIcon = ({ color, size = 20 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 5v14M5 12h14" />
   </Svg>
@@ -565,7 +565,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
             style={[styles.primaryActionBtn, { backgroundColor: monoPrimary }]}
             activeOpacity={0.8}
           >
-            <PlusIcon color={isDark ? '#000000' : '#FFFFFF'} size={16} />
+            <PlusIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
             <Text style={[styles.primaryActionText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
               Buy
             </Text>
@@ -577,7 +577,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
             style={[styles.secondaryActionBtn, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
             activeOpacity={0.8}
           >
-            <SwapIcon color={colors.text.primary} size={15} />
+            <SwapIcon color={colors.text.primary} size={19} />
             <Text style={[styles.secondaryActionText, { color: colors.text.primary }]}>
               Swap
             </Text>
@@ -589,7 +589,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
             style={[styles.secondaryActionBtn, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
             activeOpacity={0.8}
           >
-            <ArrowUpRightIcon color={colors.text.primary} size={15} />
+            <ArrowUpRightIcon color={colors.text.primary} size={19} />
             <Text style={[styles.secondaryActionText, { color: colors.text.primary }]}>
               Send
             </Text>
@@ -601,7 +601,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
             style={[styles.secondaryActionBtn, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
             activeOpacity={0.8}
           >
-            <ArrowDownLeftIcon color={colors.text.primary} size={15} />
+            <ArrowDownLeftIcon color={colors.text.primary} size={19} />
             <Text style={[styles.secondaryActionText, { color: colors.text.primary }]}>
               Receive
             </Text>

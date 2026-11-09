@@ -107,6 +107,30 @@ const CopyIcon = ({ color = '#858585', size = 12 }: { color?: string; size?: num
   </Svg>
 );
 
+const SendActionIcon = ({ color, size = 24 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M7 17L17 7M17 7H7M17 7v10" />
+  </Svg>
+);
+
+const ReceiveActionIcon = ({ color, size = 24 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M17 7L7 17M7 17h10M7 17V7" />
+  </Svg>
+);
+
+const SwapActionIcon = ({ color, size = 24 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M16 3l4 4-4 4M8 21l-4-4 4-4M4 17h16M20 7H4" />
+  </Svg>
+);
+
+const BuyActionIcon = ({ color, size = 24 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 5v14M5 12h14" />
+  </Svg>
+);
+
 // High-Res Uniform Token Badges
 const EthLogo = () => (
   <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
@@ -250,7 +274,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
   const [moversTab, setMoversTab] = useState<'gainers' | 'losers'>('gainers');
 
-  const { balances, loadTransactions } = useTransactionStore();
+  const { balances, transactions, loadTransactions } = useTransactionStore();
 
   useEffect(() => {
     loadTransactions();
@@ -541,7 +565,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Send */}
           <SpringButton onPress={() => navigation.navigate('Send')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoPrimary }]}>
-              <Text style={[styles.actionIconGlyph, { color: isDark ? '#000000' : '#FFFFFF' }]}>↗</Text>
+              <SendActionIcon color={isDark ? '#000000' : '#FFFFFF'} size={24} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Send</Text>
           </SpringButton>
@@ -549,7 +573,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Receive */}
           <SpringButton onPress={() => navigation.navigate('Receive')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <Text style={[styles.actionIconGlyph, { color: monoPrimary }]}>↙</Text>
+              <ReceiveActionIcon color={monoPrimary} size={24} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Receive</Text>
           </SpringButton>
@@ -557,7 +581,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Swap */}
           <SpringButton onPress={() => navigation.navigate('Swap')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <Text style={[styles.actionIconGlyph, { color: monoPrimary }]}>⇄</Text>
+              <SwapActionIcon color={monoPrimary} size={24} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Swap</Text>
           </SpringButton>
@@ -565,7 +589,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Buy */}
           <SpringButton onPress={() => navigation.navigate('Buy')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <Text style={[styles.actionIconGlyph, { color: monoPrimary }]}>+</Text>
+              <BuyActionIcon color={monoPrimary} size={24} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Buy</Text>
           </SpringButton>
@@ -576,7 +600,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeading}>ASSETS</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Community')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Portfolio', { initialTab: 'assets' })}>
             <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>See All</Text>
           </TouchableOpacity>
         </View>
@@ -723,39 +747,76 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeading}>RECENT ACTIVITY</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Activity')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Portfolio', { initialTab: 'transactions' })}>
             <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>View All</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          <View style={[styles.activityItemRow, { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}>
-            <View style={[styles.activityIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <Text style={{ color: monoPrimary, fontSize: 13, fontWeight: '700' }}>⇄</Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={[styles.activityTitle, { color: colors.text.primary }]}>Smart Aggregator Swap</Text>
-              <Text style={styles.activitySub}>12.5 ETH → 42,750 USDC • Saved $28</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={[styles.activityAmount, { color: colors.text.primary }]}>+42,750 USDC</Text>
-              <Text style={styles.activityTime}>12m ago</Text>
-            </View>
-          </View>
+          {(transactions && transactions.length > 0 ? transactions.slice(0, 3) : [
+            {
+              id: 'tx-fallback-1',
+              type: 'swap',
+              asset: 'ETH → USDC',
+              amount: '12.5',
+              receivedAmount: '42750.00',
+              value: '$42,750.00',
+              time: '12m ago',
+              status: 'confirmed',
+              hash: '0xabc1234567890abcdef1234567890abcdef1234',
+              timestamp: Date.now() - 720000,
+            },
+            {
+              id: 'tx-fallback-2',
+              type: 'received',
+              asset: 'ETH',
+              amount: '0.412',
+              value: '$1,409.25',
+              time: '3h ago',
+              status: 'confirmed',
+              hash: '0xdef4567890abcdef1234567890abcdef12345678',
+              timestamp: Date.now() - 10800000,
+            },
+          ]).map((txItem: any, index: number, arr: any[]) => {
+            const isLast = index === arr.length - 1;
+            const isSent = txItem.type === 'sent';
+            const isSwap = txItem.type === 'swap';
 
-          <View style={styles.activityItemRow}>
-            <View style={[styles.activityIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <Text style={{ color: monoPrimary, fontSize: 13, fontWeight: '700' }}>+</Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={[styles.activityTitle, { color: colors.text.primary }]}>Staking Yield Payout</Text>
-              <Text style={styles.activitySub}>Lido Validator Node #842</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={[styles.activityAmount, { color: colors.text.primary }]}>+0.412 ETH</Text>
-              <Text style={styles.activityTime}>3h ago</Text>
-            </View>
-          </View>
+            return (
+              <SpringButton
+                key={txItem.id || `home-tx-${index}`}
+                onPress={() => navigation.navigate('TransactionDetail', { tx: txItem })}
+                style={[
+                  styles.activityItemRow,
+                  !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }
+                ]}
+              >
+                <View style={[styles.activityIconCircle, { backgroundColor: monoMutedSurface }]}>
+                  {isSwap ? (
+                    <SwapActionIcon color={monoPrimary} size={15} />
+                  ) : isSent ? (
+                    <SendActionIcon color={monoPrimary} size={15} />
+                  ) : (
+                    <ReceiveActionIcon color={monoPrimary} size={15} />
+                  )}
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={[styles.activityTitle, { color: colors.text.primary }]}>
+                    {isSwap ? 'Smart Aggregator Swap' : isSent ? 'Transfer Sent' : 'Transfer Received'}
+                  </Text>
+                  <Text style={styles.activitySub}>
+                    {txItem.asset} • {txItem.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={[styles.activityAmount, { color: colors.text.primary }]}>
+                    {isSent ? `-${txItem.amount}` : isSwap ? `+${txItem.receivedAmount || txItem.amount}` : `+${txItem.amount}`} {txItem.asset.includes('→') ? 'USDC' : txItem.asset}
+                  </Text>
+                  <Text style={styles.activityTime}>{txItem.time}</Text>
+                </View>
+              </SpringButton>
+            );
+          })}
         </View>
       </Animated.ScrollView>
 
@@ -1056,9 +1117,9 @@ const styles = StyleSheet.create({
     minWidth: 62,
   },
   actionIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
