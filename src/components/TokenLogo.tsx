@@ -1,4 +1,4 @@
-// src/components/TokenLogo.tsx - Consistent Institutional Vector Badges for CryptoVaultAI
+// src/components/TokenLogo.tsx - Consistent Institutional Vector Badges for Cura Wallet
 
 import React from 'react';
 import Svg, { Circle, Path, Rect, Polygon, Text as SvgText } from 'react-native-svg';

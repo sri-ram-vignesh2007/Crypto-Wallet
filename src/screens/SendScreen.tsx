@@ -4,11 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TextInput,
   SafeAreaView, StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
-  ActivityIndicator, Linking, Animated, Pressable, TouchableOpacity,
+  ActivityIndicator, Linking, Animated, Pressable, TouchableOpacity, PanResponder,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { ethers } from 'ethers';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
@@ -82,6 +82,13 @@ const CheckIcon = ({ color = '#FFFFFF', size = 28 }: { color?: string; size?: nu
   </Svg>
 );
 
+const ScanQrIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+    <Rect x="7" y="7" width="10" height="10" rx="1.5" />
+  </Svg>
+);
+
 export default function SendScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
@@ -98,9 +105,23 @@ export default function SendScreen({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showTokenSelector, setShowTokenSelector] = useState(false);
+  const [showScannerModal, setShowScannerModal] = useState(false);
   const [gasSpeed, setGasSpeed] = useState<'economy' | 'standard' | 'instant'>('standard');
   const [gasFeeEstimate, setGasFeeEstimate] = useState<string>('~0.0004 ' + currentChainObj.symbol);
   const [txSuccessHash, setTxSuccessHash] = useState<string | null>(null);
+
+  // PanResponder to slide down / dismiss token selector sheet
+  const tokenSelectorPan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 10,
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 40) {
+          setShowTokenSelector(false);
+        }
+      },
+    })
+  ).current;
 
   // Available tokens for current network
   const availableTokens = balances.length > 0
@@ -232,13 +253,18 @@ export default function SendScreen({ navigation }: { navigation: any }) {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Apple Navigation Bar */}
-      <View style={[styles.navBar, { paddingTop: insets.top + 4 }]}>
-        <SpringButton onPress={() => navigation.goBack()} style={styles.navBackBtn}>
-          <BackChevronIcon color={colors.text.primary} size={24} />
-          <Text style={[styles.navBackText, { color: colors.text.primary }]}>Wallet</Text>
-        </SpringButton>
+      <View style={[styles.navBar, { paddingTop: insets.top + 6 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={[styles.backButton, { backgroundColor: monoMuted }]}
+          activeOpacity={0.7}
+        >
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M15 18l-6-6 6-6" />
+          </Svg>
+        </TouchableOpacity>
         <Text style={[styles.navTitle, { color: colors.text.primary }]}>Send</Text>
-        <View style={{ width: 60 }} />
+        <View style={{ width: 36 }} />
       </View>
 
       <KeyboardAvoidingView
@@ -284,9 +310,14 @@ export default function SendScreen({ navigation }: { navigation: any }) {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <SpringButton onPress={handlePaste} style={[styles.pastePill, { backgroundColor: monoMuted }]}>
-                <Text style={[styles.pastePillText, { color: colors.text.primary }]}>Paste</Text>
-              </SpringButton>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <SpringButton onPress={handlePaste} style={[styles.pastePill, { backgroundColor: monoMuted }]}>
+                  <Text style={[styles.pastePillText, { color: colors.text.primary }]}>Paste</Text>
+                </SpringButton>
+                <SpringButton onPress={() => setShowScannerModal(true)} style={[styles.pastePill, { backgroundColor: monoMuted, paddingHorizontal: 9 }]}>
+                  <ScanQrIcon color={colors.text.primary} size={15} />
+                </SpringButton>
+              </View>
             </View>
           </View>
 
@@ -359,13 +390,6 @@ export default function SendScreen({ navigation }: { navigation: any }) {
                   );
                 })}
               </View>
-            </View>
-
-            {/* Smart Routing Savings Notice */}
-            <View style={{ padding: 10, borderRadius: 10, backgroundColor: isDark ? '#202020' : '#F7F7F7', borderWidth: 0.5, borderColor: hairline, marginBottom: 6 }}>
-              <Text style={{ fontSize: 11, color: colors.text.primary, fontWeight: '600' }}>
-                ⚡ Saves you $18.40 via Smart Routing (0.35% protocol fee included)
-              </Text>
             </View>
 
             <View style={styles.feeInfoRow}>
@@ -499,7 +523,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
         </View>
       </Modal>
 
-      {/* Asset Selector Sheet Modal */}
+      {/* Asset Selector Sheet Modal (Slide down dismissible) */}
       <Modal
         visible={showTokenSelector}
         transparent
@@ -507,7 +531,15 @@ export default function SendScreen({ navigation }: { navigation: any }) {
         onRequestClose={() => setShowTokenSelector(false)}
       >
         <View style={styles.modalBackdrop}>
-          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <TouchableOpacity
+            style={{ flex: 1, width: '100%' }}
+            activeOpacity={1}
+            onPress={() => setShowTokenSelector(false)}
+          />
+          <View
+            {...tokenSelectorPan.panHandlers}
+            style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline }]}
+          >
             <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
             <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary }]}>Select Token</Text>
             <ScrollView style={{ maxHeight: 300, marginTop: 12 }}>
@@ -531,6 +563,75 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+
+      {/* QR Code Scanner Viewfinder Modal */}
+      <Modal
+        visible={showScannerModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowScannerModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity
+            style={{ flex: 1, width: '100%' }}
+            activeOpacity={1}
+            onPress={() => setShowScannerModal(false)}
+          />
+          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline, paddingBottom: 28 }]}>
+            <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
+            <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary }]}>Scan Recipient Address</Text>
+            <Text style={[styles.confirmHeaderSubtitle, { color: colors.text.muted, marginBottom: 14 }]}>
+              Align recipient QR code within the camera frame
+            </Text>
+
+            {/* Viewfinder frame */}
+            <View style={{ alignItems: 'center', marginVertical: 10 }}>
+              <View style={{
+                width: 200,
+                height: 200,
+                borderRadius: 18,
+                borderWidth: 2,
+                borderColor: primaryBtnBg,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: isDark ? '#101010' : '#F7F7F7',
+              }}>
+                <ScanQrIcon color={colors.text.primary} size={44} />
+                <Text style={{ fontSize: 11, color: colors.text.muted, marginTop: 8 }}>Camera Optical Viewfinder</Text>
+              </View>
+            </View>
+
+            {/* Fast selection options for testing/demo */}
+            <Text style={{ fontSize: 11, color: colors.text.secondary, textAlign: 'center', marginTop: 6, marginBottom: 8 }}>
+              Or quick select verified address:
+            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { label: 'Uniswap Vault', addr: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC' },
+                { label: 'Binance Hot', addr: '0x28C6c06298d514Db089934071355E5743bf21d60' },
+              ].map(testTarget => (
+                <TouchableOpacity
+                  key={testTarget.label}
+                  onPress={() => {
+                    setRecipient(testTarget.addr);
+                    setShowScannerModal(false);
+                  }}
+                  style={{ backgroundColor: monoMuted, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: '600', color: colors.text.primary }}>{testTarget.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <SpringButton
+              onPress={() => setShowScannerModal(false)}
+              style={[styles.primaryActionBtn, { backgroundColor: monoMuted, marginTop: 14 }]}
+            >
+              <Text style={[styles.primaryActionBtnText, { color: colors.text.primary }]}>Close</Text>
+            </SpringButton>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -545,6 +646,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 10,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   navBackBtn: {
     flexDirection: 'row',

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseModel):
-    PROJECT_NAME: str = "CryptoVaultAI Backend"
+    PROJECT_NAME: str = "Cura Wallet Backend"
     VERSION: str = "2.0.0"
     API_PREFIX: str = "/api"
     HOST: str = os.getenv("HOST", "0.0.0.0")

@@ -39,17 +39,17 @@ def get_local_web3_intelligence(prompt: str) -> str:
         )
     elif any(w in low for w in ["seed", "phrase", "mnemonic", "recovery", "key"]):
         return (
-            "🔐 **CryptoVault Self-Custody Rules**:\n\n"
+            "🔐 **Cura Wallet Self-Custody Rules**:\n\n"
             "1. **Never share your 12-word recovery phrase** with anyone or any website.\n"
             "2. Write your seed phrase on paper or metal and store it in a secure, fireproof location.\n"
-            "3. CryptoVaultAI operates non-custodially: your private keys never leave your phone."
+            "3. Cura Wallet operates non-custodially: your private keys never leave your phone."
         )
     elif any(w in low for w in ["swap", "slippage", "dex", "exchange"]):
         return (
             "🔄 **DeFi Swap Guidance**:\n\n"
             "- **Slippage**: The maximum allowed difference between the estimated and execution price (standard: 0.5%).\n"
             "- **Price Impact**: Occurs on low-liquidity pairs where a large swap changes the pool ratio.\n"
-            "- **Routing**: CryptoVaultAI queries multiple decentralized liquidity pools to secure the best rates."
+            "- **Routing**: Cura Wallet queries multiple decentralized liquidity pools to secure the best rates."
         )
     elif any(w in low for w in ["safe", "audit", "security", "scam", "phishing"]):
         return (
@@ -60,9 +60,9 @@ def get_local_web3_intelligence(prompt: str) -> str:
         )
     else:
         return (
-            f"🧠 **CryptoVaultAI Intelligence**:\n\n"
+            f"🧠 **Cura AI Intelligence**:\n\n"
             f"I have analyzed your query about: *{prompt.strip()}*.\n\n"
-            "CryptoVaultAI is operating with real-time multi-chain connectivity across Ethereum, BSC, Polygon, Base, and Arbitrum. "
+            "Cura Wallet is operating with real-time multi-chain connectivity across Ethereum, BSC, Polygon, Base, and Arbitrum. "
             "Feel free to ask about smart contract safety audits, gas optimizations, or portfolio rebalancing strategies!"
         )
 
@@ -86,7 +86,7 @@ async def chat_endpoint(req: ChatRequest):
             payload = {
                 "model": req.model,
                 "messages": [
-                    {"role": "system", "content": "You are CryptoVaultAI, an ultra-intelligent, concise, and security-focused Web3 crypto assistant. Provide accurate, formatted advice."},
+                    {"role": "system", "content": "You are Cura AI, an ultra-intelligent, concise, and security-focused Web3 crypto assistant. Provide accurate, formatted advice."},
                     *[m.dict() for m in req.messages]
                 ],
                 "temperature": 0.3,
@@ -102,7 +102,7 @@ async def chat_endpoint(req: ChatRequest):
 
     # High quality fallback
     answer = get_local_web3_intelligence(user_query)
-    return {"role": "assistant", "content": answer, "model": "CryptoVault-Local-Engine"}
+    return {"role": "assistant", "content": answer, "model": "Cura-Local-Engine"}
 
 @router.post("/chat/stream")
 async def chat_stream_endpoint(req: ChatRequest):
@@ -124,7 +124,7 @@ async def chat_stream_endpoint(req: ChatRequest):
                 payload = {
                     "model": req.model,
                     "messages": [
-                        {"role": "system", "content": "You are CryptoVaultAI, an expert Web3 assistant. Keep responses clear and formatted."},
+                        {"role": "system", "content": "You are Cura AI, an expert Web3 assistant. Keep responses clear and formatted."},
                         *[m.dict() for m in req.messages]
                     ],
                     "stream": True,

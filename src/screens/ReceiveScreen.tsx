@@ -135,7 +135,7 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
             <Path d="M15 18l-6-6 6-6" />
           </Svg>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Receive {activeChain.symbol}</Text>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Receive {activeChain.name}</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -164,7 +164,7 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
                       ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
                       : { color: colors.text.primary },
                   ]}>
-                    {chain.symbol} • {chain.name}
+                    {chain.name}
                   </Text>
                 </TouchableOpacity>
               );
@@ -180,27 +180,37 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
             backgroundColor="#FFFFFF"
             foregroundColor="#000000"
             centerSymbol={activeChain.symbol}
-            showViewfinderCorners={true}
+            showViewfinderCorners={false}
           />
         </View>
 
-        {/* Public Address Card with Instant 1-Tap Copy */}
+        {/* Public Address Card with Instant 1-Tap Copy and Share */}
         <TouchableOpacity
           onPress={copyAddress}
           style={[styles.addressCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
           activeOpacity={0.75}
         >
           <View style={styles.addressCardHeader}>
+            <Text style={styles.chainBadgeText}>
+              {activeChain.name} Deposit Address
+            </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <ShieldCheckIcon color={colors.text.muted} size={14} />
-              <Text style={styles.chainBadgeText}>
-                {activeChain.name} Deposit Address
-              </Text>
-            </View>
-            <View style={[styles.copyTapPill, { backgroundColor: monoMutedSurface }]}>
-              <Text style={[styles.copyTapText, { color: colors.text.primary }]}>
-                {copied ? '✓ Copied' : 'Tap to Copy'}
-              </Text>
+              <View style={[styles.copyTapPill, { backgroundColor: monoMutedSurface }]}>
+                <Text style={[styles.copyTapText, { color: colors.text.primary }]}>
+                  {copied ? '✓ Copied' : 'Tap to copy'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleShare();
+                }}
+                style={[styles.copyTapPill, { backgroundColor: monoMutedSurface, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 9 }]}
+                activeOpacity={0.7}
+              >
+                <ShareIcon color={colors.text.primary} size={12} />
+                <Text style={[styles.copyTapText, { color: colors.text.primary }]}>Share</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -209,35 +219,8 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
           </Text>
         </TouchableOpacity>
 
-        {/* Primary Action Buttons: Copy Address & Share */}
-        <View style={styles.actionsRow}>
-          <SpringButton
-            onPress={copyAddress}
-            style={[styles.primaryActionBtn, { backgroundColor: monoPrimary }]}
-          >
-            {copied ? (
-              <CheckIcon color={isDark ? '#000000' : '#FFFFFF'} size={17} />
-            ) : (
-              <CopyIcon color={isDark ? '#000000' : '#FFFFFF'} size={17} />
-            )}
-            <Text style={[styles.primaryActionBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-              {copied ? 'Copied to Clipboard' : 'Copy Address'}
-            </Text>
-          </SpringButton>
-
-          <SpringButton
-            onPress={handleShare}
-            style={[styles.shareActionBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-          >
-            <ShareIcon color={colors.text.primary} size={17} />
-            <Text style={[styles.shareActionBtnText, { color: colors.text.primary }]}>
-              Share
-            </Text>
-          </SpringButton>
-        </View>
-
         {/* Institutional Safeguard Warning Card */}
-        <View style={[styles.safeguardCard, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+        <View style={[styles.safeguardCard, { backgroundColor: monoMutedSurface, borderColor: cardBorder, marginTop: 16 }]}>
           <Text style={[styles.safeguardTitle, { color: colors.text.primary }]}>
             Enclave Verified Address
           </Text>

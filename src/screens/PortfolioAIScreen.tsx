@@ -35,7 +35,7 @@ export default function PortfolioAIScreen() {
       totalValueUsd,
     };
     const csv = PortfolioAIService.taxCSV(snapshot);
-    Share.share({ message: csv, title: 'CryptoVaultAI_TaxReport.csv' }).catch(() => Alert.alert('Exported', 'Tax report has been shared.'));
+    Share.share({ message: csv, title: 'CuraWallet_TaxReport.csv' }).catch(() => Alert.alert('Exported', 'Tax report has been shared.'));
   };
 
   const pColor = (result && result.totalPnLUsd >= 0) ? theme.colors.success : result ? theme.colors.danger : theme.colors.text;

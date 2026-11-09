@@ -121,7 +121,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
             <View style={styles.cardSpecularLine} />
 
             <View style={styles.cardTopRow}>
-              <Text style={styles.cardBrandText}>CRYPTO VAULT</Text>
+              <Text style={styles.cardBrandText}>CURA WALLET</Text>
               <ContactlessIcon size={20} />
             </View>
 

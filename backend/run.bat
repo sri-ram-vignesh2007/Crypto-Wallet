@@ -1,6 +1,6 @@
 @echo off
 echo ===================================================
-echo   Starting CryptoVaultAI Python FastAPI Backend
+echo   Starting Cura Wallet Python FastAPI Backend
 echo ===================================================
 
 cd /d "%~dp0\.."

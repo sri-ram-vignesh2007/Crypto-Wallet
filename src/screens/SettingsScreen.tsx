@@ -251,32 +251,68 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               <Text style={[styles.activeCapsuleText, { color: colors.text.primary }]}>Active</Text>
             </View>
           </View>
+        </View>
 
-          <View style={[styles.rowDivider, { backgroundColor: hairline, marginLeft: 0 }]} />
+        {/* Section: Wallet Security & Keys (Line-by-line matching Display & Privacy) */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>WALLET SECURITY & KEYS</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          {/* Row 1: Public Address */}
+          <SpringButton onPress={viewPublicAddress}>
+            <View style={styles.settingsRow}>
+              <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+                <GlobeIcon color={colors.text.primary} size={16} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                  Public Address
+                </Text>
+                <Text style={[styles.settingsSubtext, { color: colors.text.muted }]} numberOfLines={1}>
+                  {displayAddress.slice(0, 10)}...{displayAddress.slice(-8)}
+                </Text>
+              </View>
+              <ChevronRightIcon color={colors.text.muted} size={14} />
+            </View>
+          </SpringButton>
 
-          {/* Quick Key Export Buttons */}
-          <View style={styles.keyActionsContainer}>
-            <SpringButton
-              onPress={viewPublicAddress}
-              style={[styles.keyPillBtn, { backgroundColor: monoMuted }]}
-            >
-              <Text style={[styles.keyPillBtnText, { color: colors.text.primary }]}>Public Address</Text>
-            </SpringButton>
+          <View style={[styles.rowDivider, { backgroundColor: hairline }]} />
 
-            <SpringButton
-              onPress={viewSecretPhrase}
-              style={[styles.keyPillBtn, { backgroundColor: monoMuted }]}
-            >
-              <Text style={[styles.keyPillBtnText, { color: colors.text.primary }]}>Seed Phrase</Text>
-            </SpringButton>
+          {/* Row 2: Recovery Seed Phrase */}
+          <SpringButton onPress={viewSecretPhrase}>
+            <View style={styles.settingsRow}>
+              <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+                <ShieldIcon color={colors.text.primary} size={16} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                  Recovery Seed Phrase
+                </Text>
+                <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                  12-word master recovery backup
+                </Text>
+              </View>
+              <ChevronRightIcon color={colors.text.muted} size={14} />
+            </View>
+          </SpringButton>
 
-            <SpringButton
-              onPress={viewPrivateKey}
-              style={[styles.keyPillBtn, { backgroundColor: monoMuted }]}
-            >
-              <Text style={[styles.keyPillBtnText, { color: isDark ? '#EF4444' : '#DC2626' }]}>Private Key</Text>
-            </SpringButton>
-          </View>
+          <View style={[styles.rowDivider, { backgroundColor: hairline }]} />
+
+          {/* Row 3: Private Key */}
+          <SpringButton onPress={viewPrivateKey}>
+            <View style={styles.settingsRow}>
+              <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+                <KeyIcon color={isDark ? '#EF4444' : '#DC2626'} size={16} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                  Private Key
+                </Text>
+                <Text style={[styles.settingsSubtext, { color: isDark ? '#EF4444' : '#DC2626' }]}>
+                  Direct on-chain private export
+                </Text>
+              </View>
+              <ChevronRightIcon color={colors.text.muted} size={14} />
+            </View>
+          </SpringButton>
         </View>
 
         {/* Section: Appearance */}

@@ -1,6 +1,6 @@
-# CryptoVaultAI Python FastAPI Backend
+# Cura Wallet Python FastAPI Backend
 
-High-performance Python backend for the CryptoVaultAI multi-chain self-custodial mobile wallet.
+High-performance Python backend for the Cura Wallet multi-chain self-custodial mobile wallet.
 
 ## Features
 

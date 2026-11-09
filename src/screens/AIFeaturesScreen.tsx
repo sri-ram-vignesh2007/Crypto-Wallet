@@ -18,7 +18,7 @@ interface AIFeature {
 const FEATURES: AIFeature[] = [
   { id: 'risk_analyzer',   title: 'Transaction Risk Analyzer', description: 'Score any tx 0–100, detect phishing, unlimited approvals, honeypots.', icon: '🛡️', status: 'ready', screen: 'RiskAnalyzer' },
   { id: 'nl_wallet',       title: 'Natural Language Wallet',   description: 'Type "Send $50 USDC to Alex" — AI parses, simulates, confirms.', icon: '💬', status: 'ready', screen: 'AICommandBar' },
-  { id: 'ai_chatbot',      title: 'CryptoVault AI Chatbot',    description: 'Real-time streaming AI assistant — ask anything about crypto, DeFi, gas, prices.', icon: '🤖', status: 'ready', screen: 'AIChatbot' },
+  { id: 'ai_chatbot',      title: 'Cura AI Chatbot',           description: 'Real-time streaming AI assistant — ask anything about crypto, DeFi, gas, prices.', icon: '🤖', status: 'ready', screen: 'AIChatbot' },
   { id: 'portfolio_ai',    title: 'Portfolio AI',              description: 'P/L, tax estimate, health score, rebalance, yield opportunities.', icon: '📈', status: 'ready', screen: 'PortfolioAI' },
   { id: 'scam_detector',   title: 'AI Scam Detector',          description: 'Scan any address/contract — flag honeypots, rugs, fake tokens.', icon: '🔍', status: 'ready', screen: 'RiskAnalyzer' },
   { id: 'health_score',    title: 'Wallet Health Score',       description: 'Seed backup, biometrics, age, risky approvals, concentration.', icon: '💚', status: 'ready', screen: 'WalletHealth' },

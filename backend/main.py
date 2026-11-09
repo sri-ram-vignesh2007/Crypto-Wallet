@@ -1,5 +1,5 @@
 # backend/main.py
-# FastAPI Root Application for CryptoVaultAI
+# FastAPI Root Application for Cura Wallet
 
 import uvicorn
 from fastapi import FastAPI
@@ -10,7 +10,7 @@ from .routers import ai, wallet, market, swap, community
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="High-performance Python Web3 & AI Backend for CryptoVaultAI mobile wallet.",
+    description="High-performance Python Web3 & AI Backend for Cura Wallet mobile application.",
     docs_url="/docs",
     redoc_url="/redoc",
 )

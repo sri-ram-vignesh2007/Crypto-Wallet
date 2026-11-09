@@ -2,7 +2,7 @@
 import './src/polyfills';
 
 import React, { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -149,8 +149,8 @@ function MainTabs() {
 
   // Adaptive safe area bottom padding across all iPhone & Android models
   const isAndroid = Platform.OS === 'android';
-  const bottomPadding = insets.bottom > 0 ? insets.bottom + 6 : (isAndroid ? 14 : 10);
-  const tabHeight = 64 + bottomPadding;
+  const bottomPadding = insets.bottom > 0 ? insets.bottom + 4 : (isAndroid ? 10 : 8);
+  const tabHeight = 62 + bottomPadding;
 
   return (
     <Tab.Navigator
@@ -162,14 +162,22 @@ function MainTabs() {
           backgroundColor: colors.bg.surface,
           borderTopColor: colors.border.subtle,
           borderTopWidth: 0.5,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          overflow: 'hidden',
           height: tabHeight,
           paddingBottom: bottomPadding,
-          paddingTop: 5,
+          paddingTop: 6,
+          elevation: 10,
+          shadowColor: '#000000',
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.08,
+          shadowRadius: 10,
         },
         tabBarItemStyle: {
           justifyContent: 'center',
           alignItems: 'center',
-          paddingVertical: 1,
+          paddingVertical: 2,
         },
         tabBarLabelStyle: {
           fontSize: 10.5,
@@ -183,6 +191,23 @@ function MainTabs() {
           marginTop: 1,
           marginBottom: 1,
         },
+        tabBarButton: (props) => (
+          <Pressable
+            {...props}
+            android_ripple={{
+              color: theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+              borderless: true,
+              radius: 28,
+            }}
+            style={({ pressed }) => [
+              props.style,
+              {
+                borderRadius: 24,
+                opacity: pressed ? 0.75 : 1,
+              },
+            ]}
+          />
+        ),
       }}
     >
       <Tab.Screen

@@ -1,4 +1,4 @@
-// src/screens/HomeScreen.tsx - Institutional-Grade Fintech Dashboard for CryptoVaultAI
+// src/screens/HomeScreen.tsx - Institutional-Grade Fintech Dashboard for Cura Wallet
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
@@ -787,10 +787,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           <TouchableOpacity style={{ flex: 1 }} onPress={() => setShowNetworkModal(false)} />
           <View style={[styles.modalSheetCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
             <View style={styles.sheetHandle} />
-            <Text style={[styles.modalSheetTitle, { color: colors.text.primary }]}>Select Native Blockchain</Text>
-            <Text style={styles.modalSheetSubtitle}>Zero-latency multi-node failover</Text>
+            <Text style={[styles.modalSheetTitle, { color: colors.text.primary }]}>Select Blockchain</Text>
 
-            <View style={{ marginTop: 12 }}>
+            <View style={{ marginTop: 14 }}>
               {Object.entries(CHAINS).map(([key, chain]) => {
                 const isSelected = selectedChain === key;
                 return (
@@ -803,11 +802,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                     style={[styles.chainSelectRow, isSelected && { backgroundColor: monoMutedSurface }]}
                   >
                     <View style={styles.chainRowLeft}>
-                      <Text style={{ fontSize: 20 }}>{chain.logo}</Text>
-                      <View>
-                        <Text style={[styles.chainNameText, { color: colors.text.primary }]}>{chain.name}</Text>
-                        <Text style={styles.chainRpcText}>{chain.rpcUrls[0].replace('https://', '')}</Text>
-                      </View>
+                      <TokenLogo symbol={chain.symbol} size={28} />
+                      <Text style={[styles.chainNameText, { color: colors.text.primary, marginLeft: 12, fontSize: 16, fontWeight: '600' }]}>
+                        {chain.name}
+                      </Text>
                     </View>
                     {isSelected && <CheckIcon color={monoPrimary} size={18} />}
                   </SpringButton>

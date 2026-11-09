@@ -1,11 +1,12 @@
 // src/screens/ExploreScreen.tsx - Cura Community: AI Autonomous Desks & Dispatches
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
   SafeAreaView, StatusBar, RefreshControl, Modal, Animated, Pressable,
   Share, KeyboardAvoidingView, Platform, Dimensions,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
@@ -341,17 +342,47 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     setTimeout(() => setShowToast(false), 2400);
   };
 
-  const handleRefresh = () => {
+  const BACKEND_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
+
+  const loadLiveDispatches = async () => {
+    try {
+      // 1. Check local storage cache
+      const stored = await AsyncStorage.getItem('cura_portal_dispatches_v1');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setBroadcasts(parsed);
+        }
+      }
+
+      // 2. Fetch live dispatches from FastAPI backend
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(`${BACKEND_URL}/api/community/dispatches`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      if (res.ok) {
+        const remoteData = await res.json();
+        if (Array.isArray(remoteData) && remoteData.length > 0) {
+          setBroadcasts(remoteData);
+          AsyncStorage.setItem('cura_portal_dispatches_v1', JSON.stringify(remoteData)).catch(() => {});
+        }
+      }
+    } catch {
+      // Seamlessly keep current dispatches
+    }
+  };
+
+  useEffect(() => {
+    loadLiveDispatches();
+  }, []);
+
+  const handleRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setBroadcasts(prev =>
-        prev.map(b => ({
-          ...b,
-          viewCount: b.viewCount + Math.floor(Math.random() * 30) + 5,
-        }))
-      );
-      setRefreshing(false);
-    }, 800);
+    await loadLiveDispatches();
+    setRefreshing(false);
   };
 
   // Open Post Dispatch
@@ -405,6 +436,16 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
 
     const targetBroadcastId = selectedBroadcast.id;
     const orgName = selectedBroadcast.orgName;
+
+    // Post to FastAPI backend so organization portal sees the inquiry
+    fetch(`${BACKEND_URL}/api/community/inquiries`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        broadcast_id: targetBroadcastId,
+        user_question: trimmed,
+      }),
+    }).catch(() => {});
 
     setTimeout(() => {
       setBroadcasts(prev =>

@@ -609,17 +609,17 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
             <Text style={styles.successSub}>
               Successfully exchanged {fromAmount} {fromAsset.symbol} for ≈ {toAmount} {toAsset.symbol} via Cura Smart Aggregator.
             </Text>
-            <SpringButton
+            <TouchableOpacity
               onPress={() => {
                 setShowSuccessModal(false);
                 setFromAmount('');
                 setToAmount('');
               }}
-              containerStyle={{ width: '100%' }}
-              style={[styles.successCloseBtn, { backgroundColor: monoPrimary }]}
+              style={[styles.successCloseBtn, { backgroundColor: monoPrimary, width: '100%', alignSelf: 'stretch' }]}
+              activeOpacity={0.8}
             >
               <Text style={[styles.successCloseText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Done</Text>
-            </SpringButton>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -711,6 +711,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.6,
     paddingVertical: 4,
     marginRight: 10,
+    backgroundColor: 'transparent',
   },
   amountOutputText: {
     flex: 1,

@@ -171,3 +171,4 @@ async def reply_to_inquiry(inquiry_id: str, request: ReplyInquiryRequest):
                 }
                 return inq
     raise HTTPException(status_code=404, detail="Inquiry not found")
+

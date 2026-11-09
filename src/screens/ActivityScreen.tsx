@@ -160,11 +160,16 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
                       : <Circle cx="12" cy="12" r="8" fill={colors.text.primary} />}
                   </View>
                   <View style={styles.txInfo}>
-                    <Text style={[styles.txType, { color: colors.text.primary }]}>
-                      {txTypeLabels[item.type] || 'Transaction'}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={[styles.txType, { color: colors.text.primary }]}>
+                        {txTypeLabels[item.type] || 'Transaction'}
+                      </Text>
+                      <Text style={{ fontSize: 11.5, color: colors.text.muted, fontWeight: '500' }}>
+                        {item.time || 'Just now'}
+                      </Text>
+                    </View>
                     <Text style={[styles.txSubtitle, { color: colors.text.muted }]} numberOfLines={1}>
-                      {item.asset} • {item.time}
+                      {item.asset}
                     </Text>
                   </View>
                 </View>
