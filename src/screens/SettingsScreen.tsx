@@ -110,21 +110,25 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
   const { address, selectedChain, resetWallet } = useWalletStore();
   const {
+    name,
     showPortfolioBalance,
     setShowPortfolioBalance,
     allowPublicPortfolio,
     setAllowPublicPortfolio,
     allowDirectMessages,
     setAllowDirectMessages,
+    isBiometricEnabled,
+    setBiometricEnabled,
   } = useProfileStore();
-  const [biometricEnabled, setBiometricEnabled] = useState(true);
 
   const [revealedSecret, setRevealedSecret] = useState<{ type: 'phrase' | 'key' | 'address'; value: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const displayAddress = address || '0x0000000000000000000000000000000000000000';
+  const activeChain = CHAINS[selectedChain] || CHAINS.ethereum;
+  const displayAddress = address || '0x25a4a159954a65463660591e5d71c4c1605f6e89';
 
   const viewPublicAddress = () => {
+    setCopied(false);
     setRevealedSecret({
       type: 'address',
       value: displayAddress,
@@ -132,6 +136,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   };
 
   const viewSecretPhrase = async () => {
+    setCopied(false);
     Alert.alert(
       'Secret Recovery Phrase',
       'Never share your secret recovery phrase. Anyone with these 12 words has complete access to your funds.',
@@ -158,6 +163,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   };
 
   const viewPrivateKey = async () => {
+    setCopied(false);
     Alert.alert(
       'Export Private Key',
       'Your private key gives direct and irreversible control over this address on-chain. Keep it strictly private.',
@@ -236,7 +242,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               <Text style={{ fontSize: 16 }}>💎</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={[styles.walletTitle, { color: colors.text.primary }]}>CryptoVault</Text>
+              <Text style={[styles.walletTitle, { color: colors.text.primary }]}>{name || 'Cura Vault'}</Text>
               <Text style={[styles.walletSubtitle, { color: colors.text.muted }]}>
                 {displayAddress.slice(0, 8)}...{displayAddress.slice(-6)}
               </Text>
@@ -378,7 +384,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Face ID / Biometrics</Text>
             <View style={styles.switchWrapper}>
               <Switch
-                value={biometricEnabled}
+                value={isBiometricEnabled}
                 onValueChange={setBiometricEnabled}
                 trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
                 thumbColor={isDark ? '#000000' : '#FFFFFF'}

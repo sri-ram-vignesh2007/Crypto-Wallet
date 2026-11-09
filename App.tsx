@@ -85,7 +85,7 @@ type RootStackParamList = {
 
 type TabParamList = {
   Home: undefined;
-  LiveDesk: undefined;
+  Community: undefined;
   Swap: undefined;
   Activity: undefined;
   Settings: undefined;
@@ -102,16 +102,9 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
         <Circle cx="18" cy="15" r="1.5" fill={color} />
       </Svg>
     ),
-    LiveDesk: (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
-        <Circle cx="12" cy="12" r="2" fill={color} />
-        <Path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
-      </Svg>
-    ),
     Community: (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
-        <Circle cx="12" cy="12" r="2" fill={color} />
-        <Path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
+        <Path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
       </Svg>
     ),
     Assets: (
@@ -201,11 +194,11 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="LiveDesk"
+        name="Community"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="LiveDesk" focused={focused} color={color} />,
-          tabBarLabel: 'Live Desk',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} />,
+          tabBarLabel: 'Community',
         }}
       />
       <Tab.Screen

@@ -1,4 +1,4 @@
-// src/screens/ExploreScreen.tsx - Cura Live Desk: Verified Organization Broadcasts & Zero-Knowledge Q&A
+// src/screens/ExploreScreen.tsx - Cura Community: AI Autonomous Desks & Dispatches
 
 import React, { useState, useRef } from 'react';
 import {
@@ -9,44 +9,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
+import { useProfileStore } from '../store/profileStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Spring Button Component
-const SpringButton: React.FC<{
-  onPress: () => void;
-  style?: any;
-  children: React.ReactNode;
-  activeScale?: number;
-}> = ({ onPress, style, children, activeScale = 0.96 }) => {
-  const scale = useRef(new Animated.Value(1)).current;
-
-  return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={() => {
-        Animated.spring(scale, {
-          toValue: activeScale,
-          useNativeDriver: true,
-          damping: 18,
-          stiffness: 260,
-        }).start();
-      }}
-      onPressOut={() => {
-        Animated.spring(scale, {
-          toValue: 1,
-          useNativeDriver: true,
-          damping: 18,
-          stiffness: 260,
-        }).start();
-      }}
-    >
-      <Animated.View style={[style, { transform: [{ scale }] }]}>
-        {children}
-      </Animated.View>
-    </Pressable>
-  );
-};
 
 // Vector Glyphs (Monochrome)
 const SearchIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
@@ -56,24 +21,10 @@ const SearchIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: n
   </Svg>
 );
 
-const RadioTowerIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="12" cy="12" r="2" fill={color} />
-    <Path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
-  </Svg>
-);
-
 const EyeIcon = ({ color = '#858585', size = 15 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
     <Circle cx="12" cy="12" r="3" />
-  </Svg>
-);
-
-const LockIcon = ({ color = '#858585', size = 15 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </Svg>
 );
 
@@ -97,13 +48,6 @@ const VerifiedCheck = ({ color = '#FFFFFF', size = 11 }: { color?: string; size?
   </Svg>
 );
 
-const ShieldCheckIcon = ({ color = '#858585', size = 15 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <Path d="M9 12l2 2 4-4" />
-  </Svg>
-);
-
 const CloseIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M18 6L6 18M6 6l12 12" />
@@ -124,122 +68,178 @@ export interface OrganizationInquiry {
   };
 }
 
+export type AICategory =
+  | 'Business'
+  | 'Crypto'
+  | 'DeFi'
+  | 'Layer 1'
+  | 'Layer 2'
+  | 'RWA'
+  | 'Cross-Chain'
+  | 'Security'
+  | 'AI Compute'
+  | 'Macro';
+
 export interface LiveDeskBroadcast {
   id: string;
   orgName: string;
   orgHandle: string;
   orgLogoInitial: string;
-  orgCategory: 'Asset Manager' | 'Protocol Foundation' | 'Institutional Custody' | 'DeFi Infrastructure' | 'Layer 1 / Layer 2';
+  orgCategory: AICategory;
   isVerified: boolean;
   timeAgo: string;
   title: string;
   content: string;
   tags: string[];
-  viewCount: number; // What the organization can see: e.g. 38,450
+  viewCount: number;
   inquiries: OrganizationInquiry[];
 }
 
-// Initial Verified Organization Broadcasts
+// 10 AI Autonomous Desks (All divisions of the company - Cura AI)
 const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-1',
-    orgName: 'BlackRock Digital Assets',
-    orgHandle: '@blackrock_digital',
-    orgLogoInitial: 'B',
-    orgCategory: 'Asset Manager',
+    orgName: 'Cura AI Enterprise Desk',
+    orgHandle: '@cura_enterprise_ai',
+    orgLogoInitial: 'E',
+    orgCategory: 'Business',
     isVerified: true,
-    timeAgo: '14m ago',
-    title: 'Institutional Tokenized Liquidity Fund (BUIDL) Crosses $520M AUM Milestone',
-    content: 'The BlackRock USD Institutional Digital Liquidity Fund (BUIDL) has officially exceeded $520M in verified total assets. Institutional custodians and verified treasuries can now settle tokenized yield directly into institutional vaults with zero redemption slippage.',
-    tags: ['$BUIDL', '$USDC', 'TokenizedTreasuries', 'Yield'],
-    viewCount: 38450,
-    inquiries: [
-      {
-        id: 'inq-1',
-        internalRoutingId: 482915,
-        userQuestion: 'Will BUIDL support secondary market atomic swaps on Arbitrum and Solana later this quarter?',
-        timestamp: '22m ago',
-        isCurrentUser: false,
-        officialReply: {
-          repliedBy: 'BlackRock Digital Assets Desk',
-          replyText: 'Official Response: We are finalizing technical audits for additional EVM layer 2 settlement rails. Formal compliance documentation will be published ahead of Q4 rollout.',
-          timestamp: '10m ago',
-        },
-      },
-    ],
+    timeAgo: '12m ago',
+    title: 'Fortune 500 Enterprise Treasury Operations Automate Instant On-Chain Payroll',
+    content: 'Cura AI Enterprise Desk has integrated zero-slippage B2B settlements for multinational enterprise treasuries. Autonomous payroll smart vaults now execute multi-currency settlements with sub-cent transaction overhead and continuous cryptographic audit logs.',
+    tags: ['$USDC', 'Enterprise', 'Payroll', 'Treasury'],
+    viewCount: 46210,
+    inquiries: [],
   },
   {
     id: 'broadcast-2',
-    orgName: 'Solana Foundation',
-    orgHandle: '@solana_fndn',
-    orgLogoInitial: 'S',
-    orgCategory: 'Protocol Foundation',
+    orgName: 'Cura AI Sovereign Crypto Desk',
+    orgHandle: '@cura_bitcoin_ai',
+    orgLogoInitial: 'B',
+    orgCategory: 'Crypto',
     isVerified: true,
-    timeAgo: '48m ago',
-    title: 'Firedancer Validator Testnet Reaches 1,000,000 TPS Benchmark in Controlled Stress Test',
-    content: 'Jump Crypto and Solana Foundation engineers confirmed that Firedancer test clusters achieved 1M TPS under synthetic load testing. Mainnet candidate deployment schedule remains on track for gradual validator adoption across high-throughput nodes.',
-    tags: ['$SOL', 'Firedancer', 'Throughput', 'Mainnet'],
-    viewCount: 29120,
-    inquiries: [
-      {
-        id: 'inq-2',
-        internalRoutingId: 783104,
-        userQuestion: 'What are the minimum hardware specifications required for independent stakers to run the Firedancer client?',
-        timestamp: '1h ago',
-        isCurrentUser: false,
-        officialReply: {
-          repliedBy: 'Solana Foundation Core Engineering',
-          replyText: 'Official Response: Hardware requirements mirror current Frankendancer specs (32 physical cores, 128GB RAM). Dedicated documentation will be released next week.',
-          timestamp: '35m ago',
-        },
-      },
-    ],
+    timeAgo: '35m ago',
+    title: 'Bitcoin Institutional Accumulation Accelerates: Weekly Net Inflows Cross $1.8B',
+    content: 'Cura AI Sovereign Desk models indicate aggressive institutional custody accumulation above $68,000. Mining hash rate difficulty reached new all-time highs as sovereign allocation desks expand multi-year reserves.',
+    tags: ['$BTC', 'Bitcoin', 'Macro', 'Reserves'],
+    viewCount: 52180,
+    inquiries: [],
   },
   {
     id: 'broadcast-3',
-    orgName: 'Ethereum Foundation',
-    orgHandle: '@ethereum_core',
-    orgLogoInitial: 'E',
-    orgCategory: 'Protocol Foundation',
+    orgName: 'Cura AI DeFi Engine Desk',
+    orgHandle: '@cura_defi_ai',
+    orgLogoInitial: 'D',
+    orgCategory: 'DeFi',
     isVerified: true,
-    timeAgo: '2h ago',
-    title: 'Pectra Upgrade Devnet-4 Launch: MaxEB (EIP-7251) and Account Abstraction Inclusions',
-    content: 'Ethereum core developers have finalized Devnet-4 specifications for Pectra. Key highlights include raising the effective validator balance from 32 ETH to 2,048 ETH, streamlining staking infrastructure for institutional node operators and liquidity pools.',
-    tags: ['$ETH', 'Pectra', 'Staking', 'EIP7251'],
-    viewCount: 41200,
+    timeAgo: '50m ago',
+    title: 'Automated Concentrated Liquidity Rebalancing Captures 42% Fee Compression',
+    content: 'Cura AI DeFi Engine telemetry reports record liquidity efficiency across top AMM pools. Dynamic rebalancing algorithms minimized impermanent loss for high-volume trading pairs during volatility spikes.',
+    tags: ['$ETH', 'DeFi', 'Liquidity', 'Yield'],
+    viewCount: 38450,
     inquiries: [],
   },
   {
     id: 'broadcast-4',
-    orgName: 'Circle Financial',
-    orgHandle: '@circle_official',
-    orgLogoInitial: 'C',
-    orgCategory: 'Institutional Custody',
+    orgName: 'Cura AI L1 Systems Desk',
+    orgHandle: '@cura_l1_ai',
+    orgLogoInitial: 'S',
+    orgCategory: 'Layer 1',
     isVerified: true,
-    timeAgo: '3h ago',
-    title: 'Cross-Chain Transfer Protocol (CCTP) V2 Integrates Native Solana-Ethereum Bridging',
-    content: 'Circle CCTP V2 now processes native 1:1 burn-and-mint USDC transfers across Solana, Ethereum, Base, and Arbitrum with sub-second cryptographic finality. Zero bridge wrapper risk for enterprise liquidity desks.',
-    tags: ['$USDC', 'CCTP', 'Interoperability', 'Settlement'],
-    viewCount: 19840,
+    timeAgo: '1h ago',
+    title: 'Parallel Consensus & High-Throughput Benchmarks Clock 1,000,000 TPS',
+    content: 'Firedancer and parallel execution testnets completed synthetic stress workloads with sub-200ms deterministic finality. Network telemetry indicates smooth validator state synchronization.',
+    tags: ['$SOL', 'Firedancer', 'ParallelExecution', 'Throughput'],
+    viewCount: 34120,
     inquiries: [],
   },
   {
     id: 'broadcast-5',
-    orgName: 'Uniswap Labs',
-    orgHandle: '@uniswap_labs',
-    orgLogoInitial: 'U',
-    orgCategory: 'DeFi Infrastructure',
+    orgName: 'Cura AI Rollup & Scaling Desk',
+    orgHandle: '@cura_rollup_ai',
+    orgLogoInitial: 'R',
+    orgCategory: 'Layer 2',
+    isVerified: true,
+    timeAgo: '2h ago',
+    title: 'Ethereum Layer 2 Aggregate Throughput Breaks 380 TPS Post-Blob Optimizations',
+    content: 'Arbitrum and Base processed over 78% of rollup transaction volume today. Blob compression keeps median transfer fees under $0.001, making institutional micropayment channels commercially viable.',
+    tags: ['$ETH', '$ARB', 'Base', 'Rollup'],
+    viewCount: 29840,
+    inquiries: [],
+  },
+  {
+    id: 'broadcast-6',
+    orgName: 'Cura AI Tokenized Assets Desk',
+    orgHandle: '@cura_rwa_ai',
+    orgLogoInitial: 'T',
+    orgCategory: 'RWA',
+    isVerified: true,
+    timeAgo: '2h ago',
+    title: 'Tokenized US Treasuries Surpass $2.4B in Verified On-Chain Holdings',
+    content: 'Institutional tokenized treasury vaults now generate 4.8% APR with atomic liquidity redemption. Qualified institutional participants settle yield directly into multi-chain custody enclaves.',
+    tags: ['$BUIDL', '$USDC', 'RWA', 'Treasuries'],
+    viewCount: 41200,
+    inquiries: [],
+  },
+  {
+    id: 'broadcast-7',
+    orgName: 'Cura AI Interoperability Desk',
+    orgHandle: '@cura_crosschain_ai',
+    orgLogoInitial: 'C',
+    orgCategory: 'Cross-Chain',
+    isVerified: true,
+    timeAgo: '3h ago',
+    title: 'Native Cross-Chain Mint-and-Burn Bridges Process $5.2B in Weekly Volume',
+    content: 'CCTP V2 and atomic bridge protocols achieve unified liquidity across Solana and EVM rollups with zero wrapped asset exposure and sub-second cryptographic finality.',
+    tags: ['$USDC', 'CCTP', 'CrossChain', 'Settlement'],
+    viewCount: 25490,
+    inquiries: [],
+  },
+  {
+    id: 'broadcast-8',
+    orgName: 'Cura AI Security & Enclave Desk',
+    orgHandle: '@cura_security_ai',
+    orgLogoInitial: 'K',
+    orgCategory: 'Security',
+    isVerified: true,
+    timeAgo: '4h ago',
+    title: 'Automated Formal Verification Confirms Zero Vulnerabilities Across Verified Vaults',
+    content: 'Cura AI automated symbolic execution engines verified 140+ protocol smart contracts this week. MEV shielding successfully protected institutional swaps from sandwich attacks.',
+    tags: ['Security', 'Audits', 'MEVShield', 'Enclaves'],
+    viewCount: 21900,
+    inquiries: [],
+  },
+  {
+    id: 'broadcast-9',
+    orgName: 'Cura AI Agentic Compute Desk',
+    orgHandle: '@cura_compute_ai',
+    orgLogoInitial: 'A',
+    orgCategory: 'AI Compute',
     isVerified: true,
     timeAgo: '5h ago',
-    title: 'Uniswap v4 Security Audits Completed With Zero Critical Findings',
-    content: 'Custom singleton architecture and dynamic hooks have completed independent formal verification. Flash accounting reduces multi-hop swap gas costs by up to 99% for algorithmic routers and institutional liquidity providers.',
-    tags: ['$UNI', 'UniswapV4', 'Hooks', 'FlashAccounting'],
-    viewCount: 33700,
+    title: 'Autonomous On-Chain Agent Swarms Execute 150,000 Micro-Settlements Daily',
+    content: 'Autonomous AI agents are executing decentralized compute inference and data marketplace payments on-chain with zero human intervention and instant cryptographic validation.',
+    tags: ['AIAgents', 'Compute', 'DePIN', 'Autonomy'],
+    viewCount: 31250,
+    inquiries: [],
+  },
+  {
+    id: 'broadcast-10',
+    orgName: 'Cura AI Macro & Policy Desk',
+    orgHandle: '@cura_macro_ai',
+    orgLogoInitial: 'M',
+    orgCategory: 'Macro',
+    isVerified: true,
+    timeAgo: '6h ago',
+    title: 'Global Central Bank Rate Easing Cycle Accelerates Digital Asset Liquidity Expansion',
+    content: 'Global M2 liquidity metrics indicate rapid capital rotation into institutional digital asset balance sheets as central banks transition to rate easing regimes.',
+    tags: ['Macro', 'M2Liquidity', 'CentralBanks', 'Policy'],
+    viewCount: 36780,
     inquiries: [],
   },
 ];
 
-// Curated Breaking News Wire
+// Curated News Wire
 const NEWS_WIRE = [
   {
     id: 'news-1',
@@ -279,27 +279,48 @@ const NEWS_WIRE = [
   },
 ];
 
+const AI_CATEGORIES = [
+  'All',
+  'Business',
+  'Crypto',
+  'DeFi',
+  'Layer 1',
+  'Layer 2',
+  'RWA',
+  'Cross-Chain',
+  'Security',
+  'AI Compute',
+  'Macro',
+] as const;
+
 export default function ExploreScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
+  const { username, setUsername, name, setName } = useProfileStore();
 
   const [activeTab, setActiveTab] = useState<'dispatches' | 'news' | 'myInquiries'>('dispatches');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [broadcasts, setBroadcasts] = useState<LiveDeskBroadcast[]>(INITIAL_BROADCASTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Ask Question / Q&A Modal State
+  // Username Creation Modal State
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [newUsernameInput, setNewUsernameInput] = useState('');
+  const [newDisplayNameInput, setNewDisplayNameInput] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+
+  // Ask Question / Q&A Modal State (Shows ONLY the current user's questions and replies)
   const [selectedBroadcast, setSelectedBroadcast] = useState<LiveDeskBroadcast | null>(null);
   const [showQAModal, setShowQAModal] = useState(false);
   const [questionInput, setQuestionInput] = useState('');
   const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
 
-  // Organization Request Desk Access Modal State
+  // Post Dispatch Modal State (Requires Username first)
   const [showOrgRequestModal, setShowOrgRequestModal] = useState(false);
   const [orgNameInput, setOrgNameInput] = useState('');
-  const [orgDomainInput, setOrgDomainInput] = useState('');
-  const [orgCategoryInput, setOrgCategoryInput] = useState<'Asset Manager' | 'Protocol Foundation' | 'Institutional Custody' | 'DeFi Infrastructure' | 'Layer 1 / Layer 2'>('Protocol Foundation');
+  const [orgCategoryInput, setOrgCategoryInput] = useState<AICategory>('Business');
   const [orgTitleInput, setOrgTitleInput] = useState('');
   const [orgContentInput, setOrgContentInput] = useState('');
   const [isSubmittingOrgRequest, setIsSubmittingOrgRequest] = useState(false);
@@ -317,21 +338,52 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 2600);
+    setTimeout(() => setShowToast(false), 2400);
   };
 
   const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      // Simulate realistic view increments
       setBroadcasts(prev =>
         prev.map(b => ({
           ...b,
-          viewCount: b.viewCount + Math.floor(Math.random() * 45) + 5,
+          viewCount: b.viewCount + Math.floor(Math.random() * 30) + 5,
         }))
       );
       setRefreshing(false);
     }, 800);
+  };
+
+  // Open Post Dispatch (Enforces Username Requirement)
+  const handleOpenPostDispatch = () => {
+    if (!username || !username.trim()) {
+      setNewUsernameInput('');
+      setNewDisplayNameInput(name || '');
+      setUsernameError('');
+      setShowUsernameModal(true);
+      return;
+    }
+    setShowOrgRequestModal(true);
+  };
+
+  // Save Username
+  const handleSaveUsername = () => {
+    const clean = newUsernameInput.trim().replace(/^@/, '');
+    if (!clean || clean.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(clean)) {
+      setUsernameError('Only letters, numbers, and underscores allowed');
+      return;
+    }
+    setUsername(clean);
+    if (newDisplayNameInput.trim()) {
+      setName(newDisplayNameInput.trim());
+    }
+    setShowUsernameModal(false);
+    triggerToast(`Username @${clean} created! Opening dispatch editor...`);
+    setTimeout(() => setShowOrgRequestModal(true), 300);
   };
 
   // Open Q&A Thread on a Broadcast
@@ -340,14 +392,14 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     setShowQAModal(true);
   };
 
-  // Submit Anonymous User Question
+  // Submit User Question (Only visible to current user)
   const handleSubmitQuestion = () => {
     const trimmed = questionInput.trim();
     if (!trimmed || !selectedBroadcast) return;
 
     setIsSubmittingQuestion(true);
 
-    // Internal Random Number generation (acts internally, NOT shown as an ugly number)
+    // Internal Random Number generation (acts internally, NOT shown)
     const internalNumber = Math.floor(100000 + Math.random() * 900000);
 
     const newInquiry: OrganizationInquiry = {
@@ -362,7 +414,6 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     const orgName = selectedBroadcast.orgName;
 
     setTimeout(() => {
-      // Add inquiry to broadcast
       setBroadcasts(prev =>
         prev.map(b => {
           if (b.id === targetBroadcastId) {
@@ -375,7 +426,6 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         })
       );
 
-      // Update active modal view
       setSelectedBroadcast(prev => {
         if (!prev) return null;
         return {
@@ -386,13 +436,13 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
 
       setQuestionInput('');
       setIsSubmittingQuestion(false);
-      triggerToast('Anonymous question submitted. Routed via internal token.');
+      triggerToast('Question submitted to AI Desk');
 
-      // Simulate Organization Official Reply after 1.4s
+      // AI Desk official response after 1.2s
       setTimeout(() => {
         const officialResponse = {
-          repliedBy: `${orgName} Desk`,
-          replyText: `Official Response: Thank you for your inquiry. Our research desk has logged this query. Verified updates and technical specifications are monitored by our enclave verifiers.`,
+          repliedBy: `${orgName} AI`,
+          replyText: `Autonomous AI Response: Thank you for your question. Our autonomous intelligence models have processed this item. Verified telemetry and updates have been verified.`,
           timestamp: 'Just now',
         };
 
@@ -426,15 +476,15 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
           };
         });
 
-        triggerToast(`New official reply received from ${orgName} Desk!`);
-      }, 1400);
+        triggerToast(`Response received from ${orgName}!`);
+      }, 1200);
     }, 400);
   };
 
-  // Submit Organization Broadcast Request
+  // Submit User / Org Dispatch
   const handleSubmitOrgRequest = () => {
     if (!orgNameInput.trim() || !orgTitleInput.trim() || !orgContentInput.trim()) {
-      triggerToast('Please complete all organization dispatch fields');
+      triggerToast('Please complete all dispatch fields');
       return;
     }
 
@@ -451,7 +501,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         timeAgo: 'Just now',
         title: orgTitleInput.trim(),
         content: orgContentInput.trim(),
-        tags: ['OfficialDispatch', 'LiveDesk', 'Verified'],
+        tags: ['CommunityDispatch', 'Verified', orgCategoryInput],
         viewCount: 1,
         inquiries: [],
       };
@@ -461,32 +511,35 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       setShowOrgRequestModal(false);
 
       setOrgNameInput('');
-      setOrgDomainInput('');
       setOrgTitleInput('');
       setOrgContentInput('');
 
-      triggerToast('Organization broadcast published to Live Desk!');
-    }, 500);
+      triggerToast('Dispatch published to Community feed!');
+    }, 450);
   };
 
   // Share Broadcast
   const handleShareBroadcast = async (broadcast: LiveDeskBroadcast) => {
     try {
       await Share.share({
-        message: `[Cura Live Desk] ${broadcast.orgName}: "${broadcast.title}"\n\n${broadcast.content}\n\nVerified via Cura Wallet Live Desk`,
+        message: `[Cura Community] ${broadcast.orgName}: "${broadcast.title}"\n\n${broadcast.content}\n\nShared via Cura Wallet`,
       });
     } catch {}
   };
 
-  // Filtered Items
-  const filteredBroadcasts = broadcasts.filter(b =>
-    searchQuery
+  // Filtered Broadcasts by Search & Category
+  const filteredBroadcasts = broadcasts.filter(b => {
+    const matchesSearch = searchQuery
       ? b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.orgName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-      : true
-  );
+      : true;
+
+    const matchesCategory = selectedCategory === 'All' ? true : b.orgCategory === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   const filteredNews = NEWS_WIRE.filter(n =>
     searchQuery
@@ -496,7 +549,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       : true
   );
 
-  // All Inquiries asked by the current user across all broadcasts
+  // Inquiries for the current user ONLY
   const userInquiriesList: {
     broadcast: LiveDeskBroadcast;
     inquiry: OrganizationInquiry;
@@ -509,6 +562,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       }
     });
   });
+
+  // Current user's inquiries in the active selected broadcast modal
+  const activeUserInquiries = selectedBroadcast
+    ? selectedBroadcast.inquiries.filter(i => i.isCurrentUser)
+    : [];
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
@@ -525,20 +583,12 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       )}
 
-      {/* Top Header Bar */}
+      {/* Top Header Bar (Clean: "Community" title with "+ Post Dispatch" button on the right) */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 6 }]}>
-        <View style={styles.headerLeft}>
-          <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Live Desk</Text>
-          <View style={[styles.liveDot, { backgroundColor: monoPrimary }]} />
-          <View style={[styles.liveBadge, { backgroundColor: monoMutedSurface }]}>
-            <RadioTowerIcon color={colors.text.primary} size={11} />
-            <Text style={[styles.liveBadgeText, { color: colors.text.primary }]}>24/7 BROADCAST</Text>
-          </View>
-        </View>
+        <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Community</Text>
 
-        {/* Organization Broadcast Request Trigger */}
         <TouchableOpacity
-          onPress={() => setShowOrgRequestModal(true)}
+          onPress={handleOpenPostDispatch}
           style={[styles.orgSubmitBtn, { backgroundColor: monoPrimary }]}
           activeOpacity={0.8}
         >
@@ -548,21 +598,6 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       </View>
 
-      {/* Institutional Privacy Guarantee Banner */}
-      <View style={styles.guaranteeBannerWrapper}>
-        <View style={[styles.guaranteeBanner, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
-          <ShieldCheckIcon color={colors.text.primary} size={16} />
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={[styles.guaranteeTitle, { color: colors.text.primary }]}>
-              Zero-Knowledge Organization Broadcasts
-            </Text>
-            <Text style={styles.guaranteeSubtitle}>
-              Organizations broadcast news & only see live view counts. Your profile, wallet balance, and name remain 100% hidden. Inquiries use internal zero-knowledge tokens.
-            </Text>
-          </View>
-        </View>
-      </View>
-
       {/* Search Bar */}
       <View style={styles.searchRow}>
         <View style={[styles.searchBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
@@ -570,7 +605,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search verified dispatches, cashtags ($BTC, $SOL)..."
+            placeholder="Search dispatches, cashtags ($BTC, $SOL)..."
             placeholderTextColor={colors.text.muted}
             style={[styles.searchInput, { color: colors.text.primary }]}
             autoCapitalize="none"
@@ -579,7 +614,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      {/* Segmented Tab Selector */}
+      {/* Main Tabs (Dispatches, News Wire, My Inquiries) */}
       <View style={styles.segmentContainer}>
         <View style={[styles.segmentTrack, { backgroundColor: monoMutedSurface }]}>
           {(['dispatches', 'news', 'myInquiries'] as const).map(tab => {
@@ -588,7 +623,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
               ? 'Dispatches'
               : tab === 'news'
               ? 'News Wire'
-              : `My Inquiries (${userInquiriesList.length})`;
+              : `My Questions (${userInquiriesList.length})`;
 
             return (
               <TouchableOpacity
@@ -614,6 +649,37 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
+      {/* 10 AI Category Filters (When Dispatches tab is active) */}
+      {activeTab === 'dispatches' && (
+        <View style={styles.categoryFiltersContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryFiltersScroll}>
+            {AI_CATEGORIES.map(cat => {
+              const active = selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => setSelectedCategory(cat)}
+                  style={[
+                    styles.categoryFilterChip,
+                    { backgroundColor: active ? monoPrimary : monoMutedSurface },
+                  ]}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[
+                    styles.categoryFilterChipText,
+                    active
+                      ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                      : { color: colors.text.primary },
+                  ]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
+
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
         showsVerticalScrollIndicator={false}
@@ -626,126 +692,118 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         }
       >
         {/* ======================================================== */}
-        {/* TAB 1: VERIFIED ORGANIZATION DISPATCHES                  */}
+        {/* TAB 1: CURA AI DISPATCHES                                */}
         {/* ======================================================== */}
         {activeTab === 'dispatches' && (
           <>
-            {filteredBroadcasts.map(broadcast => (
-              <View
-                key={broadcast.id}
-                style={[styles.broadcastCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-              >
-                {/* Organization Header */}
-                <View style={styles.broadcastHeader}>
-                  <View style={styles.orgInfoRow}>
-                    <View style={[styles.orgAvatarCircle, { backgroundColor: monoPrimary }]}>
-                      <Text style={[styles.orgAvatarText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-                        {broadcast.orgLogoInitial}
+            {filteredBroadcasts.map(broadcast => {
+              const myInquiriesCount = broadcast.inquiries.filter(i => i.isCurrentUser).length;
+
+              return (
+                <View
+                  key={broadcast.id}
+                  style={[styles.broadcastCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
+                >
+                  {/* Header: Org Avatar, Name, Handle, Time (No category badge) */}
+                  <View style={styles.broadcastHeader}>
+                    <View style={styles.orgInfoRow}>
+                      <View style={[styles.orgAvatarCircle, { backgroundColor: monoPrimary }]}>
+                        <Text style={[styles.orgAvatarText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                          {broadcast.orgLogoInitial}
+                        </Text>
+                      </View>
+                      <View style={{ marginLeft: 10 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                          <Text style={[styles.orgNameText, { color: colors.text.primary }]}>
+                            {broadcast.orgName}
+                          </Text>
+                          {broadcast.isVerified && (
+                            <View style={[styles.verifiedBadge, { backgroundColor: monoPrimary }]}>
+                              <VerifiedCheck color={isDark ? '#000000' : '#FFFFFF'} size={9} />
+                            </View>
+                          )}
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                          <Text style={styles.orgHandleText}>{broadcast.orgHandle}</Text>
+                          <Text style={styles.dotDivider}>•</Text>
+                          <Text style={styles.timeAgoText}>{broadcast.timeAgo}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Broadcast Title */}
+                  <Text style={[styles.broadcastTitle, { color: colors.text.primary }]}>
+                    {broadcast.title}
+                  </Text>
+
+                  {/* Broadcast Content Body */}
+                  <Text style={[styles.broadcastBody, { color: colors.text.primary }]}>
+                    {broadcast.content}
+                  </Text>
+
+                  {/* Tags */}
+                  {broadcast.tags && broadcast.tags.length > 0 && (
+                    <View style={styles.tagsRow}>
+                      {broadcast.tags.map(tag => (
+                        <View key={tag} style={[styles.tagPill, { backgroundColor: monoMutedSurface }]}>
+                          <Text style={[styles.tagPillText, { color: colors.text.primary }]}>{tag}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* ONLY Views Bar (No public protected, no shielded badges) */}
+                  <View style={[styles.orgMetricsBar, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+                    <View style={styles.viewsCounterItem}>
+                      <EyeIcon color={colors.text.primary} size={14} />
+                      <Text style={[styles.viewsCounterText, { color: colors.text.primary }]}>
+                        {broadcast.viewCount.toLocaleString()} Views
                       </Text>
                     </View>
-                    <View style={{ marginLeft: 10 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                        <Text style={[styles.orgNameText, { color: colors.text.primary }]}>
-                          {broadcast.orgName}
+                  </View>
+
+                  {/* Actions Row: Ask Question & Share */}
+                  <View style={[styles.broadcastActionsRow, { borderTopColor: cardBorder }]}>
+                    <TouchableOpacity
+                      onPress={() => handleOpenQAModal(broadcast)}
+                      style={[styles.askQuestionBtn, { backgroundColor: monoPrimary }]}
+                      activeOpacity={0.8}
+                    >
+                      <MessageSquareIcon color={isDark ? '#000000' : '#FFFFFF'} size={14} />
+                      <Text style={[styles.askQuestionBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                        Ask Question
+                      </Text>
+                    </TouchableOpacity>
+
+                    {myInquiriesCount > 0 && (
+                      <TouchableOpacity
+                        onPress={() => handleOpenQAModal(broadcast)}
+                        style={[styles.viewInquiriesBtn, { backgroundColor: monoMutedSurface }]}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.viewInquiriesBtnText, { color: colors.text.primary }]}>
+                          My Replies ({myInquiriesCount})
                         </Text>
-                        {broadcast.isVerified && (
-                          <View style={[styles.verifiedBadge, { backgroundColor: monoPrimary }]}>
-                            <VerifiedCheck color={isDark ? '#000000' : '#FFFFFF'} size={9} />
-                          </View>
-                        )}
-                      </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                        <Text style={styles.orgHandleText}>{broadcast.orgHandle}</Text>
-                        <Text style={styles.dotDivider}>•</Text>
-                        <Text style={styles.timeAgoText}>{broadcast.timeAgo}</Text>
-                      </View>
-                    </View>
-                  </View>
+                      </TouchableOpacity>
+                    )}
 
-                  {/* Category Pill */}
-                  <View style={[styles.categoryBadge, { backgroundColor: monoMutedSurface }]}>
-                    <Text style={[styles.categoryBadgeText, { color: colors.text.primary }]}>
-                      {broadcast.orgCategory}
-                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleShareBroadcast(broadcast)}
+                      style={[styles.shareBtnCircle, { backgroundColor: monoMutedSurface }]}
+                      activeOpacity={0.7}
+                    >
+                      <ShareIcon color={colors.text.primary} size={14} />
+                    </TouchableOpacity>
                   </View>
                 </View>
-
-                {/* Broadcast Title */}
-                <Text style={[styles.broadcastTitle, { color: colors.text.primary }]}>
-                  {broadcast.title}
-                </Text>
-
-                {/* Broadcast Content Body */}
-                <Text style={[styles.broadcastBody, { color: colors.text.primary }]}>
-                  {broadcast.content}
-                </Text>
-
-                {/* Tags Row */}
-                {broadcast.tags && broadcast.tags.length > 0 && (
-                  <View style={styles.tagsRow}>
-                    {broadcast.tags.map(tag => (
-                      <View key={tag} style={[styles.tagPill, { backgroundColor: monoMutedSurface }]}>
-                        <Text style={[styles.tagPillText, { color: colors.text.primary }]}>{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* What Organization Sees: View Counter & Shield Info */}
-                <View style={[styles.orgMetricsBar, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
-                  <View style={styles.viewsCounterItem}>
-                    <EyeIcon color={colors.text.primary} size={14} />
-                    <Text style={[styles.viewsCounterText, { color: colors.text.primary }]}>
-                      {broadcast.viewCount.toLocaleString()} Live Views
-                    </Text>
-                  </View>
-
-                  <View style={styles.shieldedNoticeItem}>
-                    <LockIcon color={colors.text.muted} size={13} />
-                    <Text style={styles.shieldedNoticeText}>
-                      User Profiles 100% Shielded
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Interactive Action Bar: Ask Question & Share */}
-                <View style={[styles.broadcastActionsRow, { borderTopColor: cardBorder }]}>
-                  <TouchableOpacity
-                    onPress={() => handleOpenQAModal(broadcast)}
-                    style={[styles.askQuestionBtn, { backgroundColor: monoPrimary }]}
-                    activeOpacity={0.8}
-                  >
-                    <MessageSquareIcon color={isDark ? '#000000' : '#FFFFFF'} size={14} />
-                    <Text style={[styles.askQuestionBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-                      Ask Question
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => handleOpenQAModal(broadcast)}
-                    style={[styles.viewInquiriesBtn, { backgroundColor: monoMutedSurface }]}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.viewInquiriesBtnText, { color: colors.text.primary }]}>
-                      Q&A Thread ({broadcast.inquiries.length})
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => handleShareBroadcast(broadcast)}
-                    style={[styles.shareBtnCircle, { backgroundColor: monoMutedSurface }]}
-                    activeOpacity={0.7}
-                  >
-                    <ShareIcon color={colors.text.primary} size={14} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </>
         )}
 
         {/* ======================================================== */}
-        {/* TAB 2: BREAKING NEWS WIRE                                */}
+        {/* TAB 2: NEWS WIRE                                         */}
         {/* ======================================================== */}
         {activeTab === 'news' && (
           <View style={styles.newsStream}>
@@ -783,7 +841,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 3: MY INQUIRIES & OFFICIAL REPLIES                   */}
+        {/* TAB 3: MY QUESTIONS (Only Current User's Questions)      */}
         {/* ======================================================== */}
         {activeTab === 'myInquiries' && (
           <View>
@@ -793,10 +851,10 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   <MessageSquareIcon color={colors.text.primary} size={24} />
                 </View>
                 <Text style={[styles.emptyInquiriesTitle, { color: colors.text.primary }]}>
-                  No Active Inquiries
+                  No Questions Asked Yet
                 </Text>
                 <Text style={styles.emptyInquiriesSubtitle}>
-                  You haven't asked any questions to verified organizations yet. Tap "Ask Question" on any official dispatch to receive verified responses with complete zero-knowledge anonymity.
+                  You haven't submitted any questions yet. Tap "Ask Question" on any AI dispatch to receive an instant verified response.
                 </Text>
               </View>
             ) : (
@@ -806,15 +864,10 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   style={[styles.userInquiryCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
                 >
                   <View style={styles.inquiryCardHeader}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={[styles.inquiryOrgTitle, { color: colors.text.primary }]}>
-                        Inquiry to {broadcast.orgName}
-                      </Text>
-                    </View>
-                    <View style={[styles.privacyProtectedPill, { backgroundColor: monoMutedSurface }]}>
-                      <LockIcon color={colors.text.muted} size={11} />
-                      <Text style={styles.privacyProtectedText}>Profile Shielded</Text>
-                    </View>
+                    <Text style={[styles.inquiryOrgTitle, { color: colors.text.primary }]}>
+                      Question to {broadcast.orgName}
+                    </Text>
+                    <Text style={styles.inquiryTimeText}>{inquiry.timestamp}</Text>
                   </View>
 
                   <Text style={[styles.inquiryQuestionText, { color: colors.text.primary }]}>
@@ -837,7 +890,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   ) : (
                     <View style={[styles.awaitingReplyBox, { backgroundColor: monoMutedSurface }]}>
                       <Text style={styles.awaitingReplyText}>
-                        ⏳ Awaiting official response from {broadcast.orgName} desk...
+                        ⏳ Generating response from {broadcast.orgName}...
                       </Text>
                     </View>
                   )}
@@ -849,7 +902,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       </ScrollView>
 
       {/* ======================================================== */}
-      {/* MODAL 1: ASK QUESTION & Q&A THREAD                       */}
+      {/* MODAL 1: ASK QUESTION (Shows ONLY User's Own Questions)  */}
       {/* ======================================================== */}
       <Modal
         visible={showQAModal}
@@ -865,11 +918,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
           <View style={[styles.qaSheet, { backgroundColor: cardBg, borderColor: cardBorder }]}>
             <View style={styles.sheetHandle} />
 
-            {/* Modal Header */}
+            {/* Header */}
             <View style={styles.qaSheetHeader}>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.qaSheetTitle, { color: colors.text.primary }]}>
-                  {selectedBroadcast?.orgName} Q&A
+                  {selectedBroadcast?.orgName}
                 </Text>
                 <Text style={styles.qaSheetSub} numberOfLines={1}>
                   {selectedBroadcast?.title}
@@ -883,28 +936,20 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
               </TouchableOpacity>
             </View>
 
-            {/* Zero-Knowledge Inquirer Shield Notice */}
-            <View style={[styles.qaShieldNotice, { backgroundColor: monoMutedSurface }]}>
-              <ShieldCheckIcon color={colors.text.primary} size={14} />
-              <Text style={[styles.qaShieldText, { color: colors.text.primary }]}>
-                Zero-Knowledge Privacy: Your profile, name, and wallet address are 100% hidden from {selectedBroadcast?.orgName}. An encrypted internal token routes your question.
-              </Text>
-            </View>
-
-            {/* Questions Thread */}
+            {/* ONLY current user's questions shown; other users' questions are hidden */}
             <ScrollView style={{ maxHeight: 240, marginVertical: 10 }} showsVerticalScrollIndicator={false}>
-              {selectedBroadcast && selectedBroadcast.inquiries.length === 0 ? (
+              {activeUserInquiries.length === 0 ? (
                 <View style={{ paddingVertical: 18, alignItems: 'center' }}>
                   <Text style={{ color: colors.text.muted, fontSize: 12 }}>
-                    No inquiries submitted yet. Be the first to ask!
+                    Ask a question below to receive an official answer.
                   </Text>
                 </View>
               ) : (
-                selectedBroadcast?.inquiries.map(inq => (
+                activeUserInquiries.map(inq => (
                   <View key={inq.id} style={[styles.inquiryThreadItem, { borderColor: cardBorder }]}>
                     <View style={styles.inquiryUserHeader}>
                       <Text style={[styles.inquiryUserLabel, { color: colors.text.primary }]}>
-                        {inq.isCurrentUser ? 'You (Shielded Inquirer)' : 'Anonymous Inquirer'}
+                        Your Question
                       </Text>
                       <Text style={styles.inquiryTimeText}>{inq.timestamp}</Text>
                     </View>
@@ -929,7 +974,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                     ) : (
                       <View style={{ marginTop: 6 }}>
                         <Text style={{ color: colors.text.muted, fontSize: 11, fontStyle: 'italic' }}>
-                          ⏳ Awaiting official response from desk...
+                          ⏳ Generating response...
                         </Text>
                       </View>
                     )}
@@ -938,7 +983,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
               )}
             </ScrollView>
 
-            {/* Ask Question Composer */}
+            {/* Question Input */}
             <View style={[styles.qaComposerWrapper, { borderTopColor: cardBorder }]}>
               <TextInput
                 value={questionInput}
@@ -966,7 +1011,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.submitQuestionBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-                    {isSubmittingQuestion ? 'Routing…' : 'Submit Question'}
+                    {isSubmittingQuestion ? 'Submitting…' : 'Submit Question'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -976,7 +1021,87 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       </Modal>
 
       {/* ======================================================== */}
-      {/* MODAL 2: ORGANIZATION REQUEST DESK BROADCAST             */}
+      {/* MODAL 2: USERNAME CREATION (Required before posting)     */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showUsernameModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUsernameModal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalBackdrop}
+        >
+          <Pressable style={styles.modalDismissArea} onPress={() => setShowUsernameModal(false)} />
+          <View style={[styles.usernameModalCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.sheetHandle} />
+            <Text style={[styles.usernameModalTitle, { color: colors.text.primary }]}>
+              Create Username
+            </Text>
+            <Text style={styles.usernameModalSubtitle}>
+              You must set a unique username before publishing a dispatch to the Community feed.
+            </Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputGroupLabel}>USERNAME</Text>
+              <View style={[styles.usernameInputBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+                <Text style={[styles.atSymbol, { color: colors.text.muted }]}>@</Text>
+                <TextInput
+                  value={newUsernameInput}
+                  onChangeText={(t) => {
+                    setNewUsernameInput(t.toLowerCase().replace(/[^a-zA-Z0-9_]/g, ''));
+                    setUsernameError('');
+                  }}
+                  placeholder="your_handle"
+                  placeholderTextColor={colors.text.muted}
+                  style={[styles.usernameTextInput, { color: colors.text.primary }]}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  maxLength={20}
+                  autoFocus
+                />
+              </View>
+              {usernameError ? (
+                <Text style={styles.errorText}>{usernameError}</Text>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputGroupLabel}>DISPLAY NAME (OPTIONAL)</Text>
+              <TextInput
+                value={newDisplayNameInput}
+                onChangeText={setNewDisplayNameInput}
+                placeholder="e.g. Satoshi Rivera"
+                placeholderTextColor={colors.text.muted}
+                style={[styles.displayNameTextInput, { backgroundColor: monoMutedSurface, color: colors.text.primary, borderColor: cardBorder }]}
+                maxLength={30}
+              />
+            </View>
+
+            <View style={styles.usernameModalBtnRow}>
+              <TouchableOpacity
+                onPress={() => setShowUsernameModal(false)}
+                style={[styles.cancelModalBtn, { backgroundColor: monoMutedSurface }]}
+              >
+                <Text style={[styles.cancelModalBtnText, { color: colors.text.primary }]}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSaveUsername}
+                style={[styles.confirmUsernameBtn, { backgroundColor: monoPrimary }]}
+              >
+                <Text style={[styles.confirmUsernameBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                  Save & Continue
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ======================================================== */}
+      {/* MODAL 3: POST DISPATCH (Only accessible after username)  */}
       {/* ======================================================== */}
       <Modal
         visible={showOrgRequestModal}
@@ -995,10 +1120,10 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             <View style={styles.orgModalHeader}>
               <View>
                 <Text style={[styles.orgModalTitle, { color: colors.text.primary }]}>
-                  Post Organization Dispatch
+                  Post Dispatch
                 </Text>
                 <Text style={styles.orgModalSubtitle}>
-                  Publish official news to Cura Live Desk. You will see aggregate view counts.
+                  Publishing as @{username || 'user'}
                 </Text>
               </View>
               <TouchableOpacity
@@ -1010,36 +1135,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-              {/* Org Name */}
+              {/* Dispatch Category */}
               <View style={styles.inputFieldGroup}>
-                <Text style={styles.inputFieldLabel}>ORGANIZATION / COMPANY NAME</Text>
-                <TextInput
-                  value={orgNameInput}
-                  onChangeText={setOrgNameInput}
-                  placeholder="e.g. StarkWare Industries, Arbitrum Foundation"
-                  placeholderTextColor={colors.text.muted}
-                  style={[styles.standardTextInput, { backgroundColor: monoMutedSurface, color: colors.text.primary, borderColor: cardBorder }]}
-                />
-              </View>
-
-              {/* Org Domain / Email */}
-              <View style={styles.inputFieldGroup}>
-                <Text style={styles.inputFieldLabel}>OFFICIAL DOMAIN OR WORK EMAIL</Text>
-                <TextInput
-                  value={orgDomainInput}
-                  onChangeText={setOrgDomainInput}
-                  placeholder="e.g. press@starkware.co"
-                  placeholderTextColor={colors.text.muted}
-                  style={[styles.standardTextInput, { backgroundColor: monoMutedSurface, color: colors.text.primary, borderColor: cardBorder }]}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              {/* Category Selector */}
-              <View style={styles.inputFieldGroup}>
-                <Text style={styles.inputFieldLabel}>ENTITY CLASSIFICATION</Text>
+                <Text style={styles.inputFieldLabel}>CATEGORY</Text>
                 <View style={styles.categoryChipsRow}>
-                  {(['Asset Manager', 'Protocol Foundation', 'Institutional Custody', 'DeFi Infrastructure'] as const).map(cat => {
+                  {(['Business', 'Crypto', 'DeFi', 'Layer 1', 'Layer 2', 'RWA', 'Cross-Chain', 'Security'] as const).map(cat => {
                     const active = orgCategoryInput === cat;
                     return (
                       <TouchableOpacity
@@ -1064,6 +1164,18 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                 </View>
               </View>
 
+              {/* Publisher Name */}
+              <View style={styles.inputFieldGroup}>
+                <Text style={styles.inputFieldLabel}>PUBLISHER / ORGANIZATION NAME</Text>
+                <TextInput
+                  value={orgNameInput}
+                  onChangeText={setOrgNameInput}
+                  placeholder="e.g. StarkWare Industries or Your Team"
+                  placeholderTextColor={colors.text.muted}
+                  style={[styles.standardTextInput, { backgroundColor: monoMutedSurface, color: colors.text.primary, borderColor: cardBorder }]}
+                />
+              </View>
+
               {/* Headline */}
               <View style={styles.inputFieldGroup}>
                 <Text style={styles.inputFieldLabel}>DISPATCH HEADLINE</Text>
@@ -1082,7 +1194,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                 <TextInput
                   value={orgContentInput}
                   onChangeText={setOrgContentInput}
-                  placeholder="Official dispatch details, technical metrics, and timeline..."
+                  placeholder="Dispatch details, technical metrics, and timeline..."
                   placeholderTextColor={colors.text.muted}
                   style={[
                     styles.standardTextInput,
@@ -1099,7 +1211,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                 activeOpacity={0.8}
               >
                 <Text style={[styles.confirmPublishBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-                  {isSubmittingOrgRequest ? 'Submitting & Verifying…' : 'Publish to Live Desk'}
+                  {isSubmittingOrgRequest ? 'Publishing…' : 'Publish Dispatch'}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -1143,63 +1255,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
   screenTitle: {
-    fontSize: 21,
+    fontSize: 22,
     fontWeight: '800',
     letterSpacing: -0.4,
   },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  liveBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  liveBadgeText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
   orgSubmitBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 14,
   },
   orgSubmitBtnText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '700',
-  },
-  guaranteeBannerWrapper: {
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-  },
-  guaranteeBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: 0.5,
-  },
-  guaranteeTitle: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  guaranteeSubtitle: {
-    color: '#858585',
-    fontSize: 10.5,
-    lineHeight: 14.5,
   },
   searchRow: {
     paddingHorizontal: 16,
@@ -1222,7 +1290,7 @@ const styles = StyleSheet.create({
   },
   segmentContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
   segmentTrack: {
     flexDirection: 'row',
@@ -1239,6 +1307,22 @@ const styles = StyleSheet.create({
   },
   segmentButtonText: {
     fontSize: 11.5,
+    fontWeight: '600',
+  },
+  categoryFiltersContainer: {
+    paddingVertical: 6,
+  },
+  categoryFiltersScroll: {
+    paddingHorizontal: 16,
+    gap: 6,
+  },
+  categoryFilterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  categoryFilterChipText: {
+    fontSize: 11,
     fontWeight: '600',
   },
   scrollContent: {
@@ -1296,15 +1380,6 @@ const styles = StyleSheet.create({
     color: '#858585',
     fontSize: 11,
   },
-  categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  categoryBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-  },
   broadcastTitle: {
     fontSize: 15,
     fontWeight: '800',
@@ -1334,7 +1409,6 @@ const styles = StyleSheet.create({
   },
   orgMetricsBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -1351,16 +1425,6 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
-  },
-  shieldedNoticeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  shieldedNoticeText: {
-    color: '#858585',
-    fontSize: 10.5,
-    fontWeight: '600',
   },
   broadcastActionsRow: {
     flexDirection: 'row',
@@ -1496,18 +1560,9 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '800',
   },
-  privacyProtectedPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  privacyProtectedText: {
+  inquiryTimeText: {
     color: '#858585',
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 11,
   },
   inquiryQuestionText: {
     fontSize: 13,
@@ -1591,20 +1646,6 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     marginTop: 2,
   },
-  qaShieldNotice: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  qaShieldText: {
-    flex: 1,
-    fontSize: 10.5,
-    lineHeight: 14.5,
-    fontWeight: '500',
-  },
   inquiryThreadItem: {
     borderBottomWidth: 0.5,
     paddingVertical: 10,
@@ -1618,10 +1659,6 @@ const styles = StyleSheet.create({
   inquiryUserLabel: {
     fontSize: 11.5,
     fontWeight: '700',
-  },
-  inquiryTimeText: {
-    color: '#858585',
-    fontSize: 10.5,
   },
   inquiryQuestionBody: {
     fontSize: 12.5,
@@ -1671,6 +1708,90 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '700',
   },
+  // USERNAME MODAL
+  usernameModalCard: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderTopWidth: 0.5,
+    padding: 20,
+    paddingBottom: 36,
+  },
+  usernameModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  usernameModalSubtitle: {
+    color: '#858585',
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: 16,
+  },
+  inputGroup: {
+    marginBottom: 14,
+  },
+  inputGroupLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: '#858585',
+    marginBottom: 6,
+  },
+  usernameInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 0.5,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  atSymbol: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginRight: 4,
+  },
+  usernameTextInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 0,
+  },
+  displayNameTextInput: {
+    borderRadius: 12,
+    borderWidth: 0.5,
+    paddingHorizontal: 12,
+    height: 44,
+    fontSize: 14,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 11,
+    marginTop: 4,
+  },
+  usernameModalBtnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 8,
+  },
+  cancelModalBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  cancelModalBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  confirmUsernameBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  confirmUsernameBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   // ORG REQUEST MODAL
   orgModalSheet: {
     borderTopLeftRadius: 24,
@@ -1694,7 +1815,6 @@ const styles = StyleSheet.create({
     color: '#858585',
     fontSize: 11.5,
     marginTop: 2,
-    maxWidth: 270,
   },
   inputFieldGroup: {
     marginBottom: 12,
