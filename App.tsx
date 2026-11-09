@@ -148,8 +148,8 @@ function MainTabs() {
 
   // Adaptive safe area bottom padding across all iPhone & Android models
   const isAndroid = Platform.OS === 'android';
-  const bottomPadding = insets.bottom > 0 ? insets.bottom + 4 : (isAndroid ? 12 : 8);
-  const tabHeight = 62 + bottomPadding;
+  const bottomPadding = insets.bottom > 0 ? insets.bottom + 6 : (isAndroid ? 14 : 10);
+  const tabHeight = 64 + bottomPadding;
 
   return (
     <Tab.Navigator
@@ -163,12 +163,12 @@ function MainTabs() {
           borderTopWidth: 0.5,
           height: tabHeight,
           paddingBottom: bottomPadding,
-          paddingTop: 6,
+          paddingTop: 5,
         },
         tabBarItemStyle: {
           justifyContent: 'center',
           alignItems: 'center',
-          paddingVertical: 2,
+          paddingVertical: 1,
         },
         tabBarLabelStyle: {
           fontSize: 10.5,
@@ -176,10 +176,10 @@ function MainTabs() {
           letterSpacing: -0.2,
           lineHeight: 14,
           includeFontPadding: false,
-          paddingBottom: 0,
+          paddingBottom: 2,
         },
         tabBarIconStyle: {
-          marginTop: 2,
+          marginTop: 1,
           marginBottom: 1,
         },
       }}

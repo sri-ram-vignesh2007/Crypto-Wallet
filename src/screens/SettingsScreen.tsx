@@ -10,8 +10,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark, useTheme } from '../theme/ThemeContext';
 import { useWalletStore } from '../store/walletStore';
+import { useProfileStore } from '../store/profileStore';
 import { SecureKeyManager } from '../core/SecureKeyManager';
 import { CHAINS } from '../core/ChainConfig';
+
+const EyeIcon = ({ color = '#FFFFFF', size = 17 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <Circle cx="12" cy="12" r="3" />
+  </Svg>
+);
 
 // Smooth iOS Spring Button Component
 function SpringButton({
@@ -101,6 +109,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   const isDark = useIsDark();
 
   const { address, selectedChain, resetWallet } = useWalletStore();
+  const { showPortfolioBalance, setShowPortfolioBalance } = useProfileStore();
   const [biometricEnabled, setBiometricEnabled] = useState(true);
 
   const [revealedSecret, setRevealedSecret] = useState<{ type: 'phrase' | 'key' | 'address'; value: string } | null>(null);
@@ -265,12 +274,40 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               <Text style={{ fontSize: 13 }}>{isDark ? '🌙' : '☀️'}</Text>
             </View>
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Dark Mode</Text>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
-              thumbColor={isDark ? '#000000' : '#FFFFFF'}
-            />
+            <View style={styles.switchWrapper}>
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+                thumbColor={isDark ? '#000000' : '#FFFFFF'}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Section: Display & Balance Privacy */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>DISPLAY & PRIVACY</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <View style={styles.settingsRow}>
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <EyeIcon color={colors.text.primary} size={17} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                Show Portfolio Balance
+              </Text>
+              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                Display balance values on home screen
+              </Text>
+            </View>
+            <View style={styles.switchWrapper}>
+              <Switch
+                value={showPortfolioBalance}
+                onValueChange={setShowPortfolioBalance}
+                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+                thumbColor={isDark ? '#000000' : '#FFFFFF'}
+              />
+            </View>
           </View>
         </View>
 
@@ -282,12 +319,14 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               <ShieldIcon color={colors.text.primary} size={17} />
             </View>
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Face ID / Biometrics</Text>
-            <Switch
-              value={biometricEnabled}
-              onValueChange={setBiometricEnabled}
-              trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
-              thumbColor={isDark ? '#000000' : '#FFFFFF'}
-            />
+            <View style={styles.switchWrapper}>
+              <Switch
+                value={biometricEnabled}
+                onValueChange={setBiometricEnabled}
+                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+                thumbColor={isDark ? '#000000' : '#FFFFFF'}
+              />
+            </View>
           </View>
         </View>
 
@@ -508,6 +547,11 @@ const styles = StyleSheet.create({
   settingsSubtext: {
     fontSize: 12,
     marginTop: 1,
+  },
+  switchWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Platform.OS === 'android' ? -2 : 0,
   },
   settingsValue: {
     fontSize: 15,

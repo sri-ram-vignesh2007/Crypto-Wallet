@@ -8,17 +8,21 @@ const STORAGE_KEY = 'profile_data_v1';
 interface ProfileState {
   email: string;
   name: string;
+  username: string;
   avatar: string;
   isEmailVerified: boolean;
   hasCompletedOnboarding: boolean;  // persisted: has user ever completed initial onboarding?
   isSignedIn: boolean;              // NOT persisted — resets to false on every cold launch.
+  showPortfolioBalance: boolean;    // persisted: option to show or hide portfolio balance
 
   setEmail: (email: string) => void;
   setName: (name: string) => void;
+  setUsername: (username: string) => void;
   setAvatar: (avatar: string) => void;
   setEmailVerified: (verified: boolean) => void;
   setOnboardingComplete: (complete: boolean) => void;
   setSignedIn: (signedIn: boolean) => void;
+  setShowPortfolioBalance: (show: boolean) => void;
   signOut: () => void;
   loadProfile: () => Promise<void>;
   saveProfile: () => Promise<void>;
@@ -28,16 +32,31 @@ interface ProfileState {
 export const useProfileStore = create<ProfileState>((set, get) => ({
   email: '',
   name: '',
+  username: '',
   avatar: 'U',
   isEmailVerified: false,
   hasCompletedOnboarding: false,
-  // Always starts false — sign-in is required on every app launch.
   isSignedIn: false,
+  showPortfolioBalance: true,
 
   setEmail: (email) => set({ email }),
-  setName: (name) => set({ name }),
-  setAvatar: (avatar) => set({ avatar }),
+  setName: (name) => {
+    set({ name });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setUsername: (username) => {
+    set({ username });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setAvatar: (avatar) => {
+    set({ avatar });
+    setTimeout(() => get().saveProfile(), 0);
+  },
   setEmailVerified: (isEmailVerified) => set({ isEmailVerified }),
+  setShowPortfolioBalance: (showPortfolioBalance) => {
+    set({ showPortfolioBalance });
+    setTimeout(() => get().saveProfile(), 0);
+  },
 
   setOnboardingComplete: (hasCompletedOnboarding) => {
     set({ hasCompletedOnboarding });
@@ -47,8 +66,6 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   setSignedIn: (isSignedIn) => set({ isSignedIn }),
 
   signOut: () => {
-    // Sign out keeps the persisted profile (so welcome screen knows the user
-    // has completed onboarding before), but forces re-authentication next launch.
     set({ isSignedIn: false });
   },
 
@@ -57,13 +74,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
       if (raw) {
         const data = JSON.parse(raw);
-        // NOTE: isSignedIn is deliberately NOT loaded from storage.
         set({
           email: data.email || '',
           name: data.name || '',
+          username: data.username || '',
           avatar: data.avatar || 'U',
           isEmailVerified: data.isEmailVerified || false,
           hasCompletedOnboarding: data.hasCompletedOnboarding || false,
+          showPortfolioBalance: data.showPortfolioBalance !== undefined ? data.showPortfolioBalance : true,
         });
       }
     } catch (e) {
@@ -74,13 +92,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   saveProfile: async () => {
     try {
       const state = get();
-      // isSignedIn is intentionally NOT persisted.
       const data = {
         email: state.email,
         name: state.name,
+        username: state.username,
         avatar: state.avatar,
         isEmailVerified: state.isEmailVerified,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
+        showPortfolioBalance: state.showPortfolioBalance,
       };
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
@@ -92,10 +111,12 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     set({
       email: '',
       name: '',
+      username: '',
       avatar: 'U',
       isEmailVerified: false,
       hasCompletedOnboarding: false,
       isSignedIn: false,
+      showPortfolioBalance: true,
     });
     setTimeout(async () => {
       try { await AsyncStorage.removeItem(STORAGE_KEY); }

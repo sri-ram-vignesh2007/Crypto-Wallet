@@ -9,6 +9,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
+import { useProfileStore } from '../store/profileStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
 
@@ -173,6 +174,59 @@ const TOP_LOSERS = [
 
 const TIME_RANGES = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
 
+interface TimeframeData {
+  delta: string;
+  period: string;
+  path: string;
+  fillPath: string;
+  endPoint: { x: number; y: number };
+}
+
+const TIMEFRAME_CHART_DATA: Record<string, TimeframeData> = {
+  '1H': {
+    delta: '+$4,210.15 (+0.23%)',
+    period: 'Past 1 hour',
+    path: 'M0 50 C 40 46, 80 56, 130 48 C 180 40, 220 44, 270 32 C 300 26, 320 28, 340 20',
+    fillPath: 'M0 50 C 40 46, 80 56, 130 48 C 180 40, 220 44, 270 32 C 300 26, 320 28, 340 20 L 340 76 L 0 76 Z',
+    endPoint: { x: 340, y: 20 },
+  },
+  '1D': {
+    delta: '+$48,190.20 (+2.68%)',
+    period: 'Past 24 hours',
+    path: 'M0 58 C 45 54, 90 64, 135 44 C 175 26, 215 38, 260 26 C 295 16, 320 20, 340 8',
+    fillPath: 'M0 58 C 45 54, 90 64, 135 44 C 175 26, 215 38, 260 26 C 295 16, 320 20, 340 8 L 340 76 L 0 76 Z',
+    endPoint: { x: 340, y: 8 },
+  },
+  '1W': {
+    delta: '+$112,450.00 (+6.51%)',
+    period: 'Past 7 days',
+    path: 'M0 64 C 50 60, 95 48, 145 52 C 185 56, 225 32, 270 20 C 300 10, 320 16, 340 6',
+    fillPath: 'M0 64 C 50 60, 95 48, 145 52 C 185 56, 225 32, 270 20 C 300 10, 320 16, 340 6 L 340 76 L 0 76 Z',
+    endPoint: { x: 340, y: 6 },
+  },
+  '1M': {
+    delta: '+$245,800.00 (+15.42%)',
+    period: 'Past 30 days',
+    path: 'M0 68 C 40 60, 85 64, 135 46 C 175 28, 215 38, 265 22 C 295 12, 320 14, 340 4',
+    fillPath: 'M0 68 C 40 60, 85 64, 135 46 C 175 28, 215 38, 265 22 C 295 12, 320 14, 340 4 L 340 76 L 0 76 Z',
+    endPoint: { x: 340, y: 4 },
+  },
+  '1Y': {
+    delta: '+$890,120.00 (+93.58%)',
+    period: 'Past 1 year',
+    path: 'M0 70 C 60 68, 105 52, 155 46 C 205 40, 245 26, 285 14 C 310 8, 325 8, 340 2',
+    fillPath: 'M0 70 C 60 68, 105 52, 155 46 C 205 40, 245 26, 285 14 C 310 8, 325 8, 340 2 L 340 76 L 0 76 Z',
+    endPoint: { x: 340, y: 2 },
+  },
+  'ALL': {
+    delta: '+$1,420,500.00 (+338.20%)',
+    period: 'All time',
+    path: 'M0 72 C 80 72, 130 58, 180 48 C 220 38, 260 22, 300 10 C 320 4, 330 3, 340 2',
+    fillPath: 'M0 72 C 80 72, 130 58, 180 48 C 220 38, 260 22, 300 10 C 320 4, 330 3, 340 2 L 340 76 L 0 76 Z',
+    endPoint: { x: 340, y: 2 },
+  },
+};
+
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
@@ -190,9 +244,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [copiedToast, setCopiedToast] = useState(false);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
   const [showFaceIdModal, setShowFaceIdModal] = useState(false);
-  const [showBalance, setShowBalance] = useState(true);
+  const { showPortfolioBalance, setShowPortfolioBalance } = useProfileStore();
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
   const [moversTab, setMoversTab] = useState<'gainers' | 'losers'>('gainers');
+
+  const activeChart = TIMEFRAME_CHART_DATA[selectedTimeRange] || TIMEFRAME_CHART_DATA['1D'];
 
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const toastAnim = useRef(new Animated.Value(-60)).current;
@@ -268,7 +324,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       <View style={[styles.navBar, { paddingTop: insets.top + 6 }]}>
         <View style={styles.brandRow}>
           <Text style={[styles.brandTitle, { color: colors.text.primary }]}>Cura Wallet</Text>
-          <View style={[styles.securityStatusDot, { backgroundColor: monoPrimary }]} />
         </View>
 
         <View style={styles.navRightRow}>
@@ -319,11 +374,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Text style={styles.heroLabel}>Total Balance</Text>
               <TouchableOpacity
-                onPress={() => setShowBalance(!showBalance)}
+                onPress={() => setShowPortfolioBalance(!showPortfolioBalance)}
                 style={styles.eyeBtn}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                {showBalance ? <EyeIcon size={14} color="#858585" /> : <EyeOffIcon size={14} color="#858585" />}
+                {showPortfolioBalance ? <EyeIcon size={14} color="#858585" /> : <EyeOffIcon size={14} color="#858585" />}
               </TouchableOpacity>
             </View>
           </View>
@@ -333,43 +388,45 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            {showBalance ? `$${displayTotalUsd}` : '••••••••••••'}
+            {showPortfolioBalance ? `$${displayTotalUsd}` : '••••••••••••'}
           </Text>
 
-          {/* Responsive P&L Delta Row (never overflows or cuts off) */}
+          {/* Dynamic P&L Delta Row */}
           <View style={styles.deltaRow}>
             <View style={[styles.deltaPill, { backgroundColor: monoMutedSurface }]}>
               <Text style={[styles.deltaPillText, { color: colors.text.primary }]}>
-                +$48,190.20 (+2.68%)
+                {activeChart.delta}
               </Text>
             </View>
-            <Text style={[styles.deltaPeriodText, { color: colors.text.muted }]}>Past 24 hours</Text>
+            <Text style={[styles.deltaPeriodText, { color: colors.text.muted }]}>{activeChart.period}</Text>
           </View>
 
-          {/* Solid Anti-Aliased Portfolio Line Chart (Strict Monochrome) */}
+          {/* Interactive Responsive Line Chart with Subtle Baseline & Pulse Dot */}
           <View style={styles.sparklineContainer}>
-            <Svg width="100%" height={64} viewBox="0 0 340 64" preserveAspectRatio="none">
+            <Svg width="100%" height={74} viewBox="0 0 340 74" preserveAspectRatio="none">
               <Defs>
                 <LinearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0%" stopColor={monoPrimary} stopOpacity={0.06} />
+                  <Stop offset="0%" stopColor={monoPrimary} stopOpacity={0.12} />
                   <Stop offset="100%" stopColor={monoPrimary} stopOpacity={0.0} />
                 </LinearGradient>
               </Defs>
+              <Path d="M0 62 L 340 62" stroke={cardBorder} strokeWidth={0.6} strokeDasharray="4 4" />
+              <Path d={activeChart.fillPath} fill="url(#heroGradient)" />
               <Path
-                d="M0 52 Q 40 44, 80 48 T 160 28 T 240 34 T 300 14 T 340 6 L 340 64 L 0 64 Z"
-                fill="url(#heroGradient)"
-              />
-              <Path
-                d="M0 52 Q 40 44, 80 48 T 160 28 T 240 34 T 300 14 T 340 6"
+                d={activeChart.path}
                 fill="none"
                 stroke={monoPrimary}
-                strokeWidth={2}
+                strokeWidth={2.4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
+              <Circle cx={activeChart.endPoint.x} cy={activeChart.endPoint.y} r={4.5} fill={monoPrimary} />
+              <Circle cx={activeChart.endPoint.x} cy={activeChart.endPoint.y} r={8} fill={monoPrimary} opacity={0.2} />
             </Svg>
           </View>
 
-          {/* Time Range Selector */}
-          <View style={styles.timeRangeRow}>
+          {/* Time Range Selector Segmented Row */}
+          <View style={[styles.timeRangeTrack, { backgroundColor: monoMutedSurface }]}>
             {TIME_RANGES.map((range) => {
               const active = selectedTimeRange === range;
               return (
@@ -377,15 +434,16 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   key={range}
                   onPress={() => setSelectedTimeRange(range)}
                   style={[
-                    styles.timeRangePill,
+                    styles.timeRangeBtn,
                     active && { backgroundColor: monoPrimary },
                   ]}
+                  activeOpacity={0.7}
                 >
                   <Text style={[
                     styles.timeRangeText,
                     active
                       ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
-                      : { color: isDark ? '#858585' : '#666666' },
+                      : { color: colors.text.muted },
                   ]}>
                     {range}
                   </Text>
@@ -808,10 +866,10 @@ const styles = StyleSheet.create({
   },
   // BENTO HERO CARD
   bentoHeroCard: {
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 0.5,
-    padding: 18,
-    marginBottom: 16,
+    padding: 15,
+    marginBottom: 14,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
@@ -839,7 +897,7 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   heroBalanceText: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '800',
     letterSpacing: -0.8,
     fontVariant: ['tabular-nums'],
@@ -849,8 +907,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 2,
   },
   deltaPeriodText: {
     fontSize: 12,
@@ -867,30 +925,37 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   sparklineContainer: {
-    height: 64,
+    height: 74,
     marginVertical: 4,
   },
-  timeRangeRow: {
+  timeRangeTrack: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
+    alignItems: 'center',
+    borderRadius: 10,
+    padding: 2.5,
+    marginTop: 4,
+    marginBottom: 2,
   },
-  timeRangePill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  timeRangeBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
     borderRadius: 8,
   },
   timeRangeText: {
     fontSize: 11,
     fontWeight: '600',
+    lineHeight: 14,
+    includeFontPadding: false,
   },
   heroFooterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 0.5,
-    paddingTop: 12,
-    marginTop: 6,
+    paddingTop: 10,
+    marginTop: 8,
   },
   heroFooterItem: {
     flexDirection: 'row',
@@ -926,49 +991,59 @@ const styles = StyleSheet.create({
   actionsBarRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
-    paddingHorizontal: 6,
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   actionBtnItem: {
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
+    minWidth: 62,
   },
   actionIconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: 5,
     elevation: 2,
   },
   actionIconGlyph: {
-    color: '#FFFFFF',
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '700',
   },
   actionBtnLabel: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '600',
+    lineHeight: 16,
+    includeFontPadding: false,
+    marginTop: 5,
+    textAlign: 'center',
   },
   // MARKET MOVERS (GAINERS & LOSERS)
   moversSegmentPill: {
     flexDirection: 'row',
-    borderRadius: 14,
-    padding: 3,
+    alignItems: 'center',
+    borderRadius: 12,
+    padding: 2.5,
     gap: 2,
   },
   moversTabBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 11,
+    paddingHorizontal: 11,
+    paddingVertical: 4.5,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   moversTabText: {
     fontSize: 11,
     fontWeight: '600',
+    lineHeight: 13,
+    includeFontPadding: false,
   },
   moverAvatar: {
     width: 36,

@@ -221,12 +221,18 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
-  const { name, avatar } = useProfileStore();
+  const { name, username, avatar, setUsername, setName } = useProfileStore();
 
   const [activeTab, setActiveTab] = useState<'feed' | 'news' | 'trends'>('feed');
   const [posts, setPosts] = useState<CommunityPost[]>(INITIAL_POSTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Username Creation Modal State
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [newUsernameInput, setNewUsernameInput] = useState('');
+  const [newDisplayNameInput, setNewDisplayNameInput] = useState('');
+  const [usernameError, setUsernameError] = useState('');
 
   // New Post Composer State
   const [composerText, setComposerText] = useState('');
@@ -258,6 +264,31 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     setTimeout(() => {
       setRefreshing(false);
     }, 800);
+  };
+
+  const openUsernameModal = () => {
+    setNewUsernameInput(username || '');
+    setNewDisplayNameInput(name || '');
+    setUsernameError('');
+    setShowUsernameModal(true);
+  };
+
+  const handleSaveUsername = () => {
+    const clean = newUsernameInput.trim().replace(/^@/, '');
+    if (!clean || clean.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(clean)) {
+      setUsernameError('Only letters, numbers, and underscores allowed');
+      return;
+    }
+    setUsername(clean);
+    if (newDisplayNameInput.trim()) {
+      setName(newDisplayNameInput.trim());
+    }
+    setShowUsernameModal(false);
+    triggerToast(`Username @${clean} set! You can now post.`);
   };
 
   // Toggle Like
@@ -303,6 +334,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
 
   // Publish New Post
   const handleCreatePost = () => {
+    if (!username || !username.trim()) {
+      openUsernameModal();
+      return;
+    }
+
     const trimmed = composerText.trim();
     if (!trimmed) {
       triggerToast('Please write your thoughts before posting');
@@ -313,8 +349,8 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     setTimeout(() => {
       const newPost: CommunityPost = {
         id: `post-user-${Date.now()}`,
-        authorName: name || 'Cura Investor',
-        authorHandle: `@${(name || 'cura_user').toLowerCase().replace(/\s+/g, '_')}`,
+        authorName: name || 'Cura Member',
+        authorHandle: `@${username}`,
         authorAvatar: avatar || 'U',
         isVerified: true,
         timeAgo: 'Just now',
@@ -458,22 +494,50 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
           <>
             {/* User Post Composer Card */}
             <View style={[styles.composerCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-              <View style={styles.composerTopRow}>
+              {/* Profile Bar in Composer */}
+              <View style={styles.composerHeaderRow}>
                 <View style={[styles.composerAvatar, { backgroundColor: monoMutedSurface }]}>
                   <Text style={[styles.composerAvatarText, { color: colors.text.primary }]}>
                     {avatar || 'U'}
                   </Text>
                 </View>
-                <TextInput
-                  value={composerText}
-                  onChangeText={setComposerText}
-                  placeholder="Share analysis, alpha, or market sentiment..."
-                  placeholderTextColor={colors.text.muted}
-                  style={[styles.composerInput, { color: colors.text.primary }]}
-                  multiline
-                  maxLength={400}
-                />
+                <View style={{ flex: 1 }}>
+                  {username ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={[styles.composerNameText, { color: colors.text.primary }]}>
+                          {name || 'Community Member'}
+                        </Text>
+                        <Text style={styles.composerHandleText}>@{username}</Text>
+                      </View>
+                      <TouchableOpacity onPress={openUsernameModal}>
+                        <Text style={[styles.composerEditHandle, { color: colors.text.muted }]}>Edit</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity onPress={openUsernameModal} style={styles.createHandleNotice}>
+                      <Text style={[styles.createHandleNoticeText, { color: monoPrimary }]}>
+                        ⚠️ Create username to post alpha →
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
+
+              <TextInput
+                value={composerText}
+                onChangeText={setComposerText}
+                onFocus={() => {
+                  if (!username) {
+                    openUsernameModal();
+                  }
+                }}
+                placeholder={username ? "Share analysis, alpha, or market sentiment..." : "Tap to create username and start posting..."}
+                placeholderTextColor={colors.text.muted}
+                style={[styles.composerInput, { color: colors.text.primary }]}
+                multiline
+                maxLength={400}
+              />
 
               {/* Sentiment & Cashtag Bar */}
               <View style={[styles.composerControlsRow, { borderTopColor: cardBorder }]}>
@@ -764,6 +828,84 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                 ]}
               >
                 <Text style={[styles.submitCommentText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Reply</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Create Username Modal */}
+      <Modal
+        visible={showUsernameModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUsernameModal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalBackdrop}
+        >
+          <Pressable style={styles.modalDismissArea} onPress={() => setShowUsernameModal(false)} />
+          <View style={[styles.usernameModalCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.sheetHandle} />
+            <Text style={[styles.usernameModalTitle, { color: colors.text.primary }]}>
+              Create Community Profile
+            </Text>
+            <Text style={styles.usernameModalSubtitle}>
+              You must set a unique handle to post alpha, analysis, and interact with the Cura community.
+            </Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputGroupLabel}>USERNAME</Text>
+              <View style={[styles.usernameInputBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+                <Text style={[styles.atSymbol, { color: colors.text.muted }]}>@</Text>
+                <TextInput
+                  value={newUsernameInput}
+                  onChangeText={(t) => {
+                    setNewUsernameInput(t.toLowerCase().replace(/[^a-zA-Z0-9_]/g, ''));
+                    setUsernameError('');
+                  }}
+                  placeholder="your_handle"
+                  placeholderTextColor={colors.text.muted}
+                  style={[styles.usernameTextInput, { color: colors.text.primary }]}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  maxLength={20}
+                  autoFocus
+                />
+              </View>
+              {usernameError ? (
+                <Text style={styles.errorText}>{usernameError}</Text>
+              ) : null}
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputGroupLabel}>DISPLAY NAME (OPTIONAL)</Text>
+              <TextInput
+                value={newDisplayNameInput}
+                onChangeText={setNewDisplayNameInput}
+                placeholder="e.g. Satoshi Rivera"
+                placeholderTextColor={colors.text.muted}
+                style={[styles.displayNameTextInput, { backgroundColor: monoMutedSurface, color: colors.text.primary, borderColor: cardBorder }]}
+                maxLength={30}
+              />
+            </View>
+
+            <View style={styles.usernameModalBtnRow}>
+              <TouchableOpacity
+                onPress={() => setShowUsernameModal(false)}
+                style={[styles.cancelModalBtn, { backgroundColor: monoMutedSurface }]}
+              >
+                <Text style={[styles.cancelModalBtnText, { color: colors.text.primary }]}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSaveUsername}
+                style={[styles.confirmUsernameBtn, { backgroundColor: monoPrimary }]}
+              >
+                <Text style={[styles.confirmUsernameBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                  Save & Continue
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1180,6 +1322,116 @@ const styles = StyleSheet.create({
   },
   submitCommentText: {
     fontSize: 12,
+    fontWeight: '700',
+  },
+  composerHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  composerNameText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  composerHandleText: {
+    fontSize: 11,
+    color: '#858585',
+  },
+  composerEditHandle: {
+    fontSize: 11,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  createHandleNotice: {
+    paddingVertical: 2,
+  },
+  createHandleNoticeText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  // USERNAME MODAL
+  usernameModalCard: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderTopWidth: 0.5,
+    padding: 20,
+    paddingBottom: 36,
+  },
+  usernameModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  usernameModalSubtitle: {
+    color: '#858585',
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: 16,
+  },
+  inputGroup: {
+    marginBottom: 14,
+  },
+  inputGroupLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: '#858585',
+    marginBottom: 6,
+  },
+  usernameInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 0.5,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  atSymbol: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginRight: 4,
+  },
+  usernameTextInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 0,
+  },
+  displayNameTextInput: {
+    borderRadius: 12,
+    borderWidth: 0.5,
+    paddingHorizontal: 12,
+    height: 44,
+    fontSize: 14,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 11,
+    marginTop: 4,
+  },
+  usernameModalBtnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 8,
+  },
+  cancelModalBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  cancelModalBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  confirmUsernameBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  confirmUsernameBtnText: {
+    fontSize: 13,
     fontWeight: '700',
   },
 });
