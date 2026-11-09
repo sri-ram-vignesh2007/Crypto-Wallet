@@ -22,7 +22,7 @@ const FilterIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; size?: n
   </Svg>
 );
 
-const TrendingIcon = ({ color = '#2563EB', size = 20 }: { color?: string; size?: number }) => (
+const TrendingIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M18 9l-6 6-6-6" />
     <Path d="M4 15h16" />
@@ -92,7 +92,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       >
         {/* Search Bar */}
         <View style={styles.searchBar}>
-          <View style={[styles.searchInputWrapper, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: colors.border.subtle, borderWidth: 0.5 }]}>
+          <View style={[styles.searchInputWrapper, { backgroundColor: isDark ? '#171717' : '#F7F7F7', borderColor: colors.border.DEFAULT, borderWidth: 0.5 }]}>
             <SearchIcon color={colors.text.muted} size={18} />
             <TextInput
               style={[styles.searchInput, { color: colors.text.primary }]}
@@ -104,34 +104,39 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             />
           </View>
           <TouchableOpacity
-            style={[styles.filterButton, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: colors.border.subtle, borderWidth: 0.5 }]}
+            style={[styles.filterButton, { backgroundColor: isDark ? '#171717' : '#F7F7F7', borderColor: colors.border.DEFAULT, borderWidth: 0.5 }]}
             onPress={() => navigation.navigate('CustomToken')}
             activeOpacity={0.7}
           >
-            <Text style={{ color: colors.primary.DEFAULT, fontSize: 18, fontWeight: '700' }}>+</Text>
+            <Text style={{ color: colors.text.primary, fontSize: 18, fontWeight: '700' }}>+</Text>
           </TouchableOpacity>
         </View>
 
         {/* Tab Selector */}
-        <View style={[styles.tabSelector, { backgroundColor: isDark ? '#1F2937' : '#F1F5F9' }]}>
-          {['markets', 'news', 'chains'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={[
-                styles.tabButton,
-                activeTab === tab ? [styles.tabButtonActive, { backgroundColor: isDark ? '#283548' : '#FFFFFF' }] : null,
-              ]}
-              onPress={() => setActiveTab(tab as any)}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.tabButtonText,
-                activeTab === tab ? { color: colors.primary.DEFAULT, fontWeight: '700' } : { color: colors.text.muted },
-              ]}>
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View style={[styles.tabSelector, { backgroundColor: isDark ? '#171717' : '#F2F2F2' }]}>
+          {['markets', 'news', 'chains'].map((tab) => {
+            const active = activeTab === tab;
+            return (
+              <TouchableOpacity
+                key={tab}
+                style={[
+                  styles.tabButton,
+                  active ? [styles.tabButtonActive, { backgroundColor: isDark ? '#FFFFFF' : '#111111' }] : null,
+                ]}
+                onPress={() => setActiveTab(tab as any)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.tabButtonText,
+                  active
+                    ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
+                    : { color: colors.text.muted },
+                ]}>
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Markets Tab */}
@@ -140,13 +145,13 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             {/* Watchlist */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Watchlist</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Watchlist</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Explore')} activeOpacity={0.7}>
-                  <Text style={styles.seeAll}>See All</Text>
+                  <Text style={[styles.seeAll, { color: colors.text.primary }]}>See All</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.watchlist}>
-                {WATCHLIST.map((asset, i) => (
+                {WATCHLIST.map((asset) => (
                   <TouchableOpacity
                     key={asset.symbol}
                     style={[
@@ -158,11 +163,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   >
                     <View style={[
                       styles.assetAvatar,
-                      { backgroundColor: i === 0 ? '#F7931A15' : i === 1 ? '#627EEA15' : '#9945FF15' },
+                      { backgroundColor: isDark ? '#202020' : '#F2F2F2' },
                     ]}>
                       <Text style={[
                         styles.assetAvatarText,
-                        { color: i === 0 ? '#F7931A' : i === 1 ? '#627EEA' : '#9945FF' },
+                        { color: colors.text.primary },
                       ]}>
                         {asset.symbol.charAt(0)}
                       </Text>
@@ -175,7 +180,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                       <Text style={[styles.assetPrice, { color: colors.text.primary }]}>{asset.price}</Text>
                       <Text style={[
                         styles.assetChange,
-                        { color: asset.positive ? colors.success.DEFAULT : colors.danger.DEFAULT },
+                        { color: asset.positive ? colors.text.primary : colors.danger.DEFAULT },
                       ]}>
                         {asset.change}
                       </Text>
@@ -188,9 +193,9 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             {/* Market Movers */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Top Movers</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Top Movers</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Explore')} activeOpacity={0.7}>
-                  <Text style={styles.seeAll}>See All</Text>
+                  <Text style={[styles.seeAll, { color: colors.text.primary }]}>See All</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.moversList}>
@@ -205,7 +210,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                     activeOpacity={0.85}
                   >
                     <View style={styles.moverRank}>
-                      <Text style={[styles.moverRankText, { color: i < 3 ? '#F59E0B' : colors.text.muted }]}>#{i + 1}</Text>
+                      <Text style={[styles.moverRankText, { color: colors.text.primary }]}>#{i + 1}</Text>
                     </View>
                     <View style={styles.assetInfo}>
                       <Text style={[styles.assetSymbol, { color: colors.text.primary }]}>{asset.symbol}</Text>
@@ -215,7 +220,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                       <Text style={[styles.assetPrice, { color: colors.text.primary }]}>{asset.price}</Text>
                       <Text style={[
                         styles.assetChange,
-                        { color: asset.positive ? colors.success.DEFAULT : colors.danger.DEFAULT },
+                        { color: asset.positive ? colors.text.primary : colors.danger.DEFAULT },
                       ]}>
                         {asset.change}
                       </Text>
@@ -243,11 +248,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                 <View style={styles.newsContent}>
                   <Text style={[styles.newsTitle, { color: colors.text.primary }]}>{item.title}</Text>
                   <View style={styles.newsMeta}>
-                    <Text style={[styles.newsSource, { color: colors.primary.DEFAULT }]}>{item.source}</Text>
+                    <Text style={[styles.newsSource, { color: colors.text.primary }]}>{item.source}</Text>
                     <Text style={[styles.newsTime, { color: colors.text.muted }]}>{item.time}</Text>
                   </View>
                 </View>
-                <TrendingIcon color={colors.primary.DEFAULT} size={20} />
+                <TrendingIcon color={colors.text.primary} size={20} />
               </TouchableOpacity>
             ))}
           </View>
@@ -256,23 +261,23 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         {/* Chains Tab */}
         {activeTab === 'chains' && (
           <View style={styles.chainsList}>
-            {['Ethereum', 'Polygon', 'BSC', 'Arbitrum', 'Base', 'Optimism', 'Avalanche', 'Fantom', 'Solana'].map((chain, i) => (
+            {['Ethereum', 'Polygon', 'BSC', 'Arbitrum', 'Base', 'Optimism', 'Avalanche', 'Fantom', 'Solana'].map((chain) => (
               <TouchableOpacity
                 key={chain}
                 style={[
                   styles.chainCard,
                   { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },
                 ]}
-                onPress={() => navigation.navigate('ChainDetail', { chain: { id: chain.toLowerCase(), name: chain, symbol: chain.slice(0, 3).toUpperCase(), color: '#007AFF', tvl: '$' + (Math.random() * 10 + 1).toFixed(1) + 'B', dapps: Math.floor(Math.random() * 500 + 50) + '+' } })}
+                onPress={() => navigation.navigate('ChainDetail', { chain: { id: chain.toLowerCase(), name: chain, symbol: chain.slice(0, 3).toUpperCase(), color: colors.primary.DEFAULT, tvl: '$' + (Math.random() * 10 + 1).toFixed(1) + 'B', dapps: Math.floor(Math.random() * 500 + 50) + '+' } })}
                 activeOpacity={0.85}
               >
                 <View style={[
                   styles.chainAvatar,
-                  { backgroundColor: ['#627EEA15', '#8247E515', '#F3BA2F15', '#28A0F015', '#007AFF15', '#FF3B3015', '#E8414215', '#5856D615', '#AF52DE15'][i] },
+                  { backgroundColor: isDark ? '#202020' : '#F2F2F2' },
                 ]}>
                   <Text style={[
                     styles.chainAvatarText,
-                    { color: ['#627EEA', '#8247E5', '#F3BA2F', '#28A0F0', '#007AFF', '#FF3B30', '#E84142', '#5856D6', '#AF52DE'][i] },
+                    { color: colors.text.primary },
                   ]}>
                     {chain.slice(0, 2).toUpperCase()}
                   </Text>
@@ -281,7 +286,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   <Text style={[styles.chainName, { color: colors.text.primary }]}>{chain}</Text>
                   <Text style={[styles.chainDetail, { color: colors.text.muted }]}>L1 Blockchain</Text>
                 </View>
-                <Text style={styles.chainTvl}>$5.2B TVL</Text>
+                <Text style={[styles.chainTvl, { color: colors.text.primary }]}>$5.2B TVL</Text>
               </TouchableOpacity>
             ))}
           </View>

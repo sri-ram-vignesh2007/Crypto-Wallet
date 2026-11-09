@@ -130,7 +130,7 @@ export default function AIChatbotScreen() {
         <View style={[styles.header, { borderBottomColor: colors.border.subtle, paddingTop: Math.max(16, insets.top + 6) }]}>
           <View style={styles.headerLeft}>
             <View style={[styles.avatar, { backgroundColor: colors.primary.DEFAULT }]}>
-              <Text style={styles.avatarText}>AI</Text>
+              <Text style={[styles.avatarText, { color: colors.text.inverse }]}>AI</Text>
             </View>
             <View>
               <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Crypto Wallet AI</Text>
@@ -139,7 +139,7 @@ export default function AIChatbotScreen() {
               </Text>
             </View>
           </View>
-          <TouchableOpacity onPress={clearChat} style={[styles.clearBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', borderColor: colors.border.subtle }]}>
+          <TouchableOpacity onPress={clearChat} style={[styles.clearBtn, { backgroundColor: isDark ? '#202020' : '#F2F2F2', borderColor: colors.border.subtle }]}>
             <Text style={[styles.clearText, { color: colors.text.secondary }]}>Clear</Text>
           </TouchableOpacity>
         </View>
@@ -156,8 +156,8 @@ export default function AIChatbotScreen() {
             return (
               <View key={m.id} style={[styles.msgRow, isUser ? styles.msgRowUser : styles.msgRowAI]}>
                 {!isUser && (
-                  <View style={[styles.msgAvatar, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#DBEAFE' }]}>
-                    <Text style={[styles.msgAvatarText, { color: colors.primary.DEFAULT }]}>AI</Text>
+                  <View style={[styles.msgAvatar, { backgroundColor: isDark ? '#202020' : '#F2F2F2' }]}>
+                    <Text style={[styles.msgAvatarText, { color: colors.text.primary }]}>AI</Text>
                   </View>
                 )}
                 <View
@@ -168,7 +168,7 @@ export default function AIChatbotScreen() {
                       : [styles.aiBubble, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }],
                   ]}
                 >
-                  <Text style={[isUser ? styles.userBubbleText : [styles.aiBubbleText, { color: colors.text.primary }]]}>
+                  <Text style={[isUser ? [styles.userBubbleText, { color: colors.text.inverse }] : [styles.aiBubbleText, { color: colors.text.primary }]]}>
                     {m.content}
                     {m.pending && !m.content && (
                       <ActivityIndicator size="small" color={colors.primary.DEFAULT} style={{ marginTop: 4 }} />
@@ -202,7 +202,7 @@ export default function AIChatbotScreen() {
             onChangeText={setInput}
             placeholder="Ask about gas, tokens, wallet security…"
             placeholderTextColor={colors.text.muted}
-            style={[styles.input, { backgroundColor: isDark ? '#0B0F19' : '#F1F5F9', color: colors.text.primary, borderColor: colors.border.subtle }]}
+            style={[styles.input, { backgroundColor: isDark ? '#171717' : '#F7F7F7', color: colors.text.primary, borderColor: colors.border.DEFAULT }]}
             multiline
             editable={!busy}
           />
@@ -220,7 +220,7 @@ export default function AIChatbotScreen() {
                 !input.trim() && { opacity: 0.4 },
               ]}
             >
-              <Text style={styles.sendText}>↑</Text>
+              <Text style={[styles.sendText, { color: colors.text.inverse }]}>↑</Text>
             </TouchableOpacity>
           )}
         </View>

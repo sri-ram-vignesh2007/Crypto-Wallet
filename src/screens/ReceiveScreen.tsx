@@ -177,7 +177,7 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
             {displayAddress}
           </Text>
           {copied && (
-            <Text style={[styles.copiedText, { color: isDark ? '#30D158' : '#34C759' }]}>Copied to clipboard</Text>
+            <Text style={[styles.copiedText, { color: colors.text.primary }]}>✓ Copied to clipboard</Text>
           )}
         </View>
 
@@ -187,15 +187,15 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
             onPress={copyAddress}
             style={[styles.primaryBtn, { backgroundColor: colors.primary.DEFAULT }]}
           >
-            <CopyIcon color="#FFFFFF" size={17} />
-            <Text style={styles.primaryBtnText}>{copied ? 'Copied' : 'Copy'}</Text>
+            <CopyIcon color={colors.text.inverse} size={17} />
+            <Text style={[styles.primaryBtnText, { color: colors.text.inverse }]}>{copied ? 'Copied' : 'Copy'}</Text>
           </AppleButton>
 
           <AppleButton
             onPress={handleShare}
-            style={[styles.secondaryBtn, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
+            style={[styles.secondaryBtn, { backgroundColor: isDark ? '#202020' : '#F7F7F7', borderColor: colors.border.subtle }]}
           >
-            <ShareIcon color={colors.primary.DEFAULT} size={17} />
+            <ShareIcon color={colors.text.primary} size={17} />
             <Text style={[styles.secondaryBtnText, { color: colors.text.primary }]}>Share</Text>
           </AppleButton>
         </View>
@@ -293,8 +293,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 16,
     marginRight: 6,
-    shadowColor: '#007AFF',
-    shadowOpacity: 0.2,
+    shadowColor: '#000000',
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,

@@ -10,19 +10,19 @@ import Svg, { Path, Circle, Line, Text as SvgText } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { ClayButton } from '../components/ClayButton';
 
-const CheckIcon = ({ color = '#16A34A', size = 20 }: { color?: string; size?: number }) => (
+const CheckIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M20 6L9 17l-5-5" />
   </Svg>
 );
 
-const ChevronRightIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; size?: number }) => (
+const ChevronRightIcon = ({ color = '#858585', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
-const SwapArrowIcon = ({ color = '#007AFF', size = 24 }: { color?: string; size?: number }) => (
+const SwapArrowIcon = ({ color = '#FFFFFF', size = 24 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M7 16h10l-4-4M17 14H3l4 4" />
   </Svg>
@@ -247,7 +247,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
             <TouchableOpacity style={styles.assetRow} onPress={() => setShowToSelector(true)} activeOpacity={0.7}>
               <View style={[
                 styles.assetSelector,
-                { backgroundColor: colors.success.muted },
+                { backgroundColor: colors.bg.surfaceElevated },
               ]}>
                 {toAssetData.logo}
               </View>
@@ -277,7 +277,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Price Impact</Text>
-                <Text style={[styles.detailValue, { color: priceImpact.includes('>') ? colors.danger.DEFAULT : colors.success.DEFAULT }]}>{priceImpact}</Text>
+                <Text style={[styles.detailValue, { color: priceImpact.includes('>') ? colors.danger.DEFAULT : colors.text.primary }]}>{priceImpact}</Text>
               </View>
             </View>
             <View style={styles.detailRow}>
@@ -314,11 +314,11 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
           />
 
           {/* Warnings */}
-          <View style={[styles.warningRow, { backgroundColor: colors.warning.muted, borderColor: colors.warning.DEFAULT }]}>
-            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.warning.DEFAULT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <View style={[styles.warningRow, { backgroundColor: isDark ? '#202020' : '#F7F7F7', borderColor: colors.border.DEFAULT }]}>
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.secondary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <Path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
             </Svg>
-            <Text style={styles.warningText}>Price impact {priceImpact}. Min received: {minReceived} {toAsset}. Verify details before confirming.</Text>
+            <Text style={[styles.warningText, { color: colors.text.secondary }]}>Price impact {priceImpact}. Min received: {minReceived} {toAsset}. Verify details before confirming.</Text>
           </View>
 
           {insufficient && (

@@ -11,53 +11,53 @@ export const moderateScale = (size: number, factor = 0.5) => size + (scale - 1) 
 export const verticalScale = (size: number) => size * scale;
 
 // ============================================
-// LIGHT PALETTE — Institutional Solid Fintech
+// LIGHT PALETTE — Strict Monochrome Fintech
 // ============================================
 export const lightColors = {
   // Base
   bg: {
-    canvas: '#F8FAFC',           // Off White (#F8FAFC)
-    surface: '#FFFFFF',          // Pure White
-    surfaceElevated: '#FFFFFF',  // Elevated Card
-    surfaceMuted: '#F1F5F9',     // Muted Surface
-    surfacePressed: '#E2E8F0',   // Border Grey pressed state
-    toString() { return '#F8FAFC'; },
+    canvas: '#FFFFFF',           // Primary background: #FFFFFF
+    surface: '#FFFFFF',          // Card background: #FFFFFF
+    surfaceElevated: '#F7F7F7',  // Secondary background: #F7F7F7
+    surfaceMuted: '#F2F2F2',     // Disabled background: #F2F2F2
+    surfacePressed: '#EEEEEE',   // Dividers: #EEEEEE
+    toString() { return '#FFFFFF'; },
   },
 
   // Text
   text: {
-    primary: '#111827',          // Midnight Navy (#111827)
-    secondary: '#64748B',        // Slate (#64748B)
-    muted: '#94A3B8',            // Light Slate
+    primary: '#111111',          // Primary text: #111111
+    secondary: '#666666',        // Secondary text: #666666
+    muted: '#999999',            // Tertiary text: #999999
     inverse: '#FFFFFF',
     onPrimary: '#FFFFFF',
-    toString() { return '#111827'; },
+    toString() { return '#111111'; },
   },
 
-  // Primary - Forest Green (#166B52)
+  // Primary - Black (#111111)
   primary: {
-    DEFAULT: '#166B52',
-    pressed: '#0F4C3A',
-    muted: '#E6F4EA',
-    container: '#E6F4EA',
-    onContainer: '#166B52',
-    light: '#2E8B6E',
-    dark: '#0F4C3A',
-    toString() { return '#166B52'; },
+    DEFAULT: '#111111',
+    pressed: '#333333',
+    muted: '#F2F2F2',
+    container: '#F7F7F7',
+    onContainer: '#111111',
+    light: '#444444',
+    dark: '#000000',
+    toString() { return '#111111'; },
   },
 
-  // Semantic
+  // Semantic (Monochrome status with restrained danger)
   success: {
-    DEFAULT: '#166B52',          // Muted Forest Green
-    light: '#2E8B6E',
-    muted: '#E6F4EA',
-    container: '#E6F4EA',
-    onContainer: '#166B52',
-    toString() { return '#166B52'; },
+    DEFAULT: '#111111',
+    light: '#444444',
+    muted: '#F2F2F2',
+    container: '#F7F7F7',
+    onContainer: '#111111',
+    toString() { return '#111111'; },
   },
 
   danger: {
-    DEFAULT: '#DC2626',          // Professional Red
+    DEFAULT: '#DC2626',          // Restrained Red (safety only)
     light: '#EF4444',
     muted: '#FEF2F2',
     container: '#FEF2F2',
@@ -66,63 +66,62 @@ export const lightColors = {
   },
 
   warning: {
-    DEFAULT: '#D97706',          // Restrained Amber
-    light: '#F59E0B',
-    muted: '#FFFBEB',
-    container: '#FFFBEB',
-    onContainer: '#92400E',
-    toString() { return '#D97706'; },
+    DEFAULT: '#666666',          // Monochrome Warning
+    light: '#888888',
+    muted: '#F2F2F2',
+    container: '#F7F7F7',
+    onContainer: '#111111',
+    toString() { return '#666666'; },
   },
 
   info: {
-    DEFAULT: '#2563EB',          // Muted Blue
-    light: '#3B82F6',
-    muted: '#EFF6FF',
-    container: '#EFF6FF',
-    onContainer: '#1D4ED8',
-    toString() { return '#2563EB'; },
+    DEFAULT: '#111111',
+    light: '#444444',
+    muted: '#F2F2F2',
+    container: '#F7F7F7',
+    onContainer: '#111111',
+    toString() { return '#111111'; },
   },
 
-  // Borders
+  // Borders & Dividers
   border: {
-    subtle: '#E2E8F0',           // Border Grey (#E2E8F0)
-    DEFAULT: '#CBD5E1',
-    strong: '#94A3B8',
+    subtle: '#EEEEEE',           // Dividers: #EEEEEE
+    DEFAULT: '#E5E5E5',          // Borders: #E5E5E5
+    strong: '#CCCCCC',
     highlight: '#FFFFFF',
-    shadow: '#E2E8F0',
-    divider: '#E2E8F0',
-    toString() { return '#E2E8F0'; },
+    shadow: '#EEEEEE',
+    divider: '#EEEEEE',
+    toString() { return '#E5E5E5'; },
   },
 
-  // Gradients (Subtle flat depth)
+  // Flat Monochrome Depth
   gradient: {
-    primary: ['#166B52', '#0F4C3A'],
-    hero: ['#FFFFFF', '#F8FAFC'],
-    success: ['#166B52', '#0F4C3A'],
-    danger: ['#DC2626', '#B91C1C'],
-    warning: ['#D97706', '#B45309'],
-    chatBot: ['#1F2937', '#111827'],
+    primary: ['#111111', '#111111'],
+    hero: ['#FFFFFF', '#F7F7F7'],
+    success: ['#111111', '#111111'],
+    danger: ['#DC2626', '#DC2626'],
+    warning: ['#666666', '#666666'],
+    chatBot: ['#111111', '#111111'],
   },
 
-  // Clay / Shadow
   clay: {
     overlay: 'rgba(0, 0, 0, 0.02)',
     cardBorderHighlight: '#FFFFFF',
-    cardBorderShadow: '#E2E8F0',
+    cardBorderShadow: '#E5E5E5',
   },
 
   shadow: {
-    color: '#111827',
-    opacity: 0.04,
-    opacityStrong: 0.08,
+    color: '#000000',
+    opacity: 0.03,
+    opacityStrong: 0.06,
   },
 
-  overlay: 'rgba(17, 24, 39, 0.4)',
-  overlayStrong: 'rgba(17, 24, 39, 0.7)',
+  overlay: 'rgba(0, 0, 0, 0.4)',
+  overlayStrong: 'rgba(0, 0, 0, 0.7)',
 
-  online: '#166B52',
-  offline: '#94A3B8',
-  pending: '#D97706',
+  online: '#111111',
+  offline: '#999999',
+  pending: '#666666',
 
   network: {
     ethereum: '#627EEA',
@@ -139,130 +138,130 @@ export const lightColors = {
   },
 
   surface: '#FFFFFF',
-  surfaceElevated: '#FFFFFF',
-  surfaceMuted: '#F1F5F9',
-  surfacePressed: '#E2E8F0',
-  background: '#F8FAFC',
-  textPrimary: '#111827',
-  textSecondary: '#64748B',
-  textMuted: '#94A3B8',
+  surfaceElevated: '#F7F7F7',
+  surfaceMuted: '#F2F2F2',
+  surfacePressed: '#EEEEEE',
+  background: '#FFFFFF',
+  textPrimary: '#111111',
+  textSecondary: '#666666',
+  textMuted: '#999999',
   textInverse: '#FFFFFF',
   textOnPrimary: '#FFFFFF',
-  borderLight: '#E2E8F0',
+  borderLight: '#E5E5E5',
   borderHighlight: '#FFFFFF',
-  borderShadow: '#E2E8F0',
-  shadowColor: '#111827',
-  primaryMuted: '#E6F4EA',
-  warningContainer: '#FFFBEB',
-  divider: '#E2E8F0',
+  borderShadow: '#E5E5E5',
+  shadowColor: '#000000',
+  primaryMuted: '#F2F2F2',
+  warningContainer: '#F7F7F7',
+  divider: '#EEEEEE',
 };
 
 // ============================================
-// DARK PALETTE — Deep Charcoal & Graphite Institutional
+// DARK PALETTE — Strict Monochrome Fintech
 // ============================================
 export const darkColors = {
   bg: {
-    canvas: '#171C24',           // Deep Charcoal (#171C24)
-    surface: '#1F2937',          // Graphite (#1F2937)
-    surfaceElevated: '#283548',  // Elevated Graphite
-    surfaceMuted: '#111827',     // Midnight Navy (#111827)
-    surfacePressed: '#374151',
-    toString() { return '#171C24'; },
+    canvas: '#000000',           // Primary background: #000000
+    surface: '#171717',          // Card background: #171717
+    surfaceElevated: '#202020',  // Elevated surface: #202020
+    surfaceMuted: '#101010',     // Secondary background: #101010
+    surfacePressed: '#262626',   // Dividers: #262626
+    toString() { return '#000000'; },
   },
 
   text: {
-    primary: '#FFFFFF',          // Solid White
-    secondary: '#94A3B8',        // Slate Light
-    muted: '#64748B',            // Slate (#64748B)
-    inverse: '#111827',
-    onPrimary: '#FFFFFF',
+    primary: '#FFFFFF',          // Primary text: #FFFFFF
+    secondary: '#B3B3B3',        // Secondary text: #B3B3B3
+    muted: '#858585',            // Tertiary text: #858585
+    inverse: '#000000',
+    onPrimary: '#000000',
     toString() { return '#FFFFFF'; },
   },
 
   primary: {
-    DEFAULT: '#166B52',          // Forest Green (#166B52)
-    pressed: '#0F4C3A',
-    muted: 'rgba(22, 107, 82, 0.2)',
-    container: 'rgba(22, 107, 82, 0.25)',
-    onContainer: '#34D399',
-    light: '#2E8B6E',
-    dark: '#0F4C3A',
-    toString() { return '#166B52'; },
+    DEFAULT: '#FFFFFF',          // Primary button: #FFFFFF
+    pressed: '#E5E5E5',
+    muted: '#202020',
+    container: '#171717',
+    onContainer: '#FFFFFF',
+    light: '#FFFFFF',
+    dark: '#E5E5E5',
+    toString() { return '#FFFFFF'; },
   },
 
   success: {
-    DEFAULT: '#10B981',          // Muted Green (Solid, non-neon)
-    light: '#34D399',
-    muted: 'rgba(16, 185, 129, 0.15)',
-    container: 'rgba(16, 185, 129, 0.15)',
-    onContainer: '#34D399',
-    toString() { return '#10B981'; },
+    DEFAULT: '#FFFFFF',          // Monochrome Checkmark
+    light: '#FFFFFF',
+    muted: '#202020',
+    container: '#171717',
+    onContainer: '#FFFFFF',
+    toString() { return '#FFFFFF'; },
   },
 
   danger: {
-    DEFAULT: '#EF4444',          // Professional Red
+    DEFAULT: '#EF4444',          // Restrained Red (safety only)
     light: '#F87171',
-    muted: 'rgba(239, 68, 68, 0.15)',
-    container: 'rgba(239, 68, 68, 0.15)',
+    muted: '#3B1818',
+    container: '#2A1212',
     onContainer: '#F87171',
     toString() { return '#EF4444'; },
   },
 
   warning: {
-    DEFAULT: '#F59E0B',          // Restrained Amber
-    light: '#FBBF24',
-    muted: 'rgba(245, 158, 11, 0.15)',
-    container: 'rgba(245, 158, 11, 0.15)',
-    onContainer: '#FBBF24',
-    toString() { return '#F59E0B'; },
+    DEFAULT: '#B3B3B3',          // Monochrome Warning
+    light: '#CCCCCC',
+    muted: '#202020',
+    container: '#171717',
+    onContainer: '#FFFFFF',
+    toString() { return '#B3B3B3'; },
   },
 
   info: {
-    DEFAULT: '#3B82F6',          // Muted Blue
-    light: '#60A5FA',
-    muted: 'rgba(59, 130, 246, 0.15)',
-    container: 'rgba(59, 130, 246, 0.15)',
-    onContainer: '#60A5FA',
-    toString() { return '#3B82F6'; },
+    DEFAULT: '#FFFFFF',
+    light: '#FFFFFF',
+    muted: '#202020',
+    container: '#171717',
+    onContainer: '#FFFFFF',
+    toString() { return '#FFFFFF'; },
   },
 
   border: {
-    subtle: '#2A3441',           // Subtle Slate/Graphite Border
-    DEFAULT: '#374151',          // Standard Border
-    strong: '#4B5563',
-    highlight: '#374151',
-    shadow: '#111827',
-    divider: '#2A3441',
-    toString() { return '#2A3441'; },
+    subtle: '#262626',           // Dividers: #262626
+    DEFAULT: '#303030',          // Borders: #303030
+    strong: '#404040',
+    highlight: '#303030',
+    shadow: '#000000',
+    divider: '#262626',
+    toString() { return '#303030'; },
   },
 
   gradient: {
-    primary: ['#166B52', '#0F4C3A'],
-    hero: ['#1F2937', '#171C24'],
-    success: ['#10B981', '#166B52'],
-    danger: ['#EF4444', '#DC2626'],
-    warning: ['#F59E0B', '#D97706'],
-    chatBot: ['#1F2937', '#111827'],
+    primary: ['#FFFFFF', '#FFFFFF'],
+    hero: ['#171717', '#101010'],
+    success: ['#FFFFFF', '#FFFFFF'],
+    danger: ['#EF4444', '#EF4444'],
+    warning: ['#B3B3B3', '#B3B3B3'],
+    chatBot: ['#171717', '#101010'],
   },
 
   clay: {
     overlay: 'rgba(255, 255, 255, 0.02)',
-    cardBorderHighlight: '#2A3441',
-    cardBorderShadow: '#111827',
+    cardBorderHighlight: '#303030',
+    cardBorderShadow: '#000000',
   },
 
   shadow: {
     color: '#000000',
-    opacity: 0.25,
-    opacityStrong: 0.45,
+    opacity: 0.3,
+    opacityStrong: 0.5,
   },
 
-  overlay: 'rgba(0, 0, 0, 0.7)',
-  overlayStrong: 'rgba(0, 0, 0, 0.85)',
+  overlay: 'rgba(0, 0, 0, 0.75)',
+  overlayStrong: 'rgba(0, 0, 0, 0.9)',
 
-  online: '#10B981',
-  offline: '#64748B',
-  pending: '#F59E0B',
+  online: '#FFFFFF',
+  offline: '#858585',
+  pending: '#B3B3B3',
 
   network: {
     ethereum: '#627EEA',
@@ -278,23 +277,23 @@ export const darkColors = {
     sepolia: '#627EEA',
   },
 
-  surface: '#1F2937',
-  surfaceElevated: '#283548',
-  surfaceMuted: '#111827',
-  surfacePressed: '#374151',
-  background: '#171C24',
+  surface: '#171717',
+  surfaceElevated: '#202020',
+  surfaceMuted: '#101010',
+  surfacePressed: '#262626',
+  background: '#000000',
   textPrimary: '#FFFFFF',
-  textSecondary: '#94A3B8',
-  textMuted: '#64748B',
-  textInverse: '#111827',
-  textOnPrimary: '#FFFFFF',
-  borderLight: '#2A3441',
-  borderHighlight: '#374151',
-  borderShadow: '#111827',
+  textSecondary: '#B3B3B3',
+  textMuted: '#858585',
+  textInverse: '#000000',
+  textOnPrimary: '#000000',
+  borderLight: '#303030',
+  borderHighlight: '#303030',
+  borderShadow: '#000000',
   shadowColor: '#000000',
-  primaryMuted: 'rgba(22, 107, 82, 0.2)',
-  warningContainer: 'rgba(245, 158, 11, 0.15)',
-  divider: '#2A3441',
+  primaryMuted: '#202020',
+  warningContainer: '#171717',
+  divider: '#262626',
 };
 
 // ============================================

@@ -73,8 +73,8 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
 
   const getRiskComponent = (risk: string) => {
     switch (risk) {
-      case 'normal': return <ShieldCheckIcon color={colors.success.DEFAULT} size={14} />;
-      case 'attention': return <ShieldAlertIcon color={colors.warning.DEFAULT} size={14} />;
+      case 'normal': return <ShieldCheckIcon color={colors.text.primary} size={14} />;
+      case 'attention': return <ShieldAlertIcon color={colors.text.secondary} size={14} />;
       case 'high': return <ShieldAlertIcon color={colors.danger.DEFAULT} size={14} />;
       default: return null;
     }
@@ -82,12 +82,14 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return colors.success.DEFAULT;
-      case 'pending': return colors.warning.DEFAULT;
+      case 'confirmed': return colors.text.primary;
+      case 'pending': return colors.text.secondary;
       case 'failed': return colors.danger.DEFAULT;
       default: return colors.text.muted;
     }
   };
+
+  const monoMuted = isDark ? '#202020' : '#F2F2F2';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
@@ -99,8 +101,8 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Activity</Text>
-          <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
+          <Text style={[styles.title, { color: colors.text.primary }]}>Activity</Text>
+          <TouchableOpacity style={[styles.searchButton, { backgroundColor: monoMuted }]} activeOpacity={0.7}>
             <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <Circle cx="11" cy="11" r="8" />
               <Path d="M21 21l-4.35-4.35" />
@@ -109,13 +111,13 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchBar}>
+        <View style={[styles.searchBar, { backgroundColor: isDark ? '#171717' : '#F7F7F7', borderColor: colors.border.DEFAULT, borderWidth: 0.5 }]}>
           <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <Circle cx="11" cy="11" r="8" />
             <Path d="M21 21l-4.35-4.35" />
           </Svg>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text.primary }]}
             placeholder="Search transactions..."
             placeholderTextColor={colors.text.muted}
             value={searchText}
@@ -126,30 +128,35 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
 
         {/* Filters */}
         <View style={styles.filters}>
-          {FILTERS.map((filter) => (
-            <TouchableOpacity
-              key={filter}
-              style={[
-                styles.filterChip,
-                activeFilter === filter ? styles.filterChipActive : null,
-                { backgroundColor: activeFilter === filter ? colors.primary.DEFAULT : colors.bg.surface, borderColor: colors.border.subtle },
-              ]}
-              onPress={() => setActiveFilter(filter)}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.filterChipText,
-                activeFilter === filter ? { color: colors.text.onPrimary } : { color: colors.text.primary },
-              ]}>
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {FILTERS.map((filter) => {
+            const active = activeFilter === filter;
+            return (
+              <TouchableOpacity
+                key={filter}
+                style={[
+                  styles.filterChip,
+                  {
+                    backgroundColor: active ? (isDark ? '#FFFFFF' : '#111111') : colors.bg.surface,
+                    borderColor: active ? (isDark ? '#FFFFFF' : '#111111') : colors.border.subtle,
+                  },
+                ]}
+                onPress={() => setActiveFilter(filter)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.filterChipText,
+                  { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.secondary },
+                ]}>
+                  {filter}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Transactions */}
         {filteredTxs.length === 0 ? (
-          <View style={styles.emptyState}>
+          <View style={[styles.emptyState, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
             <Svg width={48} height={48} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
               <Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <Path d="M16 2v4" />
@@ -160,11 +167,10 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
             <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>Transactions will appear here when you send, receive, or swap</Text>
           </View>
         ) : (
-          <FlatList
-            data={filteredTxs}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => (
+          <View>
+            {filteredTxs.map((item) => (
               <TouchableOpacity
+                key={item.id.toString()}
                 style={[
                   styles.txItem,
                   { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },
@@ -174,10 +180,10 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
               >
                 <View style={styles.txLeft}>
                   <View style={[
-                    typesIconBg[item.type],
-                    { backgroundColor: colors.primary.muted },
+                    styles.txIconBox,
+                    { backgroundColor: monoMuted },
                   ]}>
-                    {typesIcons[item.type]({ color: colors.primary.DEFAULT, size: 20 })}
+                    {typesIcons[item.type]({ color: colors.text.primary, size: 20 })}
                   </View>
                   <View style={styles.txInfo}>
                     <View style={styles.txTopRow}>
@@ -191,7 +197,7 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
                   <View style={styles.txValueRow}>
                     <Text style={[
                       styles.txValue,
-                      item.type === 'received' ? { color: colors.success.DEFAULT } : { color: colors.text.primary },
+                      { color: colors.text.primary },
                     ]}>
                       {item.type === 'received' ? '+' : '-'}{item.amount} {item.asset.split(' → ')[0]}
                     </Text>
@@ -200,19 +206,26 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
                   <View style={styles.txStatusRow}>
                     <View style={[
                       styles.statusBadge,
-                      { backgroundColor: getStatusColor(item.status) + '15', borderColor: getStatusColor(item.status) },
+                      {
+                        backgroundColor: monoMuted,
+                        borderColor: item.status === 'failed' ? colors.danger.DEFAULT : colors.border.subtle,
+                      },
                     ]}>
-                      <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+                      <Text style={[
+                        styles.statusText,
+                        { color: item.status === 'failed' ? colors.danger.DEFAULT : colors.text.primary },
+                      ]}>
+                        {item.status}
+                      </Text>
                     </View>
                     {getRiskComponent(item.risk)}
                     <ChevronRightIcon color={colors.text.muted} size={16} />
                   </View>
                 </View>
               </TouchableOpacity>
-            )}>
-              <View style={styles.txDivider} />
-            </FlatList>
-          )}
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -234,12 +247,6 @@ const typesIcons: Record<string, ({ color, size }: { color?: string; size?: numb
       <Path d="M16 3l4 4-4 4M8 21l-4-4 4-4M4 17h16M20 7H4" />
     </Svg>
   ),
-};
-
-const typesIconBg: Record<string, { backgroundColor: string }> = {
-  sent: { backgroundColor: '#2563EB15' },
-  received: { backgroundColor: '#16A34A15' },
-  swap: { backgroundColor: '#8B5CF615' },
 };
 
 const txTypeLabels: Record<string, string> = {
@@ -308,6 +315,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   txLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  txIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   txInfo: { flex: 1, gap: 4 },
   txTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   txType: { fontSize: 15, fontWeight: '600' },

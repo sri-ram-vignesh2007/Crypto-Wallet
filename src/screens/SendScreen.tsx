@@ -220,19 +220,22 @@ export default function SendScreen({ navigation }: { navigation: any }) {
     Linking.openURL(url).catch(() => {});
   };
 
-  const primaryBlue = isDark ? '#0A84FF' : '#007AFF';
-  const cardBg = isDark ? '#1C1C1E' : '#FFFFFF';
-  const hairline = isDark ? '#2C2C2E' : '#E5E5EA';
+  const primaryBtnBg = isDark ? '#FFFFFF' : '#111111';
+  const primaryBtnText = isDark ? '#000000' : '#FFFFFF';
+  const cardBg = isDark ? '#171717' : '#FFFFFF';
+  const hairline = isDark ? '#303030' : '#E5E5E5';
+  const canvasBg = isDark ? '#000000' : '#FFFFFF';
+  const monoMuted = isDark ? '#202020' : '#F2F2F2';
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: canvasBg }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Apple Navigation Bar */}
       <View style={[styles.navBar, { paddingTop: insets.top + 4 }]}>
         <SpringButton onPress={() => navigation.goBack()} style={styles.navBackBtn}>
-          <BackChevronIcon color={primaryBlue} size={24} />
-          <Text style={[styles.navBackText, { color: primaryBlue }]}>Wallet</Text>
+          <BackChevronIcon color={colors.text.primary} size={24} />
+          <Text style={[styles.navBackText, { color: colors.text.primary }]}>Wallet</Text>
         </SpringButton>
         <Text style={[styles.navTitle, { color: colors.text.primary }]}>Send</Text>
         <View style={{ width: 60 }} />
@@ -250,7 +253,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>ASSET</Text>
           <SpringButton onPress={() => setShowTokenSelector(true)} style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
             <View style={styles.assetRow}>
-              <View style={[styles.assetIconCircle, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
+              <View style={[styles.assetIconCircle, { backgroundColor: monoMuted }]}>
                 <Text style={styles.assetIconEmoji}>{currentSelectedBalance.token.logo || '🪙'}</Text>
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
@@ -281,8 +284,8 @@ export default function SendScreen({ navigation }: { navigation: any }) {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <SpringButton onPress={handlePaste} style={[styles.pastePill, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
-                <Text style={[styles.pastePillText, { color: primaryBlue }]}>Paste</Text>
+              <SpringButton onPress={handlePaste} style={[styles.pastePill, { backgroundColor: monoMuted }]}>
+                <Text style={[styles.pastePillText, { color: colors.text.primary }]}>Paste</Text>
               </SpringButton>
             </View>
           </View>
@@ -303,8 +306,8 @@ export default function SendScreen({ navigation }: { navigation: any }) {
                 <Text style={[styles.amountSymbol, { color: colors.text.primary }]}>
                   {currentSelectedBalance.token.symbol}
                 </Text>
-                <SpringButton onPress={handleMaxAmount} style={[styles.maxPill, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}>
-                  <Text style={[styles.maxPillText, { color: primaryBlue }]}>MAX</Text>
+                <SpringButton onPress={handleMaxAmount} style={[styles.maxPill, { backgroundColor: monoMuted }]}>
+                  <Text style={[styles.maxPillText, { color: colors.text.primary }]}>MAX</Text>
                 </SpringButton>
               </View>
             </View>
@@ -315,40 +318,52 @@ export default function SendScreen({ navigation }: { navigation: any }) {
             <View style={{ marginBottom: 12 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
                 <Text style={[styles.feeLabel, { color: colors.text.secondary }]}>Execution Speed</Text>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#10B981' : '#166B52', fontVariant: ['tabular-nums'] }}>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text.primary, fontVariant: ['tabular-nums'] }}>
                   {gasSpeed === 'economy' ? 'Economy • ~45s' : gasSpeed === 'standard' ? 'Standard • ~15s' : 'Instant • Next Block (~4s)'}
                 </Text>
               </View>
 
               <View style={{ flexDirection: 'row', gap: 6 }}>
-                {(['economy', 'standard', 'instant'] as const).map((spd) => (
-                  <TouchableOpacity
-                    key={spd}
-                    onPress={() => setGasSpeed(spd)}
-                    style={{
-                      flex: 1,
-                      paddingVertical: 8,
-                      borderRadius: 10,
-                      alignItems: 'center',
-                      backgroundColor: gasSpeed === spd ? (isDark ? 'rgba(22, 107, 82, 0.25)' : '#E6F4EA') : (isDark ? '#283548' : '#F1F5F9'),
-                      borderWidth: 0.5,
-                      borderColor: gasSpeed === spd ? (isDark ? '#10B981' : '#166B52') : 'transparent',
-                    }}
-                  >
-                    <Text style={{ fontSize: 11, fontWeight: '700', textTransform: 'capitalize', color: gasSpeed === spd ? (isDark ? '#10B981' : '#166B52') : colors.text.muted }}>
-                      {spd}
-                    </Text>
-                    <Text style={{ fontSize: 10, marginTop: 2, color: colors.text.secondary }}>
-                      {spd === 'economy' ? '$0.95' : spd === 'standard' ? '$1.82' : '$3.45'}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {(['economy', 'standard', 'instant'] as const).map((spd) => {
+                  const isSelected = gasSpeed === spd;
+                  return (
+                    <TouchableOpacity
+                      key={spd}
+                      onPress={() => setGasSpeed(spd)}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 8,
+                        borderRadius: 10,
+                        alignItems: 'center',
+                        backgroundColor: isSelected ? primaryBtnBg : monoMuted,
+                        borderWidth: 0.5,
+                        borderColor: isSelected ? primaryBtnBg : 'transparent',
+                      }}
+                    >
+                      <Text style={{
+                        fontSize: 11,
+                        fontWeight: '700',
+                        textTransform: 'capitalize',
+                        color: isSelected ? primaryBtnText : (isDark ? '#B3B3B3' : '#666666'),
+                      }}>
+                        {spd}
+                      </Text>
+                      <Text style={{
+                        fontSize: 10,
+                        marginTop: 2,
+                        color: isSelected ? primaryBtnText : colors.text.secondary,
+                      }}>
+                        {spd === 'economy' ? '$0.95' : spd === 'standard' ? '$1.82' : '$3.45'}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
 
             {/* Smart Routing Savings Notice */}
-            <View style={{ padding: 10, borderRadius: 10, backgroundColor: isDark ? 'rgba(22, 107, 82, 0.15)' : '#E6F4EA', borderWidth: 0.5, borderColor: isDark ? 'rgba(22, 107, 82, 0.3)' : '#CBD5E1', marginBottom: 6 }}>
-              <Text style={{ fontSize: 11, color: isDark ? '#34D399' : '#166B52', fontWeight: '600' }}>
+            <View style={{ padding: 10, borderRadius: 10, backgroundColor: isDark ? '#202020' : '#F7F7F7', borderWidth: 0.5, borderColor: hairline, marginBottom: 6 }}>
+              <Text style={{ fontSize: 11, color: colors.text.primary, fontWeight: '600' }}>
                 ⚡ Saves you $18.40 via Smart Routing (0.35% protocol fee included)
               </Text>
             </View>
@@ -363,12 +378,12 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           <SpringButton
             onPress={handleSendPress}
             disabled={loading}
-            style={[styles.primaryActionBtn, { backgroundColor: primaryBlue }]}
+            style={[styles.primaryActionBtn, { backgroundColor: primaryBtnBg }]}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={primaryBtnText} />
             ) : (
-              <Text style={styles.primaryActionBtnText}>Review Transaction</Text>
+              <Text style={[styles.primaryActionBtnText, { color: primaryBtnText }]}>Review Transaction</Text>
             )}
           </SpringButton>
         </ScrollView>
@@ -391,7 +406,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
               Verify transaction parameters before broadcast
             </Text>
 
-            <View style={[styles.confirmGroupCard, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}>
+            <View style={[styles.confirmGroupCard, { backgroundColor: monoMuted }]}>
               <View style={styles.confirmItemRow}>
                 <Text style={[styles.confirmItemLabel, { color: colors.text.secondary }]}>Send Amount</Text>
                 <Text style={[styles.confirmItemVal, { color: colors.text.primary, fontWeight: '700' }]}>
@@ -422,14 +437,14 @@ export default function SendScreen({ navigation }: { navigation: any }) {
 
               <View style={styles.confirmItemRow}>
                 <Text style={[styles.confirmItemLabel, { color: colors.text.secondary }]}>MEV Shield</Text>
-                <Text style={[styles.confirmItemVal, { color: colors.primary.DEFAULT, fontWeight: '700' }]}>Private Relay Active ✓</Text>
+                <Text style={[styles.confirmItemVal, { color: colors.text.primary, fontWeight: '700' }]}>Private Relay Active ✓</Text>
               </View>
             </View>
 
             <View style={styles.sheetActionsRow}>
               <SpringButton
                 onPress={() => setShowConfirm(false)}
-                style={[styles.sheetCancelBtn, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
+                style={[styles.sheetCancelBtn, { backgroundColor: monoMuted }]}
               >
                 <Text style={[styles.sheetCancelBtnText, { color: colors.text.primary }]}>Cancel</Text>
               </SpringButton>
@@ -437,12 +452,12 @@ export default function SendScreen({ navigation }: { navigation: any }) {
               <SpringButton
                 onPress={executeSend}
                 disabled={loading}
-                style={[styles.sheetConfirmBtn, { backgroundColor: primaryBlue }]}
+                style={[styles.sheetConfirmBtn, { backgroundColor: primaryBtnBg }]}
               >
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={primaryBtnText} />
                 ) : (
-                  <Text style={styles.sheetConfirmBtnText}>Confirm & Send</Text>
+                  <Text style={[styles.sheetConfirmBtnText, { color: primaryBtnText }]}>Confirm & Send</Text>
                 )}
               </SpringButton>
             </View>
@@ -459,8 +474,8 @@ export default function SendScreen({ navigation }: { navigation: any }) {
       >
         <View style={styles.modalBackdrop}>
           <View style={[styles.successModalCard, { backgroundColor: cardBg, borderColor: hairline }]}>
-            <View style={[styles.successCircle, { backgroundColor: isDark ? '#30D158' : '#34C759' }]}>
-              <CheckIcon color="#FFFFFF" size={26} />
+            <View style={[styles.successCircle, { backgroundColor: primaryBtnBg }]}>
+              <CheckIcon color={primaryBtnText} size={26} />
             </View>
             <Text style={[styles.successHeading, { color: colors.text.primary }]}>Transaction Sent</Text>
             <Text style={[styles.successBody, { color: colors.text.secondary }]}>
@@ -469,16 +484,16 @@ export default function SendScreen({ navigation }: { navigation: any }) {
 
             <SpringButton
               onPress={() => txSuccessHash && openExplorer(txSuccessHash)}
-              style={[styles.explorerPill, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]}
+              style={[styles.explorerPill, { backgroundColor: monoMuted }]}
             >
-              <Text style={[styles.explorerPillText, { color: primaryBlue }]}>View on Explorer ↗</Text>
+              <Text style={[styles.explorerPillText, { color: colors.text.primary }]}>View on Explorer ↗</Text>
             </SpringButton>
 
             <SpringButton
               onPress={() => setTxSuccessHash(null)}
-              style={[styles.successDoneBtn, { backgroundColor: primaryBlue }]}
+              style={[styles.successDoneBtn, { backgroundColor: primaryBtnBg }]}
             >
-              <Text style={styles.successDoneBtnText}>Done</Text>
+              <Text style={[styles.successDoneBtnText, { color: primaryBtnText }]}>Done</Text>
             </SpringButton>
           </View>
         </View>

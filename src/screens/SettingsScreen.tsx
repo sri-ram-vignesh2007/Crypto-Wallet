@@ -194,10 +194,11 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   };
 
   const { toggleTheme } = useTheme();
-  const primaryGreen = isDark ? '#10B981' : '#166B52';
-  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
-  const hairline = isDark ? '#2A3441' : '#E2E8F0';
-  const canvasBg = isDark ? '#171C24' : '#F8FAFC';
+  const cardBg = isDark ? '#171717' : '#FFFFFF';
+  const hairline = isDark ? '#303030' : '#E5E5E5';
+  const canvasBg = isDark ? '#000000' : '#FFFFFF';
+  const monoPrimary = isDark ? '#FFFFFF' : '#111111';
+  const monoMuted = isDark ? '#202020' : '#F2F2F2';
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: canvasBg }]}>
@@ -215,8 +216,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         {/* Wallet Profile Card */}
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
           <View style={styles.walletProfileRow}>
-            <View style={[styles.walletAvatar, { backgroundColor: primaryGreen }]}>
-              <Text style={styles.walletAvatarEmoji}>💎</Text>
+            <View style={[styles.walletAvatar, { backgroundColor: monoPrimary }]}>
+              <Text style={{ fontSize: 16 }}>💎</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
               <Text style={[styles.walletTitle, { color: colors.text.primary }]}>CryptoVault</Text>
@@ -224,8 +225,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
                 {displayAddress.slice(0, 8)}...{displayAddress.slice(-6)}
               </Text>
             </View>
-            <View style={[styles.activeCapsule, { backgroundColor: isDark ? 'rgba(16,185,129,0.18)' : '#E6F4EA' }]}>
-              <Text style={[styles.activeCapsuleText, { color: primaryGreen }]}>Active</Text>
+            <View style={[styles.activeCapsule, { backgroundColor: monoMuted }]}>
+              <Text style={[styles.activeCapsuleText, { color: colors.text.primary }]}>Active</Text>
             </View>
           </View>
 
@@ -235,21 +236,21 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           <View style={styles.keyActionsContainer}>
             <SpringButton
               onPress={viewPublicAddress}
-              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
+              style={[styles.keyPillBtn, { backgroundColor: monoMuted }]}
             >
-              <Text style={[styles.keyPillBtnText, { color: primaryGreen }]}>Public Address</Text>
+              <Text style={[styles.keyPillBtnText, { color: colors.text.primary }]}>Public Address</Text>
             </SpringButton>
 
             <SpringButton
               onPress={viewSecretPhrase}
-              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
+              style={[styles.keyPillBtn, { backgroundColor: monoMuted }]}
             >
-              <Text style={[styles.keyPillBtnText, { color: isDark ? '#F59E0B' : '#D97706' }]}>Seed Phrase</Text>
+              <Text style={[styles.keyPillBtnText, { color: colors.text.primary }]}>Seed Phrase</Text>
             </SpringButton>
 
             <SpringButton
               onPress={viewPrivateKey}
-              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
+              style={[styles.keyPillBtn, { backgroundColor: monoMuted }]}
             >
               <Text style={[styles.keyPillBtnText, { color: isDark ? '#EF4444' : '#DC2626' }]}>Private Key</Text>
             </SpringButton>
@@ -260,15 +261,15 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>APPEARANCE</Text>
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
           <View style={styles.settingsRow}>
-            <View style={[styles.iconCapsule, { backgroundColor: isDark ? '#283548' : '#E2E8F0' }]}>
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
               <Text style={{ fontSize: 13 }}>{isDark ? '🌙' : '☀️'}</Text>
             </View>
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Dark Mode</Text>
             <Switch
               value={isDark}
               onValueChange={toggleTheme}
-              trackColor={{ false: '#CBD5E1', true: primaryGreen }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+              thumbColor={isDark ? '#000000' : '#FFFFFF'}
             />
           </View>
         </View>
@@ -277,15 +278,15 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>SECURITY</Text>
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
           <View style={styles.settingsRow}>
-            <View style={[styles.iconCapsule, { backgroundColor: primaryGreen }]}>
-              <ShieldIcon color="#FFFFFF" size={17} />
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <ShieldIcon color={colors.text.primary} size={17} />
             </View>
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Face ID / Biometrics</Text>
             <Switch
               value={biometricEnabled}
               onValueChange={setBiometricEnabled}
-              trackColor={{ false: isDark ? '#3A3A3C' : '#E5E5EA', true: primaryGreen }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+              thumbColor={isDark ? '#000000' : '#FFFFFF'}
             />
           </View>
         </View>
@@ -297,8 +298,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
             onPress={() => navigation.navigate('NetworkSettings')}
             style={styles.settingsRow}
           >
-            <View style={[styles.iconCapsule, { backgroundColor: primaryGreen }]}>
-              <GlobeIcon color="#FFFFFF" size={17} />
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <GlobeIcon color={colors.text.primary} size={17} />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
@@ -319,8 +320,8 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
             onPress={() => navigation.navigate('About')}
             style={styles.settingsRow}
           >
-            <View style={[styles.iconCapsule, { backgroundColor: '#8E8E93' }]}>
-              <InfoIcon color="#FFFFFF" size={17} />
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <InfoIcon color={colors.text.primary} size={17} />
             </View>
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>About Crypto Wallet</Text>
             <Text style={[styles.settingsValue, { color: colors.text.muted }]}>v1.0.0</Text>
@@ -383,10 +384,10 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
             <SpringButton
               onPress={copySecret}
-              style={[styles.primarySheetBtn, { backgroundColor: primaryGreen }]}
+              style={[styles.primarySheetBtn, { backgroundColor: monoPrimary }]}
             >
-              <Text style={styles.primarySheetBtnText}>
-                {copied ? 'Copied to Clipboard' : 'Copy to Clipboard'}
+              <Text style={[styles.primarySheetBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                {copied ? '✓ Copied to Clipboard' : 'Copy to Clipboard'}
               </Text>
             </SpringButton>
 

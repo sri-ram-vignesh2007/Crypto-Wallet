@@ -58,8 +58,8 @@ export function WalletsScreen({ navigation }: { navigation?: any }) {
               {address ? `${address.slice(0, 10)}...${address.slice(-8)}` : '0x71C...389A'}
             </Text>
           </View>
-          <View style={styles.activePill}>
-            <Text style={styles.activeText}>Active</Text>
+          <View style={[styles.activePill, { backgroundColor: isDark ? '#202020' : '#F2F2F2' }]}>
+            <Text style={[styles.activeText, { color: colors.text.primary }]}>Active</Text>
           </View>
         </View>
       </View>
@@ -69,7 +69,7 @@ export function WalletsScreen({ navigation }: { navigation?: any }) {
         onPress={() => navigation?.navigate?.('SeedPhrase', { mode: 'import' })}
         activeOpacity={0.85}
       >
-        <Text style={styles.primaryBtnText}>+ Import Another Wallet</Text>
+        <Text style={[styles.primaryBtnText, { color: colors.text.inverse }]}>+ Import Another Wallet</Text>
       </TouchableOpacity>
     </View>
   );

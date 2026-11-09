@@ -213,18 +213,18 @@ export default function SeedPhraseScreen({ navigation, route }: Props) {
               onPress={copyToClipboard}
               style={[styles.copyButton, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}
             >
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={copied ? '#34C759' : colors.primary.DEFAULT} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.primary.DEFAULT} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
                 <Rect x="9" y="9" width="13" height="13" rx="2.5" />
                 <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </Svg>
-              <Text style={[styles.copyButtonText, { color: copied ? '#34C759' : colors.primary.DEFAULT }]}>
-                {copied ? 'Copied to Clipboard' : 'Copy All Words'}
+              <Text style={[styles.copyButtonText, { color: colors.primary.DEFAULT }]}>
+                {copied ? '✓ Copied to Clipboard' : 'Copy All Words'}
               </Text>
             </AppleButton>
 
             {/* Apple Warning Callout */}
-            <View style={[styles.warningCallout, { backgroundColor: isDark ? 'rgba(255, 159, 10, 0.12)' : 'rgba(255, 149, 0, 0.12)', borderColor: isDark ? '#FF9F0A' : '#FF9500' }]}>
-              <Text style={[styles.warningHeading, { color: isDark ? '#FF9F0A' : '#C97700' }]}>Important Security Notice</Text>
+            <View style={[styles.warningCallout, { backgroundColor: isDark ? '#202020' : '#F7F7F7', borderColor: colors.border.DEFAULT }]}>
+              <Text style={[styles.warningHeading, { color: colors.text.primary }]}>Important Security Notice</Text>
               <Text style={[styles.warningBody, { color: colors.text.secondary }]}>
                 Anyone with access to these words can withdraw all funds permanently. Store them offline in a password manager or physical vault.
               </Text>

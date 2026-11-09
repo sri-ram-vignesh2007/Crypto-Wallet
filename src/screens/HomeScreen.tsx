@@ -58,46 +58,46 @@ const SpringButton: React.FC<SpringButtonProps> = ({
 };
 
 // Fintech Vector Glyphs
-const ChevronDownIcon = ({ color = '#64748B', size = 12 }: { color?: string; size?: number }) => (
+const ChevronDownIcon = ({ color = '#858585', size = 12 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M6 9l6 6 6-6" />
   </Svg>
 );
 
-const CheckIcon = ({ color = '#10B981', size = 18 }: { color?: string; size?: number }) => (
+const CheckIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M20 6L9 17l-5-5" />
   </Svg>
 );
 
-const SparkIcon = ({ color = '#166B52', size = 18 }: { color?: string; size?: number }) => (
+const SparkIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
   </Svg>
 );
 
-const ShieldIcon = ({ color = '#166B52', size = 16 }: { color?: string; size?: number }) => (
+const ShieldIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     <Path d="M9 12l2 2 4-4" />
   </Svg>
 );
 
-const EyeIcon = ({ color = '#64748B', size = 16 }: { color?: string; size?: number }) => (
+const EyeIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
     <Circle cx="12" cy="12" r="3" />
   </Svg>
 );
 
-const EyeOffIcon = ({ color = '#64748B', size = 16 }: { color?: string; size?: number }) => (
+const EyeOffIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
     <Path d="M1 1l22 22" />
   </Svg>
 );
 
-const CopyIcon = ({ color = '#64748B', size = 12 }: { color?: string; size?: number }) => (
+const CopyIcon = ({ color = '#858585', size = 12 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Rect x="9" y="9" width="13" height="13" rx="2.5" />
     <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
@@ -226,10 +226,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     ? totalValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : '1,842,590.42';
 
-  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
-  const cardBorder = isDark ? '#2A3441' : '#E2E8F0';
-  const canvasBg = isDark ? '#171C24' : '#F8FAFC';
-  const primaryGreen = isDark ? '#10B981' : '#166B52';
+  const cardBg = isDark ? '#171717' : '#FFFFFF';
+  const cardBorder = isDark ? '#303030' : '#E5E5E5';
+  const canvasBg = isDark ? '#000000' : '#FFFFFF';
+  const monoPrimary = isDark ? '#FFFFFF' : '#111111';
+  const monoSurfaceElevated = isDark ? '#202020' : '#F7F7F7';
+  const monoMutedSurface = isDark ? '#202020' : '#F2F2F2';
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: canvasBg }]}>
@@ -238,8 +240,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       {/* Dynamic Toast Pill */}
       {copiedToast && (
         <Animated.View style={[styles.toastContainer, { transform: [{ translateY: toastAnim }] }]}>
-          <View style={[styles.toastPill, { backgroundColor: isDark ? '#1F2937' : '#111827', borderColor: cardBorder }]}>
-            <CheckIcon color={primaryGreen} size={14} />
+          <View style={[styles.toastPill, { backgroundColor: isDark ? '#202020' : '#111111', borderColor: cardBorder }]}>
+            <CheckIcon color="#FFFFFF" size={14} />
             <Text style={styles.toastText}>Address copied to clipboard</Text>
           </View>
         </Animated.View>
@@ -251,7 +253,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       <View style={[styles.navBar, { paddingTop: insets.top + 6 }]}>
         <View style={styles.brandRow}>
           <Text style={[styles.brandTitle, { color: colors.text.primary }]}>CryptoVault</Text>
-          <View style={[styles.securityStatusDot, { backgroundColor: primaryGreen }]} />
+          <View style={[styles.securityStatusDot, { backgroundColor: monoPrimary }]} />
         </View>
 
         <View style={styles.navRightRow}>
@@ -260,7 +262,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             onPress={() => setShowNetworkModal(true)}
             style={[styles.chainSelectorPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
-            <View style={[styles.chainStatusDot, { backgroundColor: '#627EEA' }]} />
+            <View style={[styles.chainStatusDot, { backgroundColor: monoPrimary }]} />
             <Text style={[styles.chainSelectorText, { color: colors.text.primary }]}>
               {currentChainObj.name}
             </Text>
@@ -272,7 +274,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             onPress={() => navigation.navigate('AIChatbot')}
             style={[styles.iconButton, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
-            <SparkIcon color={primaryGreen} size={17} />
+            <SparkIcon color={monoPrimary} size={17} />
           </SpringButton>
 
           {/* Security Vault Trigger */}
@@ -280,7 +282,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             onPress={triggerFaceId}
             style={[styles.iconButton, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
-            <ShieldIcon color={primaryGreen} size={16} />
+            <ShieldIcon color={monoPrimary} size={16} />
           </SpringButton>
         </View>
       </View>
@@ -293,7 +295,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={primaryGreen}
+            tintColor={monoPrimary}
           />
         }
       >
@@ -306,7 +308,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
               <View style={styles.balanceHeaderRow}>
                 <Text style={styles.heroLabel}>Total Balance</Text>
                 <TouchableOpacity onPress={() => setShowBalance(!showBalance)} style={styles.eyeBtn}>
-                  {showBalance ? <EyeIcon size={14} color="#64748B" /> : <EyeOffIcon size={14} color="#64748B" />}
+                  {showBalance ? <EyeIcon size={14} color="#858585" /> : <EyeOffIcon size={14} color="#858585" />}
                 </TouchableOpacity>
               </View>
 
@@ -315,18 +317,18 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
               </Text>
             </View>
 
-            <View style={[styles.deltaPill, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.14)' : '#E6F4EA' }]}>
-              <Text style={[styles.deltaPillText, { color: primaryGreen }]}>+$48,190.20 (+2.68%)</Text>
+            <View style={[styles.deltaPill, { backgroundColor: monoMutedSurface }]}>
+              <Text style={[styles.deltaPillText, { color: colors.text.primary }]}>+$48,190.20 (+2.68%)</Text>
             </View>
           </View>
 
-          {/* Solid Anti-Aliased Portfolio Line Chart */}
+          {/* Solid Anti-Aliased Portfolio Line Chart (Strict Monochrome) */}
           <View style={styles.sparklineContainer}>
             <Svg width="100%" height={64} viewBox="0 0 340 64" preserveAspectRatio="none">
               <Defs>
                 <LinearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0%" stopColor={primaryGreen} stopOpacity={0.16} />
-                  <Stop offset="100%" stopColor={primaryGreen} stopOpacity={0.0} />
+                  <Stop offset="0%" stopColor={monoPrimary} stopOpacity={0.06} />
+                  <Stop offset="100%" stopColor={monoPrimary} stopOpacity={0.0} />
                 </LinearGradient>
               </Defs>
               <Path
@@ -336,8 +338,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
               <Path
                 d="M0 52 Q 40 44, 80 48 T 160 28 T 240 34 T 300 14 T 340 6"
                 fill="none"
-                stroke={primaryGreen}
-                strokeWidth={2.2}
+                stroke={monoPrimary}
+                strokeWidth={2}
               />
             </Svg>
           </View>
@@ -352,12 +354,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   onPress={() => setSelectedTimeRange(range)}
                   style={[
                     styles.timeRangePill,
-                    active && { backgroundColor: isDark ? 'rgba(22, 107, 82, 0.35)' : '#E6F4EA' },
+                    active && { backgroundColor: monoPrimary },
                   ]}
                 >
                   <Text style={[
                     styles.timeRangeText,
-                    active ? { color: primaryGreen, fontWeight: '700' } : { color: '#64748B' },
+                    active
+                      ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
+                      : { color: isDark ? '#858585' : '#666666' },
                   ]}>
                     {range}
                   </Text>
@@ -369,19 +373,19 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Sub-Metric Row (Gas, Yield, Address) */}
           <View style={[styles.heroFooterRow, { borderTopColor: cardBorder }]}>
             <View style={styles.heroFooterItem}>
-              <View style={[styles.miniDot, { backgroundColor: primaryGreen }]} />
+              <View style={[styles.miniDot, { backgroundColor: monoPrimary }]} />
               <Text style={styles.heroFooterLabel}>Gas: <Text style={[styles.heroFooterVal, { color: colors.text.primary }]}>12 Gwei</Text></Text>
             </View>
 
             <View style={styles.heroFooterItem}>
-              <Text style={styles.heroFooterLabel}>Yield: <Text style={[styles.heroFooterVal, { color: primaryGreen }]}>+4.82% APR</Text></Text>
+              <Text style={styles.heroFooterLabel}>Yield: <Text style={[styles.heroFooterVal, { color: colors.text.primary }]}>+4.82% APR</Text></Text>
             </View>
 
-            <SpringButton onPress={copyAddress} style={[styles.heroAddrPill, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}>
+            <SpringButton onPress={copyAddress} style={[styles.heroAddrPill, { backgroundColor: monoMutedSurface }]}>
               <Text style={styles.heroAddrText}>
                 {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '0x71C...389A'}
               </Text>
-              <CopyIcon color="#64748B" size={11} />
+              <CopyIcon color="#858585" size={11} />
             </SpringButton>
           </View>
         </View>
@@ -392,32 +396,32 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.actionsBarRow}>
           {/* Send */}
           <SpringButton onPress={() => navigation.navigate('Send')} style={styles.actionBtnItem}>
-            <View style={[styles.actionIconCircle, { backgroundColor: primaryGreen }]}>
-              <Text style={styles.actionIconGlyph}>↗</Text>
+            <View style={[styles.actionIconCircle, { backgroundColor: monoPrimary }]}>
+              <Text style={[styles.actionIconGlyph, { color: isDark ? '#000000' : '#FFFFFF' }]}>↗</Text>
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Send</Text>
           </SpringButton>
 
           {/* Receive */}
           <SpringButton onPress={() => navigation.navigate('Receive')} style={styles.actionBtnItem}>
-            <View style={[styles.actionIconCircle, { backgroundColor: isDark ? '#283548' : '#E2E8F0' }]}>
-              <Text style={[styles.actionIconGlyph, { color: colors.text.primary }]}>↙</Text>
+            <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
+              <Text style={[styles.actionIconGlyph, { color: monoPrimary }]}>↙</Text>
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Receive</Text>
           </SpringButton>
 
           {/* Swap */}
           <SpringButton onPress={() => navigation.navigate('Swap')} style={styles.actionBtnItem}>
-            <View style={[styles.actionIconCircle, { backgroundColor: isDark ? '#283548' : '#E2E8F0' }]}>
-              <Text style={[styles.actionIconGlyph, { color: colors.text.primary }]}>⇄</Text>
+            <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
+              <Text style={[styles.actionIconGlyph, { color: monoPrimary }]}>⇄</Text>
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Swap</Text>
           </SpringButton>
 
           {/* Buy */}
           <SpringButton onPress={() => navigation.navigate('Buy')} style={styles.actionBtnItem}>
-            <View style={[styles.actionIconCircle, { backgroundColor: isDark ? '#283548' : '#E2E8F0' }]}>
-              <Text style={[styles.actionIconGlyph, { color: colors.text.primary }]}>+</Text>
+            <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
+              <Text style={[styles.actionIconGlyph, { color: monoPrimary }]}>+</Text>
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Buy</Text>
           </SpringButton>
@@ -433,7 +437,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           >
             <View style={styles.cardHeaderSmall}>
               <Text style={styles.cardSmallTitle}>STAKING SAAS</Text>
-              <View style={[styles.statusDotSmall, { backgroundColor: primaryGreen }]} />
+              <View style={[styles.statusDotSmall, { backgroundColor: monoPrimary }]} />
             </View>
             <Text style={[styles.cardStatLarge, { color: colors.text.primary }]}>
               +4.82% <Text style={styles.cardStatUnit}>APR</Text>
@@ -447,7 +451,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           >
             <View style={styles.cardHeaderSmall}>
               <Text style={styles.cardSmallTitle}>MEV SHIELD</Text>
-              <View style={[styles.statusDotSmall, { backgroundColor: '#3B82F6' }]} />
+              <View style={[styles.statusDotSmall, { backgroundColor: monoPrimary }]} />
             </View>
             <Text style={[styles.cardStatLarge, { color: colors.text.primary }]}>
               Protected <Text style={styles.cardStatUnit}>✓</Text>
@@ -462,7 +466,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeading}>ASSETS</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Assets')}>
-            <Text style={[styles.sectionActionText, { color: primaryGreen }]}>See All</Text>
+            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>See All</Text>
           </TouchableOpacity>
         </View>
 
@@ -486,7 +490,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
                 <View style={styles.assetRightCol}>
                   <Text style={[styles.assetValueText, { color: colors.text.primary }]}>{asset.usd}</Text>
-                  <Text style={[styles.assetChangeText, { color: asset.positive ? primaryGreen : '#DC2626' }]}>
+                  <Text style={[styles.assetChangeText, { color: asset.positive ? colors.text.primary : '#EF4444' }]}>
                     {asset.change}
                   </Text>
                 </View>
@@ -501,35 +505,35 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeading}>RECENT ACTIVITY</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Activity')}>
-            <Text style={[styles.sectionActionText, { color: primaryGreen }]}>View All</Text>
+            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>View All</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
           <View style={[styles.activityItemRow, { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}>
-            <View style={[styles.activityIconCircle, { backgroundColor: isDark ? '#283548' : '#EFF6FF' }]}>
-              <Text style={{ color: '#2563EB', fontSize: 13, fontWeight: '700' }}>⇄</Text>
+            <View style={[styles.activityIconCircle, { backgroundColor: monoMutedSurface }]}>
+              <Text style={{ color: monoPrimary, fontSize: 13, fontWeight: '700' }}>⇄</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.activityTitle, { color: colors.text.primary }]}>Smart Aggregator Swap</Text>
               <Text style={styles.activitySub}>12.5 ETH → 42,750 USDC • Saved $28</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={[styles.activityAmount, { color: primaryGreen }]}>+42,750 USDC</Text>
+              <Text style={[styles.activityAmount, { color: colors.text.primary }]}>+42,750 USDC</Text>
               <Text style={styles.activityTime}>12m ago</Text>
             </View>
           </View>
 
           <View style={styles.activityItemRow}>
-            <View style={[styles.activityIconCircle, { backgroundColor: isDark ? 'rgba(22, 107, 82, 0.2)' : '#E6F4EA' }]}>
-              <Text style={{ color: primaryGreen, fontSize: 13, fontWeight: '700' }}>+</Text>
+            <View style={[styles.activityIconCircle, { backgroundColor: monoMutedSurface }]}>
+              <Text style={{ color: monoPrimary, fontSize: 13, fontWeight: '700' }}>+</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.activityTitle, { color: colors.text.primary }]}>Staking Yield Payout</Text>
               <Text style={styles.activitySub}>Lido Validator Node #842</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={[styles.activityAmount, { color: primaryGreen }]}>+0.412 ETH</Text>
+              <Text style={[styles.activityAmount, { color: colors.text.primary }]}>+0.412 ETH</Text>
               <Text style={styles.activityTime}>3h ago</Text>
             </View>
           </View>
@@ -541,8 +545,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       {/* ======================================================== */}
       <Modal visible={showFaceIdModal} transparent animationType="fade">
         <View style={styles.faceIdBackdrop}>
-          <View style={[styles.faceIdReticle, { borderColor: primaryGreen, backgroundColor: isDark ? '#1F2937' : '#FFFFFF' }]}>
-            <Svg width={44} height={44} viewBox="0 0 24 24" fill="none" stroke={primaryGreen} strokeWidth={1.8}>
+          <View style={[styles.faceIdReticle, { borderColor: monoPrimary, backgroundColor: cardBg }]}>
+            <Svg width={44} height={44} viewBox="0 0 24 24" fill="none" stroke={monoPrimary} strokeWidth={1.8}>
               <Path d="M7 3H5a2 2 0 00-2 2v2M17 3h2a2 2 0 012 2v2M7 21H5a2 2 0 01-2-2v-2M17 21h2a2 2 0 002-2v-2M9 9h.01M15 9h.01M10 13a2 2 0 004 0M10 17h4" />
             </Svg>
           </View>
@@ -577,7 +581,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                       setSelectedChain(key);
                       setShowNetworkModal(false);
                     }}
-                    style={[styles.chainSelectRow, isSelected && { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
+                    style={[styles.chainSelectRow, isSelected && { backgroundColor: monoMutedSurface }]}
                   >
                     <View style={styles.chainRowLeft}>
                       <Text style={{ fontSize: 20 }}>{chain.logo}</Text>
@@ -586,7 +590,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                         <Text style={styles.chainRpcText}>{chain.rpcUrls[0].replace('https://', '')}</Text>
                       </View>
                     </View>
-                    {isSelected && <CheckIcon color={primaryGreen} size={18} />}
+                    {isSelected && <CheckIcon color={monoPrimary} size={18} />}
                   </SpringButton>
                 );
               })}
