@@ -9,23 +9,26 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
+import { useTransactionStore } from '../store/transactionStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Spring Button Component
+// Spring Button Component with full width support
 const SpringButton: React.FC<{
   onPress: () => void;
   style?: any;
+  containerStyle?: any;
   children: React.ReactNode;
   activeScale?: number;
   disabled?: boolean;
-}> = ({ onPress, style, children, activeScale = 0.96, disabled = false }) => {
+}> = ({ onPress, style, containerStyle, children, activeScale = 0.96, disabled = false }) => {
   const scale = useRef(new Animated.Value(1)).current;
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
+      style={[{ width: style?.width || undefined }, containerStyle]}
       onPressIn={() => {
         if (disabled) return;
         Animated.spring(scale, {
@@ -134,11 +137,11 @@ interface SwapAsset {
   network: string;
 }
 
-const SWAP_ASSETS: SwapAsset[] = [
-  { symbol: 'ETH', name: 'Ethereum', balance: '2.54', priceUsd: 2700, network: 'Ethereum' },
-  { symbol: 'USDC', name: 'USD Coin', balance: '1,250.00', priceUsd: 1.00, network: 'Multi-Chain' },
-  { symbol: 'SOL', name: 'Solana', balance: '15.70', priceUsd: 168.00, network: 'Solana' },
-  { symbol: 'BTC', name: 'Bitcoin', balance: '0.12', priceUsd: 67400, network: 'Bitcoin' },
+const BASE_SWAP_ASSETS: SwapAsset[] = [
+  { symbol: 'ETH', name: 'Ethereum', balance: '306.45', priceUsd: 3420.50, network: 'Ethereum' },
+  { symbol: 'USDC', name: 'USD Coin', balance: '89790.00', priceUsd: 1.00, network: 'Multi-Chain' },
+  { symbol: 'SOL', name: 'Solana', balance: '1095.00', priceUsd: 168.20, network: 'Solana' },
+  { symbol: 'BTC', name: 'Bitcoin', balance: '7.70', priceUsd: 67540.00, network: 'Bitcoin' },
 ];
 
 export default function SwapScreen({ navigation }: { navigation: any }) {
@@ -146,8 +149,14 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
   const colors = useColors();
   const isDark = useIsDark();
 
-  const [fromAsset, setFromAsset] = useState<SwapAsset>(SWAP_ASSETS[0]);
-  const [toAsset, setToAsset] = useState<SwapAsset>(SWAP_ASSETS[1]);
+  const { balances, executeSwap, loadTransactions } = useTransactionStore();
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  const [fromAsset, setFromAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[0]);
+  const [toAsset, setToAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[1]);
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [slippage, setSlippage] = useState('0.5%');
@@ -158,6 +167,26 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
   const [tokenSearchQuery, setTokenSearchQuery] = useState('');
   const [swapping, setSwapping] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Dynamic user live balances
+  const getLiveBalance = (symbol: string): number => {
+    const key = symbol.toUpperCase() as keyof typeof balances;
+    return balances[key] !== undefined ? balances[key] : 0;
+  };
+
+  const fromAvailableBalance = getLiveBalance(fromAsset.symbol);
+  const toAvailableBalance = getLiveBalance(toAsset.symbol);
+
+  // Formatted balances for display
+  const fromBalanceFormatted = fromAvailableBalance.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: fromAvailableBalance < 1 ? 4 : 2,
+  });
+
+  const toBalanceFormatted = toAvailableBalance.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: toAvailableBalance < 1 ? 4 : 2,
+  });
 
   // Monochrome Theme Tokens
   const cardBg = isDark ? '#171717' : '#FFFFFF';
@@ -177,7 +206,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
     } else {
       setToAmount('');
     }
-  }, [fromAmount, fromAsset, toAsset]);
+  }, [fromAmount, fromAsset, toAsset, exchangeRate]);
 
   // Flip assets
   const handleFlipAssets = () => {
@@ -190,28 +219,43 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
 
   // Max balance fill
   const handleMaxPress = () => {
-    setFromAmount(fromAsset.balance.replace(',', ''));
+    setFromAmount(fromAvailableBalance > 0 ? fromAvailableBalance.toString() : '0');
   };
 
   // Balance & Input Validation
   const numericFromAmount = parseFloat(fromAmount) || 0;
-  const numericAvailableBalance = parseFloat(fromAsset.balance.replace(',', '')) || 0;
-  const isInsufficientFunds = numericFromAmount > numericAvailableBalance;
+  const isInsufficientFunds = numericFromAmount > fromAvailableBalance;
   const isInputEmpty = numericFromAmount <= 0;
 
-  // Execute Swap
+  // Execute Swap with real balance deduction and activity log
   const handleExecuteSwap = () => {
     if (isInputEmpty || isInsufficientFunds || swapping) return;
 
     setSwapping(true);
     setTimeout(() => {
+      const numericToAmount = parseFloat(toAmount) || (numericFromAmount * exchangeRate);
+      const usdEquivalent = `$${(numericFromAmount * fromAsset.priceUsd).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+
+      executeSwap(fromAsset.symbol, toAsset.symbol, numericFromAmount, numericToAmount, usdEquivalent);
+
       setSwapping(false);
       setShowSuccessModal(true);
-    }, 1200);
+    }, 900);
   };
 
   const FromLogo = TOKEN_LOGOS[fromAsset.symbol] || EthLogo;
   const ToLogo = TOKEN_LOGOS[toAsset.symbol] || UsdcLogo;
+
+  const SWAP_ASSETS: SwapAsset[] = BASE_SWAP_ASSETS.map(asset => ({
+    ...asset,
+    balance: getLiveBalance(asset.symbol).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: getLiveBalance(asset.symbol) < 1 ? 4 : 2,
+    }),
+  }));
 
   const filteredAssets = SWAP_ASSETS.filter(a =>
     tokenSearchQuery
@@ -229,7 +273,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
         style={{ flex: 1 }}
       >
         {/* Top Header Bar */}
-        <View style={[styles.headerBar, { paddingTop: insets.top + 6 }]}>
+        <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
           <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Swap</Text>
 
           <TouchableOpacity
@@ -257,7 +301,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                 <Text style={styles.cardHeaderLabel}>YOU PAY</Text>
                 <View style={styles.balanceRightRow}>
                   <Text style={styles.balanceText}>
-                    Bal: {fromAsset.balance} {fromAsset.symbol}
+                    Bal: {fromBalanceFormatted} {fromAsset.symbol}
                   </Text>
                   <TouchableOpacity onPress={handleMaxPress} style={[styles.maxPill, { backgroundColor: monoMutedSurface }]}>
                     <Text style={[styles.maxPillText, { color: colors.text.primary }]}>MAX</Text>
@@ -318,7 +362,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardHeaderLabel}>YOU RECEIVE</Text>
                 <Text style={styles.balanceText}>
-                  Bal: {toAsset.balance} {toAsset.symbol}
+                  Bal: {toBalanceFormatted} {toAsset.symbol}
                 </Text>
               </View>
 
@@ -571,6 +615,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                 setFromAmount('');
                 setToAmount('');
               }}
+              containerStyle={{ width: '100%' }}
               style={[styles.successCloseBtn, { backgroundColor: monoPrimary }]}
             >
               <Text style={[styles.successCloseText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Done</Text>
@@ -594,9 +639,9 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   slippageHeaderPill: {
     flexDirection: 'row',
@@ -875,13 +920,13 @@ const styles = StyleSheet.create({
   },
   successCloseBtn: {
     width: '100%',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   successCloseText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
   },
 });

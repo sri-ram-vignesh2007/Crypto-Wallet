@@ -148,6 +148,36 @@ const EthLogo = () => (
   </Svg>
 );
 
+const BtcLogo = () => (
+  <Svg width={44} height={44} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#F7931A" />
+    <Path d="M14.5 10.5c.8-.4 1.2-1.2 1.2-2 0-1.5-1.1-2.5-2.8-2.5H10v9h3.3c1.9 0 3-.9 3-2.6 0-1-.5-1.6-1.8-1.9zM11.5 7.5h1.2c.8 0 1.3.4 1.3 1.1s-.5 1.1-1.3 1.1h-1.2v-2.2zm1.6 6h-1.6v-2.4h1.6c.9 0 1.4.5 1.4 1.2s-.5 1.2-1.4 1.2z" fill="#FFFFFF" />
+  </Svg>
+);
+
+const SolLogo = () => (
+  <Svg width={44} height={44} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#14F195" />
+    <Path d="M6.5 15.5l2-2h9l-2 2h-9z" fill="#000000" />
+    <Path d="M8.5 12l-2-2h9l2 2h-9z" fill="#9945FF" />
+    <Path d="M6.5 8.5l2-2h9l-2 2h-9z" fill="#000000" />
+  </Svg>
+);
+
+const UsdcLogo = () => (
+  <Svg width={44} height={44} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="11" fill="#2775CA" />
+    <Path d="M12 7v10M14 9.5a2 2 0 0 0-4 0c0 2 4 1.5 4 3.5a2 2 0 0 1-4 0" stroke="#FFFFFF" strokeWidth={1.8} strokeLinecap="round" />
+  </Svg>
+);
+
+const TOKEN_LOGOS: Record<string, React.FC> = {
+  ETH: EthLogo,
+  BTC: BtcLogo,
+  SOL: SolLogo,
+  USDC: UsdcLogo,
+};
+
 // Simple line chart for price history
 const PriceChart = ({ data, color, width = 300, height = 100 }: { data: number[]; color: string; width?: number; height?: number }) => {
   if (!data.length) return null;
@@ -192,21 +222,25 @@ export default function AssetDetailScreen({ navigation, route }: Props) {
   const typography = useTypography();
   const isDark = useIsDark();
 
-  const asset = route?.params?.asset || {
-    id: 'eth',
-    symbol: 'ETH',
-    name: 'Ethereum',
-    logo: EthLogo,
-    network: 'Ethereum',
-    networkColor: '#627EEA',
-    quantity: '2.45',
-    fiatValue: '$7,842.30',
-    change24h: '+2.34%',
-    positive: true,
-    price: '$3,201.45',
-  };
+  const rawAsset = route?.params?.asset || {};
+  const symbol = (rawAsset.symbol || 'ETH').toUpperCase();
+  const name = rawAsset.name || (symbol === 'ETH' ? 'Ethereum' : symbol === 'BTC' ? 'Bitcoin' : symbol === 'SOL' ? 'Solana' : symbol === 'USDC' ? 'USD Coin' : symbol);
+  const quantity = rawAsset.quantity || rawAsset.balance || '0.00';
+  const fiatValue = rawAsset.fiatValue || rawAsset.usd || '$0.00';
+  const price = rawAsset.price || fiatValue;
+  const change24h = rawAsset.change24h || rawAsset.change || '+0.00%';
+  const network = rawAsset.network || (symbol === 'BTC' ? 'Bitcoin' : symbol === 'SOL' ? 'Solana' : 'Ethereum');
 
-  const [selectedNetwork, setSelectedNetwork] = useState(asset.network);
+  const NETWORK_COLORS: Record<string, string> = {
+    ETH: '#627EEA',
+    BTC: '#F7931A',
+    SOL: '#14F195',
+    USDC: '#2775CA',
+  };
+  const networkColor = rawAsset.networkColor || NETWORK_COLORS[symbol] || '#858585';
+  const LogoComponent = TOKEN_LOGOS[symbol] || EthLogo;
+
+  const [selectedNetwork, setSelectedNetwork] = useState(network);
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
   const [expandedTxId, setExpandedTxId] = useState<string | null>(null);
 
@@ -220,15 +254,26 @@ export default function AssetDetailScreen({ navigation, route }: Props) {
     return { text: safeStr, positive };
   };
 
-  const changeData = formatChange(asset?.change24h);
+  const changeData = formatChange(change24h);
 
   // Generate mock chart data
   const chartData = Array.from({ length: 24 }, (_, i) => {
-    const rawPriceStr = String(asset?.price || asset?.fiatValue || '100');
+    const rawPriceStr = String(price || fiatValue || '100');
     const base = parseFloat(rawPriceStr.replace('$', '').replace(/,/g, '')) || 100;
     const variance = (Math.random() - 0.5) * base * 0.05;
     return base + variance;
   });
+
+  const asset = {
+    symbol,
+    name,
+    quantity,
+    fiatValue,
+    price,
+    change24h,
+    network,
+    networkColor,
+  };
 
   return (
     <SafeAreaView style={[
@@ -283,7 +328,7 @@ export default function AssetDetailScreen({ navigation, route }: Props) {
               styles.assetLogoWrap,
               { backgroundColor: asset.networkColor + '15' },
             ]}>
-              <asset.logo />
+              <LogoComponent />
             </View>
             <View style={styles.assetHeaderInfo}>
               <View style={styles.assetHeaderNameRow}>

@@ -227,7 +227,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* Large Title Navigation Header */}
-      <View style={[styles.largeHeader, { paddingTop: insets.top + 10 }]}>
+      <View style={[styles.largeHeader, { paddingTop: insets.top + 8 }]}>
         <Text style={[styles.largeTitle, { color: colors.text.primary }]}>Settings</Text>
       </View>
 
@@ -511,13 +511,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   largeHeader: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 10,
   },
   largeTitle: {
-    fontSize: 34,
-    fontWeight: '700',
-    letterSpacing: -0.8,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.6,
   },
   content: {
     paddingHorizontal: 16,

@@ -95,54 +95,54 @@ export interface LiveDeskBroadcast {
   inquiries: OrganizationInquiry[];
 }
 
-// 10 AI Autonomous Desks (All divisions of the company - Cura AI)
+// 10 AI Autonomous Desks (All divisions of the organization)
 const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   {
     id: 'broadcast-1',
-    orgName: 'Cura AI Enterprise Desk',
-    orgHandle: '@cura_enterprise_ai',
+    orgName: 'Enterprise Desk',
+    orgHandle: '@enterprise_desk',
     orgLogoInitial: 'E',
     orgCategory: 'Business',
     isVerified: true,
     timeAgo: '12m ago',
     title: 'Fortune 500 Enterprise Treasury Operations Automate Instant On-Chain Payroll',
-    content: 'Cura AI Enterprise Desk has integrated zero-slippage B2B settlements for multinational enterprise treasuries. Autonomous payroll smart vaults now execute multi-currency settlements with sub-cent transaction overhead and continuous cryptographic audit logs.',
+    content: 'Enterprise Desk has integrated zero-slippage B2B settlements for multinational enterprise treasuries. Autonomous payroll smart vaults now execute multi-currency settlements with sub-cent transaction overhead and continuous cryptographic audit logs.',
     tags: ['$USDC', 'Enterprise', 'Payroll', 'Treasury'],
     viewCount: 46210,
     inquiries: [],
   },
   {
     id: 'broadcast-2',
-    orgName: 'Cura AI Sovereign Crypto Desk',
-    orgHandle: '@cura_bitcoin_ai',
+    orgName: 'Crypto & Bitcoin Desk',
+    orgHandle: '@crypto_desk',
     orgLogoInitial: 'B',
     orgCategory: 'Crypto',
     isVerified: true,
     timeAgo: '35m ago',
     title: 'Bitcoin Institutional Accumulation Accelerates: Weekly Net Inflows Cross $1.8B',
-    content: 'Cura AI Sovereign Desk models indicate aggressive institutional custody accumulation above $68,000. Mining hash rate difficulty reached new all-time highs as sovereign allocation desks expand multi-year reserves.',
+    content: 'Sovereign Desk models indicate aggressive institutional custody accumulation above $68,000. Mining hash rate difficulty reached new all-time highs as sovereign allocation desks expand multi-year reserves.',
     tags: ['$BTC', 'Bitcoin', 'Macro', 'Reserves'],
     viewCount: 52180,
     inquiries: [],
   },
   {
     id: 'broadcast-3',
-    orgName: 'Cura AI DeFi Engine Desk',
-    orgHandle: '@cura_defi_ai',
+    orgName: 'DeFi Engine Desk',
+    orgHandle: '@defi_desk',
     orgLogoInitial: 'D',
     orgCategory: 'DeFi',
     isVerified: true,
     timeAgo: '50m ago',
     title: 'Automated Concentrated Liquidity Rebalancing Captures 42% Fee Compression',
-    content: 'Cura AI DeFi Engine telemetry reports record liquidity efficiency across top AMM pools. Dynamic rebalancing algorithms minimized impermanent loss for high-volume trading pairs during volatility spikes.',
+    content: 'DeFi Engine telemetry reports record liquidity efficiency across top AMM pools. Dynamic rebalancing algorithms minimized impermanent loss for high-volume trading pairs during volatility spikes.',
     tags: ['$ETH', 'DeFi', 'Liquidity', 'Yield'],
     viewCount: 38450,
     inquiries: [],
   },
   {
     id: 'broadcast-4',
-    orgName: 'Cura AI L1 Systems Desk',
-    orgHandle: '@cura_l1_ai',
+    orgName: 'Layer 1 Systems Desk',
+    orgHandle: '@l1_systems',
     orgLogoInitial: 'S',
     orgCategory: 'Layer 1',
     isVerified: true,
@@ -155,8 +155,8 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   },
   {
     id: 'broadcast-5',
-    orgName: 'Cura AI Rollup & Scaling Desk',
-    orgHandle: '@cura_rollup_ai',
+    orgName: 'Rollup & Scaling Desk',
+    orgHandle: '@rollup_desk',
     orgLogoInitial: 'R',
     orgCategory: 'Layer 2',
     isVerified: true,
@@ -169,8 +169,8 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   },
   {
     id: 'broadcast-6',
-    orgName: 'Cura AI Tokenized Assets Desk',
-    orgHandle: '@cura_rwa_ai',
+    orgName: 'Tokenized Assets Desk',
+    orgHandle: '@rwa_desk',
     orgLogoInitial: 'T',
     orgCategory: 'RWA',
     isVerified: true,
@@ -183,8 +183,8 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   },
   {
     id: 'broadcast-7',
-    orgName: 'Cura AI Interoperability Desk',
-    orgHandle: '@cura_crosschain_ai',
+    orgName: 'Interoperability Desk',
+    orgHandle: '@crosschain_desk',
     orgLogoInitial: 'C',
     orgCategory: 'Cross-Chain',
     isVerified: true,
@@ -197,22 +197,22 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   },
   {
     id: 'broadcast-8',
-    orgName: 'Cura AI Security & Enclave Desk',
-    orgHandle: '@cura_security_ai',
+    orgName: 'Security & Enclave Desk',
+    orgHandle: '@security_desk',
     orgLogoInitial: 'K',
     orgCategory: 'Security',
     isVerified: true,
     timeAgo: '4h ago',
     title: 'Automated Formal Verification Confirms Zero Vulnerabilities Across Verified Vaults',
-    content: 'Cura AI automated symbolic execution engines verified 140+ protocol smart contracts this week. MEV shielding successfully protected institutional swaps from sandwich attacks.',
+    content: 'Automated symbolic execution engines verified 140+ protocol smart contracts this week. MEV shielding successfully protected institutional swaps from sandwich attacks.',
     tags: ['Security', 'Audits', 'MEVShield', 'Enclaves'],
     viewCount: 21900,
     inquiries: [],
   },
   {
     id: 'broadcast-9',
-    orgName: 'Cura AI Agentic Compute Desk',
-    orgHandle: '@cura_compute_ai',
+    orgName: 'Agentic Compute Desk',
+    orgHandle: '@compute_desk',
     orgLogoInitial: 'A',
     orgCategory: 'AI Compute',
     isVerified: true,
@@ -225,8 +225,8 @@ const INITIAL_BROADCASTS: LiveDeskBroadcast[] = [
   },
   {
     id: 'broadcast-10',
-    orgName: 'Cura AI Macro & Policy Desk',
-    orgHandle: '@cura_macro_ai',
+    orgName: 'Macro & Policy Desk',
+    orgHandle: '@macro_desk',
     orgLogoInitial: 'M',
     orgCategory: 'Macro',
     isVerified: true,
@@ -354,15 +354,8 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     }, 800);
   };
 
-  // Open Post Dispatch (Enforces Username Requirement)
+  // Open Post Dispatch
   const handleOpenPostDispatch = () => {
-    if (!username || !username.trim()) {
-      setNewUsernameInput('');
-      setNewDisplayNameInput(name || '');
-      setUsernameError('');
-      setShowUsernameModal(true);
-      return;
-    }
     setShowOrgRequestModal(true);
   };
 
@@ -584,7 +577,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       )}
 
       {/* Top Header Bar (Clean: "Community" title with "+ Post Dispatch" button on the right) */}
-      <View style={[styles.headerBar, { paddingTop: insets.top + 6 }]}>
+      <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
         <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Community</Text>
 
         <TouchableOpacity
@@ -1123,7 +1116,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   Post Dispatch
                 </Text>
                 <Text style={styles.orgModalSubtitle}>
-                  Publishing as @{username || 'user'}
+                  Publish verified live updates to Community feed
                 </Text>
               </View>
               <TouchableOpacity
@@ -1135,6 +1128,41 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+              {/* Quick Select Desk Preset */}
+              <View style={styles.inputFieldGroup}>
+                <Text style={styles.inputFieldLabel}>SELECT DESK / ORGANIZATION PRESET</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 4 }}>
+                  {[
+                    'Enterprise Desk',
+                    'Crypto & Bitcoin Desk',
+                    'DeFi Engine Desk',
+                    'Layer 1 Systems Desk',
+                    'Rollup & Scaling Desk',
+                    'Tokenized Assets Desk',
+                    'Security & Enclave Desk',
+                    'Agentic Compute Desk',
+                  ].map(desk => (
+                    <TouchableOpacity
+                      key={desk}
+                      onPress={() => setOrgNameInput(desk)}
+                      style={[
+                        styles.catChip,
+                        { backgroundColor: orgNameInput === desk ? monoPrimary : monoMutedSurface, marginRight: 6 },
+                      ]}
+                    >
+                      <Text style={[
+                        styles.catChipText,
+                        orgNameInput === desk
+                          ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
+                          : { color: colors.text.secondary },
+                      ]}>
+                        {desk}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
               {/* Dispatch Category */}
               <View style={styles.inputFieldGroup}>
                 <Text style={styles.inputFieldLabel}>CATEGORY</Text>
@@ -1253,12 +1281,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingBottom: 10,
   },
   screenTitle: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: -0.4,
+    letterSpacing: -0.6,
   },
   orgSubmitBtn: {
     paddingHorizontal: 14,

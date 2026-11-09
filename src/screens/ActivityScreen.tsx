@@ -1,59 +1,34 @@
-// src/screens/ActivityScreen.tsx - Apple Style Activity/History
+// src/screens/ActivityScreen.tsx - Institutional Activity & Transaction History
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity,
-  SafeAreaView, StatusBar, FlatList, TextInput,
+  SafeAreaView, StatusBar, TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Line } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
-import { useWalletStore } from '../store/walletStore';
+import { useTransactionStore, WalletTransaction } from '../store/transactionStore';
 
-const ChevronRightIcon = ({ color = '#94A3B8', size = 20 }: { color?: string; size?: number }) => (
+const ChevronRightIcon = ({ color = '#858585', size = 14 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
-const ShieldCheckIcon = ({ color = '#16A34A', size = 16 }: { color?: string; size?: number }) => (
+const ShieldCheckIcon = ({ color = '#16A34A', size = 13 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     <Path d="M9 12l2 2 4-4" />
   </Svg>
 );
 
-const ShieldAlertIcon = ({ color = '#DC2626', size = 16 }: { color?: string; size?: number }) => (
+const ShieldAlertIcon = ({ color = '#DC2626', size = 13 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     <Path d="M9 9v4M12 17h.01" />
   </Svg>
 );
-
-const ClockIcon = ({ color = '#94A3B8', size = 16 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="12" cy="12" r="10" />
-    <Path d="M12 6v6l4 2" />
-  </Svg>
-);
-
-const ExternalLinkIcon = ({ color = '#94A3B8', size = 14 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-    <Path d="M15 3h6v6" />
-    <Path d="M10 14L21 3" />
-  </Svg>
-);
-
-// Mock transaction data
-const TRANSACTIONS = [
-  { id: 1, type: 'sent', asset: 'ETH', amount: '0.52', value: '$1,782.40', to: '0x742d...8f32', time: '2 min ago', status: 'confirmed', risk: 'normal', hash: '0xabc123...' },
-  { id: 2, type: 'received', asset: 'USDC', amount: '500', value: '$500.00', from: '0x8a3f...1c9d', time: '1 hour ago', status: 'confirmed', risk: 'normal', hash: '0xdef456...' },
-  { id: 3, type: 'swap', asset: 'ETH → USDC', amount: '0.25', value: '$857.30', from: 'ETH', to: 'USDC', time: '3 hours ago', status: 'confirmed', risk: 'attention', hash: '0xghi789...' },
-  { id: 4, type: 'sent', asset: 'SOL', amount: '2.5', value: '$418.25', to: '0x9b2e...4f1a', time: '5 hours ago', status: 'pending', risk: 'normal', hash: '0xjkl012...' },
-  { id: 5, type: 'received', asset: 'MATIC', amount: '1,250', value: '$1,062.50', from: '0x4c8d...7e9f', time: '1 day ago', status: 'confirmed', risk: 'high', hash: '0xmno345...' },
-  { id: 6, type: 'swap', asset: 'USDC → BTC', amount: '500', value: '$500.00', from: 'USDC', to: 'BTC', time: '2 days ago', status: 'confirmed', risk: 'normal', hash: '0xpqr678...' },
-];
 
 const FILTERS = ['All', 'Sent', 'Received', 'Swaps', 'Security'];
 
@@ -64,8 +39,22 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchText, setSearchText] = useState('');
 
-  const filteredTxs = TRANSACTIONS.filter(tx => {
-    if (activeFilter !== 'All' && tx.type !== activeFilter.toLowerCase()) return false;
+  const { transactions, loadTransactions } = useTransactionStore();
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  const cardBg = isDark ? '#171717' : '#FFFFFF';
+  const cardBorder = isDark ? '#303030' : '#E5E5E5';
+  const monoMuted = isDark ? '#202020' : '#F2F2F2';
+  const monoPrimary = isDark ? '#FFFFFF' : '#111111';
+
+  const filteredTxs = transactions.filter(tx => {
+    if (activeFilter === 'Sent' && tx.type !== 'sent') return false;
+    if (activeFilter === 'Received' && tx.type !== 'received') return false;
+    if (activeFilter === 'Swaps' && tx.type !== 'swap') return false;
+    if (activeFilter === 'Security' && tx.risk !== 'attention' && tx.risk !== 'high') return false;
     if (searchText && !tx.asset.toLowerCase().includes(searchText.toLowerCase()) &&
         !tx.hash.toLowerCase().includes(searchText.toLowerCase())) return false;
     return true;
@@ -73,52 +62,35 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
 
   const getRiskComponent = (risk: string) => {
     switch (risk) {
-      case 'normal': return <ShieldCheckIcon color={colors.text.primary} size={14} />;
-      case 'attention': return <ShieldAlertIcon color={colors.text.secondary} size={14} />;
-      case 'high': return <ShieldAlertIcon color={colors.danger.DEFAULT} size={14} />;
+      case 'normal': return <ShieldCheckIcon color={colors.text.primary} size={13} />;
+      case 'attention': return <ShieldAlertIcon color={colors.text.secondary} size={13} />;
+      case 'high': return <ShieldAlertIcon color={colors.danger.DEFAULT} size={13} />;
       default: return null;
     }
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return colors.text.primary;
-      case 'pending': return colors.text.secondary;
-      case 'failed': return colors.danger.DEFAULT;
-      default: return colors.text.muted;
-    }
-  };
-
-  const monoMuted = isDark ? '#202020' : '#F2F2F2';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
+      {/* Top Header Bar (Matching Community, Swap, and Settings) */}
+      <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Activity</Text>
+      </View>
+
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text.primary }]}>Activity</Text>
-          <TouchableOpacity style={[styles.searchButton, { backgroundColor: monoMuted }]} activeOpacity={0.7}>
-            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <Circle cx="11" cy="11" r="8" />
-              <Path d="M21 21l-4.35-4.35" />
-            </Svg>
-          </TouchableOpacity>
-        </View>
-
         {/* Search Bar */}
-        <View style={[styles.searchBar, { backgroundColor: isDark ? '#171717' : '#F7F7F7', borderColor: colors.border.DEFAULT, borderWidth: 0.5 }]}>
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <View style={[styles.searchBar, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <Circle cx="11" cy="11" r="8" />
             <Path d="M21 21l-4.35-4.35" />
           </Svg>
           <TextInput
             style={[styles.searchInput, { color: colors.text.primary }]}
-            placeholder="Search transactions..."
+            placeholder="Search transactions, hashes, assets..."
             placeholderTextColor={colors.text.muted}
             value={searchText}
             onChangeText={setSearchText}
@@ -136,8 +108,8 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
                 style={[
                   styles.filterChip,
                   {
-                    backgroundColor: active ? (isDark ? '#FFFFFF' : '#111111') : colors.bg.surface,
-                    borderColor: active ? (isDark ? '#FFFFFF' : '#111111') : colors.border.subtle,
+                    backgroundColor: active ? monoPrimary : cardBg,
+                    borderColor: active ? monoPrimary : cardBorder,
                   },
                 ]}
                 onPress={() => setActiveFilter(filter)}
@@ -154,17 +126,19 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
           })}
         </View>
 
-        {/* Transactions */}
+        {/* Transactions List */}
         {filteredTxs.length === 0 ? (
-          <View style={[styles.emptyState, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
-            <Svg width={48} height={48} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+          <View style={[styles.emptyState, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <Svg width={44} height={44} viewBox="0 0 24 24" fill="none" stroke={colors.text.muted} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
               <Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <Path d="M16 2v4" />
               <Path d="M8 2v4" />
               <Path d="M3 10h18" />
             </Svg>
-            <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No transactions</Text>
-            <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>Transactions will appear here when you send, receive, or swap</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No transactions found</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>
+              Transactions will appear here when you send, receive, or swap assets.
+            </Text>
           </View>
         ) : (
           <View>
@@ -173,53 +147,50 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
                 key={item.id.toString()}
                 style={[
                   styles.txItem,
-                  { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle },
+                  { backgroundColor: cardBg, borderColor: cardBorder },
                 ]}
                 onPress={() => navigation.navigate('TransactionDetail', { tx: item })}
-                activeOpacity={0.85}
+                activeOpacity={0.8}
               >
+                {/* Left Side: Circular Icon + Title + Asset / Time */}
                 <View style={styles.txLeft}>
-                  <View style={[
-                    styles.txIconBox,
-                    { backgroundColor: monoMuted },
-                  ]}>
-                    {typesIcons[item.type]({ color: colors.text.primary, size: 20 })}
+                  <View style={[styles.txIconBox, { backgroundColor: monoMuted }]}>
+                    {typesIcons[item.type]
+                      ? typesIcons[item.type]({ color: colors.text.primary, size: 18 })
+                      : <Circle cx="12" cy="12" r="8" fill={colors.text.primary} />}
                   </View>
                   <View style={styles.txInfo}>
-                    <View style={styles.txTopRow}>
-                      <Text style={[styles.txType, { color: colors.text.primary }]}>{txTypeLabels[item.type]}</Text>
-                      <Text style={[styles.txTime, { color: colors.text.muted }]}>{item.time}</Text>
-                    </View>
-                    <Text style={[styles.txDetail, { color: colors.text.secondary }]}>{item.asset}</Text>
+                    <Text style={[styles.txType, { color: colors.text.primary }]}>
+                      {txTypeLabels[item.type] || 'Transaction'}
+                    </Text>
+                    <Text style={[styles.txSubtitle, { color: colors.text.muted }]} numberOfLines={1}>
+                      {item.asset} • {item.time}
+                    </Text>
                   </View>
                 </View>
+
+                {/* Right Side: Amount on top, Value + Status Pill + Chevron on bottom */}
                 <View style={styles.txRight}>
-                  <View style={styles.txValueRow}>
-                    <Text style={[
-                      styles.txValue,
-                      { color: colors.text.primary },
-                    ]}>
-                      {item.type === 'received' ? '+' : '-'}{item.amount} {item.asset.split(' → ')[0]}
-                    </Text>
+                  <Text style={[styles.txValue, { color: colors.text.primary }]}>
+                    {item.type === 'received' ? '+' : item.type === 'swap' ? '' : '-'}{item.amount} {item.asset.includes('→') ? '' : item.asset}
+                  </Text>
+                  <View style={styles.txMetaRow}>
                     <Text style={[styles.txUsdValue, { color: colors.text.muted }]}>{item.value}</Text>
-                  </View>
-                  <View style={styles.txStatusRow}>
                     <View style={[
                       styles.statusBadge,
                       {
-                        backgroundColor: monoMuted,
-                        borderColor: item.status === 'failed' ? colors.danger.DEFAULT : colors.border.subtle,
+                        backgroundColor: item.status === 'failed' ? 'rgba(239, 68, 68, 0.15)' : monoMuted,
+                        borderColor: item.status === 'failed' ? '#EF4444' : cardBorder,
                       },
                     ]}>
                       <Text style={[
                         styles.statusText,
-                        { color: item.status === 'failed' ? colors.danger.DEFAULT : colors.text.primary },
+                        { color: item.status === 'failed' ? '#EF4444' : colors.text.secondary },
                       ]}>
                         {item.status}
                       </Text>
                     </View>
-                    {getRiskComponent(item.risk)}
-                    <ChevronRightIcon color={colors.text.muted} size={16} />
+                    <ChevronRightIcon color={colors.text.muted} size={12} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -256,88 +227,133 @@ const txTypeLabels: Record<string, string> = {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+  container: {
+    flex: 1,
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#0F172A' },
-  searchButton: {
-    width: 40, height: 40, borderRadius: 10,
-    backgroundColor: '#F8FAFC',
-    alignItems: 'center', justifyContent: 'center',
+  headerBar: {
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.6,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
     height: 44,
-    marginBottom: 16,
+    marginBottom: 14,
+    borderWidth: 0.5,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
   },
   filters: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 0.5,
   },
-  filterChipActive: { borderWidth: 0 },
-  filterChipText: { fontSize: 13, fontWeight: '600' },
-  searchInput: { flex: 1, fontSize: 15, color: '#0F172A' },
+  filterChipText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
   emptyState: {
-    padding: 40,
+    padding: 36,
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginTop: 40,
+    borderWidth: 0.5,
+    marginTop: 20,
   },
-  emptyTitle: { fontSize: 17, fontWeight: '600', marginTop: 16 },
-  emptySubtitle: { fontSize: 14, textAlign: 'center', marginTop: 8 },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 14,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 6,
+    lineHeight: 18,
+  },
   txItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 12,
-    marginBottom: 8,
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 0.5,
+    marginBottom: 10,
   },
-  txLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  txLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    marginRight: 10,
+  },
   txIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  txInfo: { flex: 1, gap: 4 },
-  txTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  txType: { fontSize: 15, fontWeight: '600' },
-  txTime: { fontSize: 13, color: '#94A3B8' },
-  txDetail: { fontSize: 13, color: '#64748B' },
-  txRight: { alignItems: 'flex-end', gap: 8 },
-  txValueRow: { alignItems: 'flex-end', gap: 4 },
-  txValue: { fontSize: 15, fontWeight: '600' },
-  txUsdValue: { fontSize: 13 },
-  txStatusRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
+  txInfo: {
+    flex: 1,
+    gap: 3,
   },
-  statusText: { fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
-  txDivider: { height: 1, backgroundColor: '#E2E8F0', marginHorizontal: -20 },
+  txType: {
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  txSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  txRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  txValue: {
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  txMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  txUsdValue: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  statusBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 0.5,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
 });

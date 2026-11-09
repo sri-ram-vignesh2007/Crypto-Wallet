@@ -7,12 +7,15 @@ import { useTheme, useColors, useSpacing, useBorderRadius, useTypography } from 
 
 interface Props {
   navigation: any;
-  route: { params: { symbol: string; name: string; price: string; change: string; icon?: string } };
+  route?: { params?: { symbol?: string; name?: string; price?: string; change?: string; icon?: string } };
 }
 
 export default function TokenDetailScreen({ navigation, route }: Props) {
-  const { params } = route;
-  const { symbol, name, price, change } = params;
+  const params = route?.params || {};
+  const symbol = params.symbol || 'TOKEN';
+  const name = params.name || symbol;
+  const price = params.price ? (params.price.startsWith('$') ? params.price : `$${params.price}`) : '$0.00';
+  const change = params.change || '+0.00%';
   const colors = useColors();
   const spacing = useSpacing();
   const borderRadius = useBorderRadius();
@@ -21,6 +24,16 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg.canvas }]}>
+      <View style={styles.topNavRow}>
+        <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.backBtn} activeOpacity={0.8}>
+          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M19 12H5M12 19l-7-7 7-7" />
+          </Svg>
+        </TouchableOpacity>
+        <Text style={[styles.topNavTitle, { color: colors.text.primary }]}>{name}</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -32,7 +45,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
           </View>
           <View style={styles.headerInfo}>
             <Text style={[styles.tokenName, { color: colors.text.primary }]}>{name}</Text>
-            <Text style={[styles.tokenPrice, { color: colors.text.primary }]}>${price}</Text>
+            <Text style={[styles.tokenPrice, { color: colors.text.primary }]}>{price}</Text>
             <Text style={[
               styles.priceChange,
               { color: isPositive ? colors.success.DEFAULT : colors.danger.DEFAULT },
@@ -94,6 +107,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     marginBottom: 24,
+  },
+  topNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  backBtn: {
+    padding: 6,
+  },
+  topNavTitle: {
+    fontSize: 17,
+    fontWeight: '700',
   },
   tokenBadge: {
     width: 56,

@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
 import { useProfileStore } from '../store/profileStore';
+import { useTransactionStore } from '../store/transactionStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
 
@@ -248,6 +249,70 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
   const [moversTab, setMoversTab] = useState<'gainers' | 'losers'>('gainers');
 
+  const { balances, loadTransactions } = useTransactionStore();
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  const ethTotal = balances.ETH * 3420.50;
+  const btcTotal = balances.BTC * 67540.00;
+  const solTotal = balances.SOL * 168.20;
+  const usdcTotal = balances.USDC;
+  const dynamicTotalPortfolio = ethTotal + btcTotal + solTotal + usdcTotal;
+
+  const displayTotalUsd = dynamicTotalPortfolio.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  const dynamicAssets = [
+    {
+      symbol: 'ETH',
+      name: 'Ethereum',
+      balance: balances.ETH.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: balances.ETH < 1 ? 4 : 2 }),
+      price: '$3,420.50',
+      change: '+3.4%',
+      positive: true,
+      usd: `$${ethTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      network: 'Ethereum',
+      networkColor: '#627EEA',
+    },
+    {
+      symbol: 'BTC',
+      name: 'Bitcoin',
+      balance: balances.BTC.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: balances.BTC < 1 ? 4 : 2 }),
+      price: '$67,540.00',
+      change: '+1.9%',
+      positive: true,
+      usd: `$${btcTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      network: 'Bitcoin',
+      networkColor: '#F7931A',
+    },
+    {
+      symbol: 'SOL',
+      name: 'Solana',
+      balance: balances.SOL.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: balances.SOL < 1 ? 4 : 2 }),
+      price: '$168.20',
+      change: '-0.7%',
+      positive: false,
+      usd: `$${solTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      network: 'Solana',
+      networkColor: '#14F195',
+    },
+    {
+      symbol: 'USDC',
+      name: 'USD Coin',
+      balance: balances.USDC.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      price: '$1.00',
+      change: '0.0%',
+      positive: true,
+      usd: `$${usdcTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      network: 'ERC-20',
+      networkColor: '#2775CA',
+    },
+  ];
+
   const activeChart = TIMEFRAME_CHART_DATA[selectedTimeRange] || TIMEFRAME_CHART_DATA['1D'];
 
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
@@ -292,10 +357,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   };
 
   const currentChainObj = CHAINS[selectedChain] || CHAINS.ethereum;
-
-  const displayTotalUsd = totalValueUsd > 0
-    ? totalValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : '1,842,590.42';
 
   const cardBg = isDark ? '#171717' : '#FFFFFF';
   const cardBorder = isDark ? '#303030' : '#E5E5E5';
@@ -520,9 +581,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          {DEFAULT_ASSETS.map((asset, index) => {
+          {dynamicAssets.map((asset, index) => {
             const Logo = TOKEN_LOGOS[asset.symbol] || EthLogo;
-            const isLast = index === DEFAULT_ASSETS.length - 1;
+            const isLast = index === dynamicAssets.length - 1;
             return (
               <SpringButton
                 key={asset.symbol}
