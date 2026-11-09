@@ -158,45 +158,45 @@ export const lightColors = {
 };
 
 // ============================================
-// DARK PALETTE — Apple iOS Dark Mode (True Black)
+// DARK PALETTE — Institutional Obsidian & Neon Emerald / Surgical Cyan
 // ============================================
 export const darkColors = {
   bg: {
-    canvas: '#000000',           // Apple System Deep Black
-    surface: '#1C1C1E',          // Apple Secondary System Background
-    surfaceElevated: '#2C2C2E',  // Apple Tertiary System Background
-    surfaceMuted: '#1C1C1E',
-    surfacePressed: '#2C2C2E',
-    toString() { return '#000000'; },
+    canvas: '#0B0B0C',           // Deep obsidian black base
+    surface: '#121316',          // Rich midnight slate
+    surfaceElevated: '#1A1C22',  // Dimensional slate
+    surfaceMuted: '#16171B',
+    surfacePressed: '#22252D',
+    toString() { return '#0B0B0C'; },
   },
 
   text: {
-    primary: '#FFFFFF',          // iOS Label
-    secondary: '#8E8E93',        // iOS Secondary Label
-    muted: '#636366',            // iOS Tertiary Label
-    inverse: '#000000',
-    onPrimary: '#FFFFFF',
+    primary: '#FFFFFF',          // Razor sharp label
+    secondary: '#8E8E93',        // Secondary label
+    muted: '#636366',            // Tertiary label
+    inverse: '#0B0B0C',
+    onPrimary: '#0B0B0C',
     toString() { return '#FFFFFF'; },
   },
 
   primary: {
-    DEFAULT: '#0A84FF',          // iOS Dark System Blue
-    pressed: '#007AFF',
-    muted: '#0F2744',
-    container: '#0F2744',
-    onContainer: '#64A9FF',
-    light: '#64A9FF',
-    dark: '#007AFF',
-    toString() { return '#0A84FF'; },
+    DEFAULT: '#00F0FF',          // Surgical Cyan Blue
+    pressed: '#00B8CC',
+    muted: 'rgba(0, 240, 255, 0.12)',
+    container: 'rgba(0, 240, 255, 0.12)',
+    onContainer: '#00F0FF',
+    light: '#66F6FF',
+    dark: '#00A3B3',
+    toString() { return '#00F0FF'; },
   },
 
   success: {
-    DEFAULT: '#30D158',
-    light: '#5DD072',
-    muted: '#12381A',
-    container: '#12381A',
-    onContainer: '#30D158',
-    toString() { return '#30D158'; },
+    DEFAULT: '#00F5A0',          // Hyper-saturated Neon Emerald Green
+    light: '#5DFFC5',
+    muted: 'rgba(0, 245, 160, 0.14)',
+    container: 'rgba(0, 245, 160, 0.14)',
+    onContainer: '#00F5A0',
+    toString() { return '#00F5A0'; },
   },
 
   danger: {
