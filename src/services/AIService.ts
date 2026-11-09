@@ -7,7 +7,7 @@ const PYTHON_BACKEND_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 
 const OPENROUTER_API_KEY = '';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
-const SYSTEM_PROMPT = `You are CryptoVaultAI Intelligence, an institutional-grade Web3 & Fintech assistant.
+const SYSTEM_PROMPT = `You are Cura Wallet Intelligence, an institutional-grade Web3 & Fintech assistant.
 You help users understand crypto tokens (ETH, BTC, SOL, MATIC, BNB, etc.), gas fees, DeFi protocols, smart contract safety, and portfolio balance.
 Keep answers concise, structured, and easy for beginners. CRITICAL: Never request or mention private keys or seed phrases, and transactions must be authorized by user hardware.`;
 

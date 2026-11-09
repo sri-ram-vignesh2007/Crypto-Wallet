@@ -71,7 +71,7 @@ export default function ProfileSetupScreen({ navigation }: { navigation: any }) 
             styles.previewHandle,
             { color: colors.text.muted, fontSize: 14 },
           ]}>
-            @cryptovault_user
+            @cura_user
           </Text>
         </View>
 

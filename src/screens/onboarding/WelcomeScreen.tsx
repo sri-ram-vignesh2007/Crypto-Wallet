@@ -142,7 +142,7 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
         {/* Title & Subtitle */}
         <View style={styles.headingSection}>
           <Text style={[styles.title, { color: colors.text.primary }]}>
-            Crypto Vault
+            Cura Wallet
           </Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
             Engineered for high-speed, self-custody crypto payments with Apple-grade security.

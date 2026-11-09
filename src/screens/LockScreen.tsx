@@ -42,7 +42,7 @@ export default function LockScreen({ onRetry }: Props) {
         </Svg>
       </View>
 
-      <Text style={styles.title}>CryptoVault<Text style={styles.aiAccent}>AI</Text></Text>
+      <Text style={styles.title}>Cura <Text style={styles.aiAccent}>Wallet</Text></Text>
       <Text style={styles.subtitle}>Protected by Apple Secure Enclave & Hardware Encryption. Tap below to authenticate.</Text>
 
       <TouchableOpacity

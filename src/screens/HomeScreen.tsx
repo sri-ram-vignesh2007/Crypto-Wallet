@@ -267,7 +267,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       {/* ======================================================== */}
       <View style={[styles.navBar, { paddingTop: insets.top + 6 }]}>
         <View style={styles.brandRow}>
-          <Text style={[styles.brandTitle, { color: colors.text.primary }]}>CryptoVault</Text>
+          <Text style={[styles.brandTitle, { color: colors.text.primary }]}>Cura Wallet</Text>
           <View style={[styles.securityStatusDot, { backgroundColor: monoPrimary }]} />
         </View>
 
@@ -288,12 +288,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             <ChevronDownIcon color={colors.text.muted} size={11} />
           </SpringButton>
 
-          {/* AI Assistant Quick Trigger */}
+          {/* AI Assistant Quick Trigger - Scaled Down */}
           <SpringButton
             onPress={() => navigation.navigate('AIChatbot')}
             style={[styles.aiButtonPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
-            <SparkIcon color={monoPrimary} size={15} />
+            <SparkIcon color={monoPrimary} size={12} />
             <Text style={[styles.aiButtonText, { color: colors.text.primary }]}>AI</Text>
           </SpringButton>
         </View>
@@ -452,7 +452,46 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* ======================================================== */}
-        {/* MARKET MOVERS: TOP GAINERS & TOP LOSERS                  */}
+        {/* ASSET OVERVIEW SECTION (ASSETS UP)                       */}
+        {/* ======================================================== */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeading}>ASSETS</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Community')}>
+            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>See All</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          {DEFAULT_ASSETS.map((asset, index) => {
+            const Logo = TOKEN_LOGOS[asset.symbol] || EthLogo;
+            const isLast = index === DEFAULT_ASSETS.length - 1;
+            return (
+              <SpringButton
+                key={asset.symbol}
+                onPress={() => navigation.navigate('AssetDetail', { asset })}
+                style={[styles.assetRowItem, !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}
+              >
+                <View style={styles.assetLeftCol}>
+                  <Logo />
+                  <View style={{ marginLeft: 12 }}>
+                    <Text style={[styles.assetTitleText, { color: colors.text.primary }]}>{asset.name}</Text>
+                    <Text style={styles.assetSubtitleText}>{asset.balance} {asset.symbol} • {asset.network}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.assetRightCol}>
+                  <Text style={[styles.assetValueText, { color: colors.text.primary }]}>{asset.usd}</Text>
+                  <Text style={[styles.assetChangeText, { color: asset.positive ? colors.text.primary : '#EF4444' }]}>
+                    {asset.change}
+                  </Text>
+                </View>
+              </SpringButton>
+            );
+          })}
+        </View>
+
+        {/* ======================================================== */}
+        {/* MARKET MOVERS: TOP GAINERS & TOP LOSERS (MOVERS DOWN)    */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionHeading}>MARKET MOVERS</Text>
@@ -536,43 +575,33 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* ======================================================== */}
-        {/* ASSET OVERVIEW SECTION                                   */}
+        {/* CURA PULSE: LATEST NEWS & COMMUNITY HIGHLIGHT           */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>ASSETS</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Assets')}>
-            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>See All</Text>
+          <Text style={styles.sectionHeading}>CURA PULSE & NEWS</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Community')}>
+            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>View Feed →</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          {DEFAULT_ASSETS.map((asset, index) => {
-            const Logo = TOKEN_LOGOS[asset.symbol] || EthLogo;
-            const isLast = index === DEFAULT_ASSETS.length - 1;
-            return (
-              <SpringButton
-                key={asset.symbol}
-                onPress={() => navigation.navigate('AssetDetail', { asset })}
-                style={[styles.assetRowItem, !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}
-              >
-                <View style={styles.assetLeftCol}>
-                  <Logo />
-                  <View style={{ marginLeft: 12 }}>
-                    <Text style={[styles.assetTitleText, { color: colors.text.primary }]}>{asset.name}</Text>
-                    <Text style={styles.assetSubtitleText}>{asset.balance} {asset.symbol} • {asset.network}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.assetRightCol}>
-                  <Text style={[styles.assetValueText, { color: colors.text.primary }]}>{asset.usd}</Text>
-                  <Text style={[styles.assetChangeText, { color: asset.positive ? colors.text.primary : '#EF4444' }]}>
-                    {asset.change}
-                  </Text>
-                </View>
-              </SpringButton>
-            );
-          })}
-        </View>
+        <SpringButton
+          onPress={() => navigation.navigate('Community')}
+          style={[styles.pulseNewsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
+        >
+          <View style={styles.pulseCardTop}>
+            <View style={[styles.sourceBadge, { backgroundColor: monoMutedSurface }]}>
+              <Text style={[styles.sourceBadgeText, { color: colors.text.primary }]}>Bloomberg Crypto</Text>
+            </View>
+            <Text style={styles.pulseTimeText}>8m ago</Text>
+          </View>
+          <Text style={[styles.pulseTitleText, { color: colors.text.primary }]}>
+            Bitcoin ETF Net Inflows Cross $1.2B As Global Asset Allocators Rotate Into Digital Assets
+          </Text>
+          <View style={styles.pulseCardFooter}>
+            <Text style={styles.pulseMetaText}>Institutional Market Flow • 48 comments</Text>
+            <Text style={[styles.pulseReadMore, { color: colors.text.primary }]}>Join Discussion</Text>
+          </View>
+        </SpringButton>
 
         {/* ======================================================== */}
         {/* RECENT ACTIVITY SECTION                                  */}
@@ -755,14 +784,14 @@ const styles = StyleSheet.create({
   aiButtonPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 14,
     borderWidth: 0.5,
-    gap: 5,
+    gap: 4,
   },
   aiButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   iconButton: {
@@ -1021,6 +1050,52 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
+  },
+  // CURA PULSE
+  pulseNewsCard: {
+    borderRadius: 18,
+    borderWidth: 0.5,
+    padding: 16,
+    marginBottom: 20,
+  },
+  pulseCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sourceBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  sourceBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  pulseTimeText: {
+    color: '#64748B',
+    fontSize: 11,
+  },
+  pulseTitleText: {
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  pulseCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  pulseMetaText: {
+    color: '#64748B',
+    fontSize: 11,
+  },
+  pulseReadMore: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   // RECENT ACTIVITY
   activityItemRow: {

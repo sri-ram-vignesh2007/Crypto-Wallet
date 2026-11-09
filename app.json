@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Crypto Wallet",
-    "slug": "crypto-wallet",
+    "name": "Cura Wallet",
+    "slug": "cura-wallet",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -54,6 +54,9 @@ type RootStackParamList = {
   Welcome: undefined;
   SeedPhrase: { mode: 'create' | 'import' } | undefined;
   Main: undefined;
+  Community: undefined;
+  Explore: undefined;
+  Assets: undefined;
   Send: undefined;
   Receive: undefined;
   Swap: undefined;
@@ -81,7 +84,7 @@ type RootStackParamList = {
 
 type TabParamList = {
   Home: undefined;
-  Assets: undefined;
+  Community: undefined;
   Swap: undefined;
   Activity: undefined;
   Settings: undefined;
@@ -96,6 +99,11 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
         <Rect x="2" y="4" width="20" height="16" rx="3" />
         <Path d="M2 10h20" />
         <Circle cx="18" cy="15" r="1.5" fill={color} />
+      </Svg>
+    ),
+    Community: (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
       </Svg>
     ),
     Assets: (
@@ -139,8 +147,9 @@ function MainTabs() {
   }
 
   // Adaptive safe area bottom padding across all iPhone & Android models
-  const bottomPadding = insets.bottom > 0 ? insets.bottom + 2 : (Platform.OS === 'android' ? 12 : 10);
-  const tabHeight = 56 + bottomPadding;
+  const isAndroid = Platform.OS === 'android';
+  const bottomPadding = insets.bottom > 0 ? insets.bottom + 4 : (isAndroid ? 12 : 8);
+  const tabHeight = 62 + bottomPadding;
 
   return (
     <Tab.Navigator
@@ -154,16 +163,24 @@ function MainTabs() {
           borderTopWidth: 0.5,
           height: tabHeight,
           paddingBottom: bottomPadding,
-          paddingTop: 8,
+          paddingTop: 6,
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingVertical: 2,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10.5,
           fontWeight: '600',
           letterSpacing: -0.2,
-          marginTop: 2,
+          lineHeight: 14,
+          includeFontPadding: false,
+          paddingBottom: 0,
         },
         tabBarIconStyle: {
-          marginBottom: 0,
+          marginTop: 2,
+          marginBottom: 1,
         },
       }}
     >
@@ -176,11 +193,11 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Assets"
+        name="Community"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Assets" focused={focused} color={color} />,
-          tabBarLabel: 'Assets',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} />,
+          tabBarLabel: 'Community',
         }}
       />
       <Tab.Screen
@@ -245,6 +262,9 @@ function AppContent() {
           ) : (
             <>
               <Stack.Screen name="Main" component={MainTabs} />
+              <Stack.Screen name="Community" component={ExploreScreen} options={{ title: 'Community' }} />
+              <Stack.Screen name="Explore" component={ExploreScreen} options={{ title: 'Explore' }} />
+              <Stack.Screen name="Assets" component={ExploreScreen} options={{ title: 'Assets' }} />
               <Stack.Screen name="Send" component={SendScreen} options={{ title: 'Send' }} />
               <Stack.Screen name="Receive" component={ReceiveScreen} options={{ title: 'Receive' }} />
               <Stack.Screen name="Swap" component={SwapScreen} options={{ title: 'Swap' }} />
