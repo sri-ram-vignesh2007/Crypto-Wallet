@@ -109,7 +109,14 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   const isDark = useIsDark();
 
   const { address, selectedChain, resetWallet } = useWalletStore();
-  const { showPortfolioBalance, setShowPortfolioBalance } = useProfileStore();
+  const {
+    showPortfolioBalance,
+    setShowPortfolioBalance,
+    allowPublicPortfolio,
+    setAllowPublicPortfolio,
+    allowDirectMessages,
+    setAllowDirectMessages,
+  } = useProfileStore();
   const [biometricEnabled, setBiometricEnabled] = useState(true);
 
   const [revealedSecret, setRevealedSecret] = useState<{ type: 'phrase' | 'key' | 'address'; value: string } | null>(null);
@@ -304,6 +311,56 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
               <Switch
                 value={showPortfolioBalance}
                 onValueChange={setShowPortfolioBalance}
+                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+                thumbColor={isDark ? '#000000' : '#FFFFFF'}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Section: Community & Member Privacy */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>COMMUNITY & MESSAGING</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <View style={styles.settingsRow}>
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <Text style={{ fontSize: 13 }}>📊</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                Share Portfolio in Community
+              </Text>
+              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                Allow members to view your assets on profile tap
+              </Text>
+            </View>
+            <View style={styles.switchWrapper}>
+              <Switch
+                value={allowPublicPortfolio}
+                onValueChange={setAllowPublicPortfolio}
+                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
+                thumbColor={isDark ? '#000000' : '#FFFFFF'}
+              />
+            </View>
+          </View>
+
+          <View style={[styles.rowDivider, { backgroundColor: hairline }]} />
+
+          <View style={styles.settingsRow}>
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <Text style={{ fontSize: 13 }}>💬</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                Allow Direct Messages
+              </Text>
+              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                Let community members send you direct messages
+              </Text>
+            </View>
+            <View style={styles.switchWrapper}>
+              <Switch
+                value={allowDirectMessages}
+                onValueChange={setAllowDirectMessages}
                 trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
                 thumbColor={isDark ? '#000000' : '#FFFFFF'}
               />

@@ -14,6 +14,8 @@ interface ProfileState {
   hasCompletedOnboarding: boolean;  // persisted: has user ever completed initial onboarding?
   isSignedIn: boolean;              // NOT persisted — resets to false on every cold launch.
   showPortfolioBalance: boolean;    // persisted: option to show or hide portfolio balance
+  allowPublicPortfolio: boolean;    // persisted: whether others can see portfolio in community
+  allowDirectMessages: boolean;     // persisted: whether others can message user in community
 
   setEmail: (email: string) => void;
   setName: (name: string) => void;
@@ -23,6 +25,8 @@ interface ProfileState {
   setOnboardingComplete: (complete: boolean) => void;
   setSignedIn: (signedIn: boolean) => void;
   setShowPortfolioBalance: (show: boolean) => void;
+  setAllowPublicPortfolio: (allow: boolean) => void;
+  setAllowDirectMessages: (allow: boolean) => void;
   signOut: () => void;
   loadProfile: () => Promise<void>;
   saveProfile: () => Promise<void>;
@@ -38,6 +42,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   hasCompletedOnboarding: false,
   isSignedIn: false,
   showPortfolioBalance: true,
+  allowPublicPortfolio: true,
+  allowDirectMessages: true,
 
   setEmail: (email) => set({ email }),
   setName: (name) => {
@@ -55,6 +61,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   setEmailVerified: (isEmailVerified) => set({ isEmailVerified }),
   setShowPortfolioBalance: (showPortfolioBalance) => {
     set({ showPortfolioBalance });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setAllowPublicPortfolio: (allowPublicPortfolio) => {
+    set({ allowPublicPortfolio });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setAllowDirectMessages: (allowDirectMessages) => {
+    set({ allowDirectMessages });
     setTimeout(() => get().saveProfile(), 0);
   },
 
@@ -82,6 +96,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           isEmailVerified: data.isEmailVerified || false,
           hasCompletedOnboarding: data.hasCompletedOnboarding || false,
           showPortfolioBalance: data.showPortfolioBalance !== undefined ? data.showPortfolioBalance : true,
+          allowPublicPortfolio: data.allowPublicPortfolio !== undefined ? data.allowPublicPortfolio : true,
+          allowDirectMessages: data.allowDirectMessages !== undefined ? data.allowDirectMessages : true,
         });
       }
     } catch (e) {
@@ -100,6 +116,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         isEmailVerified: state.isEmailVerified,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         showPortfolioBalance: state.showPortfolioBalance,
+        allowPublicPortfolio: state.allowPublicPortfolio,
+        allowDirectMessages: state.allowDirectMessages,
       };
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
@@ -117,6 +135,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       hasCompletedOnboarding: false,
       isSignedIn: false,
       showPortfolioBalance: true,
+      allowPublicPortfolio: true,
+      allowDirectMessages: true,
     });
     setTimeout(async () => {
       try { await AsyncStorage.removeItem(STORAGE_KEY); }

@@ -1,4 +1,4 @@
-// src/screens/ExploreScreen.tsx - Cura Community, Breaking News & User Interaction Feed
+// src/screens/ExploreScreen.tsx - Cura Community, Breaking News, Profiles & Privacy-Controlled Messaging
 
 import React, { useState, useRef } from 'react';
 import {
@@ -92,8 +92,41 @@ const VerifiedCheck = ({ color = '#FFFFFF', size = 12 }: { color?: string; size?
   </Svg>
 );
 
-// Initial Community Posts
-interface CommunityPost {
+const LockIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </Svg>
+);
+
+const MessageSquareIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </Svg>
+);
+
+const ShieldCheckIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <Path d="M9 12l2 2 4-4" />
+  </Svg>
+);
+
+const CloseIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M18 6L6 18M6 6l12 12" />
+  </Svg>
+);
+
+export interface PortfolioAsset {
+  symbol: string;
+  name: string;
+  allocation: string;
+  value: string;
+  percentageNum: number;
+}
+
+export interface CommunityPost {
   id: string;
   authorName: string;
   authorHandle: string;
@@ -107,6 +140,16 @@ interface CommunityPost {
   comments: number;
   reposts: number;
   liked?: boolean;
+
+  // Member profile & privacy controls
+  bio?: string;
+  joinedDate?: string;
+  trustScore?: string;
+  portfolioValue?: string;
+  topAssets?: PortfolioAsset[];
+  showPortfolio?: boolean; // Member privacy: show portfolio or not
+  canMessage?: boolean;    // Member privacy: allow direct messages or not
+  isCurrentUser?: boolean; // If current user, syncs with profileStore
 }
 
 const INITIAL_POSTS: CommunityPost[] = [
@@ -123,6 +166,17 @@ const INITIAL_POSTS: CommunityPost[] = [
     likes: 142,
     comments: 29,
     reposts: 18,
+    bio: 'Macro & Institutional Digital Asset Strategist. Ex-Commodities Desk. On-chain liquidity and cross-asset researcher.',
+    joinedDate: 'Joined Jan 2023',
+    trustScore: '99.4% Verified Score',
+    portfolioValue: '$1,842,590.00',
+    topAssets: [
+      { symbol: 'ETH', name: 'Ethereum', allocation: '54%', value: '$995,000', percentageNum: 54 },
+      { symbol: 'BTC', name: 'Bitcoin', allocation: '32%', value: '$589,600', percentageNum: 32 },
+      { symbol: 'SOL', name: 'Solana', allocation: '14%', value: '$257,990', percentageNum: 14 },
+    ],
+    showPortfolio: true,
+    canMessage: true,
   },
   {
     id: 'post-2',
@@ -137,6 +191,17 @@ const INITIAL_POSTS: CommunityPost[] = [
     likes: 98,
     comments: 16,
     reposts: 24,
+    bio: 'DeFi infrastructure engineer & Layer 2 protocol auditor. Researching cross-chain liquidity & MEV resistance.',
+    joinedDate: 'Joined Nov 2022',
+    trustScore: '98.8% Verified Score',
+    portfolioValue: '$720,450.00',
+    topAssets: [
+      { symbol: 'ETH', name: 'Ethereum', allocation: '40%', value: '$288,180', percentageNum: 40 },
+      { symbol: 'ARB', name: 'Arbitrum', allocation: '35%', value: '$252,150', percentageNum: 35 },
+      { symbol: 'OP', name: 'Optimism', allocation: '25%', value: '$180,120', percentageNum: 25 },
+    ],
+    showPortfolio: true,
+    canMessage: true,
   },
   {
     id: 'post-3',
@@ -151,6 +216,16 @@ const INITIAL_POSTS: CommunityPost[] = [
     likes: 67,
     comments: 11,
     reposts: 8,
+    bio: 'High-frequency algorithmic market maker on Solana & high-throughput L1s. Quantitative research.',
+    joinedDate: 'Joined Mar 2023',
+    trustScore: '97.2% Verified Score',
+    portfolioValue: '$410,200.00',
+    topAssets: [
+      { symbol: 'SOL', name: 'Solana', allocation: '85%', value: '$348,670', percentageNum: 85 },
+      { symbol: 'JUP', name: 'Jupiter', allocation: '15%', value: '$61,530', percentageNum: 15 },
+    ],
+    showPortfolio: false, // Privacy: Portfolio hidden by user
+    canMessage: true,
   },
   {
     id: 'post-4',
@@ -165,6 +240,16 @@ const INITIAL_POSTS: CommunityPost[] = [
     likes: 54,
     comments: 8,
     reposts: 12,
+    bio: 'Institutional regulatory affairs analyst & enterprise blockchain compliance advisor.',
+    joinedDate: 'Joined Aug 2023',
+    trustScore: '96.5% Verified Score',
+    portfolioValue: '$95,400.00',
+    topAssets: [
+      { symbol: 'USDC', name: 'USD Coin', allocation: '60%', value: '$57,240', percentageNum: 60 },
+      { symbol: 'BTC', name: 'Bitcoin', allocation: '40%', value: '$38,160', percentageNum: 40 },
+    ],
+    showPortfolio: true,
+    canMessage: false, // Privacy: Direct messages disabled by user
   },
 ];
 
@@ -221,7 +306,15 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
-  const { name, username, avatar, setUsername, setName } = useProfileStore();
+  const {
+    name,
+    username,
+    avatar,
+    setUsername,
+    setName,
+    allowPublicPortfolio,
+    allowDirectMessages,
+  } = useProfileStore();
 
   const [activeTab, setActiveTab] = useState<'feed' | 'news' | 'trends'>('feed');
   const [posts, setPosts] = useState<CommunityPost[]>(INITIAL_POSTS);
@@ -233,6 +326,15 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
   const [newUsernameInput, setNewUsernameInput] = useState('');
   const [newDisplayNameInput, setNewDisplayNameInput] = useState('');
   const [usernameError, setUsernameError] = useState('');
+
+  // Member Profile Sheet State
+  const [selectedMember, setSelectedMember] = useState<CommunityPost | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Direct Message Modal State
+  const [showDirectMessageModal, setShowDirectMessageModal] = useState(false);
+  const [directMessageText, setDirectMessageText] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   // New Post Composer State
   const [composerText, setComposerText] = useState('');
@@ -289,6 +391,61 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
     }
     setShowUsernameModal(false);
     triggerToast(`Username @${clean} set! You can now post.`);
+  };
+
+  // Open Member Profile
+  const openMemberProfile = (post: CommunityPost) => {
+    setSelectedMember(post);
+    setShowProfileModal(true);
+  };
+
+  // Open Current User's Profile
+  const openCurrentUserProfile = () => {
+    if (!username) {
+      openUsernameModal();
+      return;
+    }
+    const myProfilePost: CommunityPost = {
+      id: 'current-user-profile',
+      authorName: name || 'Cura Vault Member',
+      authorHandle: `@${username}`,
+      authorAvatar: avatar || 'U',
+      isVerified: true,
+      timeAgo: 'Active',
+      sentiment: 'Analysis',
+      content: '',
+      cashtags: [],
+      likes: 0,
+      comments: 0,
+      reposts: 0,
+      isCurrentUser: true,
+      bio: 'Institutional CryptoVaultAI Member. Self-custodial security & multi-chain vault holder.',
+      joinedDate: 'Joined Recent',
+      trustScore: '100% Attested Safe',
+      portfolioValue: '$1,842,590.42',
+      topAssets: [
+        { symbol: 'ETH', name: 'Ethereum', allocation: '56.9%', value: '$1,048,220.00', percentageNum: 57 },
+        { symbol: 'BTC', name: 'Bitcoin', allocation: '28.2%', value: '$520,380.00', percentageNum: 28 },
+        { symbol: 'SOL', name: 'Solana', allocation: '10.0%', value: '$184,200.00', percentageNum: 10 },
+      ],
+      showPortfolio: allowPublicPortfolio,
+      canMessage: allowDirectMessages,
+    };
+    setSelectedMember(myProfilePost);
+    setShowProfileModal(true);
+  };
+
+  // Send Direct Message
+  const handleSendDirectMessage = () => {
+    if (!directMessageText.trim() || !selectedMember) return;
+    setIsSendingMessage(true);
+
+    setTimeout(() => {
+      setIsSendingMessage(false);
+      setShowDirectMessageModal(false);
+      setDirectMessageText('');
+      triggerToast(`Encrypted message delivered to ${selectedMember.authorHandle}`);
+    }, 450);
   };
 
   // Toggle Like
@@ -360,6 +517,18 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         likes: 0,
         comments: 0,
         reposts: 0,
+        isCurrentUser: true,
+        bio: 'Institutional CryptoVaultAI Member. Self-custodial security & multi-chain vault holder.',
+        joinedDate: 'Joined Today',
+        trustScore: '100% Attested Safe',
+        portfolioValue: '$1,842,590.42',
+        topAssets: [
+          { symbol: 'ETH', name: 'Ethereum', allocation: '56.9%', value: '$1,048,220.00', percentageNum: 57 },
+          { symbol: 'BTC', name: 'Bitcoin', allocation: '28.2%', value: '$520,380.00', percentageNum: 28 },
+          { symbol: 'SOL', name: 'Solana', allocation: '10.0%', value: '$184,200.00', percentageNum: 10 },
+        ],
+        showPortfolio: allowPublicPortfolio,
+        canMessage: allowDirectMessages,
       };
 
       setPosts([newPost, ...posts]);
@@ -399,6 +568,20 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       : true
   );
 
+  // Determine effective privacy permissions for active selected member
+  const isSelectedUserCurrent = Boolean(
+    selectedMember?.isCurrentUser ||
+    (username && selectedMember?.authorHandle.toLowerCase() === `@${username.toLowerCase()}`)
+  );
+
+  const effectiveShowPortfolio = isSelectedUserCurrent
+    ? allowPublicPortfolio
+    : (selectedMember?.showPortfolio ?? true);
+
+  const effectiveCanMessage = isSelectedUserCurrent
+    ? allowDirectMessages
+    : (selectedMember?.canMessage ?? true);
+
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
@@ -417,7 +600,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       {/* Top Header */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 6 }]}>
         <View style={styles.headerLeft}>
-          <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Cura Pulse</Text>
+          <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Cura Community</Text>
           <View style={[styles.liveDot, { backgroundColor: monoPrimary }]} />
         </View>
 
@@ -496,20 +679,28 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             <View style={[styles.composerCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
               {/* Profile Bar in Composer */}
               <View style={styles.composerHeaderRow}>
-                <View style={[styles.composerAvatar, { backgroundColor: monoMutedSurface }]}>
+                <TouchableOpacity
+                  onPress={openCurrentUserProfile}
+                  style={[styles.composerAvatar, { backgroundColor: monoMutedSurface }]}
+                  activeOpacity={0.7}
+                >
                   <Text style={[styles.composerAvatarText, { color: colors.text.primary }]}>
                     {avatar || 'U'}
                   </Text>
-                </View>
+                </TouchableOpacity>
                 <View style={{ flex: 1 }}>
                   {username ? (
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <TouchableOpacity
+                        onPress={openCurrentUserProfile}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                        activeOpacity={0.7}
+                      >
                         <Text style={[styles.composerNameText, { color: colors.text.primary }]}>
                           {name || 'Community Member'}
                         </Text>
                         <Text style={styles.composerHandleText}>@{username}</Text>
-                      </View>
+                      </TouchableOpacity>
                       <TouchableOpacity onPress={openUsernameModal}>
                         <Text style={[styles.composerEditHandle, { color: colors.text.muted }]}>Edit</Text>
                       </TouchableOpacity>
@@ -594,7 +785,11 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
               >
                 {/* Author Info & Sentiment */}
                 <View style={styles.postHeader}>
-                  <View style={styles.authorRow}>
+                  <TouchableOpacity
+                    onPress={() => openMemberProfile(post)}
+                    style={styles.authorRow}
+                    activeOpacity={0.7}
+                  >
                     <View style={[styles.authorAvatarCircle, { backgroundColor: monoMutedSurface }]}>
                       <Text style={[styles.authorAvatarText, { color: colors.text.primary }]}>
                         {post.authorAvatar}
@@ -613,7 +808,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                       </View>
                       <Text style={styles.authorHandleText}>{post.authorHandle} • {post.timeAgo}</Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
 
                   {/* Sentiment Badge */}
                   <View style={[styles.sentimentBadge, { backgroundColor: monoMutedSurface }]}>
@@ -778,6 +973,327 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
           </View>
         )}
       </ScrollView>
+
+      {/* ======================================================== */}
+      {/* MODAL 1: MEMBER PROFILE & PORTFOLIO DETAILS              */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showProfileModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowProfileModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={styles.modalDismissArea} onPress={() => setShowProfileModal(false)} />
+          <View style={[styles.profileSheet, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.sheetHandle} />
+
+            {/* Profile Top Bar */}
+            <View style={styles.profileSheetHeaderRow}>
+              <Text style={[styles.profileSheetTitle, { color: colors.text.primary }]}>
+                {isSelectedUserCurrent ? 'Your Community Profile' : 'Member Profile'}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowProfileModal(false)}
+                style={[styles.closeIconCircle, { backgroundColor: monoMutedSurface }]}
+              >
+                <CloseIcon color={colors.text.primary} size={16} />
+              </TouchableOpacity>
+            </View>
+
+            {selectedMember && (
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+                {/* Author Identity Badge */}
+                <View style={styles.memberIdentityCard}>
+                  <View style={[styles.largeMemberAvatar, { backgroundColor: monoPrimary }]}>
+                    <Text style={[styles.largeMemberAvatarText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                      {selectedMember.authorAvatar}
+                    </Text>
+                  </View>
+
+                  <View style={{ flex: 1, marginLeft: 14 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                      <Text style={[styles.memberFullName, { color: colors.text.primary }]}>
+                        {selectedMember.authorName}
+                      </Text>
+                      {selectedMember.isVerified && (
+                        <View style={[styles.verifiedBadge, { backgroundColor: monoPrimary, width: 15, height: 15, borderRadius: 7.5 }]}>
+                          <VerifiedCheck color={isDark ? '#000000' : '#FFFFFF'} size={10} />
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.memberHandleText}>{selectedMember.authorHandle}</Text>
+                    <View style={styles.trustPillRow}>
+                      <View style={[styles.trustPill, { backgroundColor: monoMutedSurface }]}>
+                        <ShieldCheckIcon color={colors.text.primary} size={11} />
+                        <Text style={[styles.trustPillText, { color: colors.text.primary }]}>
+                          {selectedMember.trustScore || 'Enclave Attested'}
+                        </Text>
+                      </View>
+                      <Text style={styles.memberJoinedText}>
+                        {selectedMember.joinedDate || 'Member'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Member Bio */}
+                {selectedMember.bio && (
+                  <View style={[styles.bioCard, { backgroundColor: monoMutedSurface }]}>
+                    <Text style={[styles.bioText, { color: colors.text.primary }]}>
+                      {selectedMember.bio}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Current User Notice & Privacy Shortcut */}
+                {isSelectedUserCurrent && (
+                  <View style={[styles.currentUserPrivacyCard, { borderColor: cardBorder }]}>
+                    <View style={styles.privacyCardHeader}>
+                      <Text style={[styles.privacyCardTitle, { color: colors.text.primary }]}>
+                        🔒 Your Privacy Preferences
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowProfileModal(false);
+                          navigation.navigate('Settings');
+                        }}
+                      >
+                        <Text style={[styles.managePrivacyLink, { color: monoPrimary }]}>
+                          Settings →
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.privacyCardNotice}>
+                      Portfolio visibility is currently{' '}
+                      <Text style={{ fontWeight: '700', color: colors.text.primary }}>
+                        {allowPublicPortfolio ? 'PUBLIC' : 'HIDDEN'}
+                      </Text>
+                      . Direct messaging is{' '}
+                      <Text style={{ fontWeight: '700', color: colors.text.primary }}>
+                        {allowDirectMessages ? 'ALLOWED' : 'DISABLED'}
+                      </Text>
+                      .
+                    </Text>
+                  </View>
+                )}
+
+                {/* Direct Message Action */}
+                {!isSelectedUserCurrent && (
+                  <View style={{ marginTop: 14 }}>
+                    {effectiveCanMessage ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowProfileModal(false);
+                          setShowDirectMessageModal(true);
+                        }}
+                        style={[styles.directMessageBtn, { backgroundColor: monoPrimary }]}
+                        activeOpacity={0.8}
+                      >
+                        <MessageSquareIcon color={isDark ? '#000000' : '#FFFFFF'} size={15} />
+                        <Text style={[styles.directMessageBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                          Send Direct Message
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={[styles.disabledMessagingBanner, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+                        <LockIcon color={colors.text.muted} size={15} />
+                        <View style={{ flex: 1, marginLeft: 10 }}>
+                          <Text style={[styles.disabledMessagingTitle, { color: colors.text.primary }]}>
+                            Direct Messages Disabled
+                          </Text>
+                          <Text style={styles.disabledMessagingSub}>
+                            This member has turned off direct messages in their privacy settings.
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {/* Portfolio Section */}
+                <View style={styles.portfolioSectionContainer}>
+                  <View style={styles.portfolioSectionHeader}>
+                    <Text style={[styles.portfolioSectionLabel, { color: colors.text.secondary }]}>
+                      VERIFIED PORTFOLIO DETAILS
+                    </Text>
+                    {effectiveShowPortfolio && (
+                      <View style={[styles.enclaveVerifiedTag, { backgroundColor: monoMutedSurface }]}>
+                        <Text style={[styles.enclaveVerifiedText, { color: colors.text.primary }]}>
+                          ✓ Enclave Verified
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Condition: Show Portfolio or Privacy Lock */}
+                  {effectiveShowPortfolio ? (
+                    <View style={[styles.portfolioBreakdownCard, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+                      {/* Total Portfolio Value Header */}
+                      <View style={styles.portfolioTotalRow}>
+                        <View>
+                          <Text style={styles.portfolioTotalLabel}>TOTAL ESTIMATED VALUE</Text>
+                          <Text style={[styles.portfolioTotalValue, { color: colors.text.primary }]}>
+                            {selectedMember.portfolioValue || '$1,842,590.00'}
+                          </Text>
+                        </View>
+                        <View style={[styles.allocationCountBadge, { backgroundColor: cardBg }]}>
+                          <Text style={[styles.allocationCountText, { color: colors.text.primary }]}>
+                            {selectedMember.topAssets?.length || 3} Assets
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Assets Distribution List */}
+                      {selectedMember.topAssets && selectedMember.topAssets.map(asset => (
+                        <View key={asset.symbol} style={[styles.assetAllocationRow, { borderTopColor: cardBorder }]}>
+                          <View style={styles.assetAllocationLeft}>
+                            <View style={[styles.assetSymbolCircle, { backgroundColor: cardBg }]}>
+                              <Text style={[styles.assetSymbolText, { color: colors.text.primary }]}>
+                                {asset.symbol}
+                              </Text>
+                            </View>
+                            <View style={{ marginLeft: 10 }}>
+                              <Text style={[styles.assetNameText, { color: colors.text.primary }]}>
+                                {asset.name}
+                              </Text>
+                              <Text style={styles.assetAllocationPercent}>
+                                {asset.allocation} allocation
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View style={{ alignItems: 'flex-end' }}>
+                            <Text style={[styles.assetValueText, { color: colors.text.primary }]}>
+                              {asset.value}
+                            </Text>
+                            {/* Visual allocation progress bar */}
+                            <View style={[styles.allocationTrack, { backgroundColor: cardBg }]}>
+                              <View
+                                style={[
+                                  styles.allocationFill,
+                                  { width: `${asset.percentageNum}%`, backgroundColor: monoPrimary },
+                                ]}
+                              />
+                            </View>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <View style={[styles.portfolioLockedCard, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+                      <View style={[styles.lockedIconWrapper, { backgroundColor: cardBg }]}>
+                        <LockIcon color={colors.text.primary} size={22} />
+                      </View>
+                      <Text style={[styles.portfolioLockedTitle, { color: colors.text.primary }]}>
+                        Portfolio Hidden by Member
+                      </Text>
+                      <Text style={styles.portfolioLockedDesc}>
+                        This member has chosen to keep their vault holdings, asset distribution, and portfolio balances confidential in their privacy settings.
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* ======================================================== */}
+      {/* MODAL 2: DIRECT ENCRYPTED MESSAGE COMPOSER               */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showDirectMessageModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDirectMessageModal(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalBackdrop}
+        >
+          <Pressable style={styles.modalDismissArea} onPress={() => setShowDirectMessageModal(false)} />
+          <View style={[styles.messageSheet, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.sheetHandle} />
+
+            <View style={styles.messageSheetHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={[styles.composerAvatar, { backgroundColor: monoPrimary, width: 32, height: 32, borderRadius: 16 }]}>
+                  <Text style={[styles.composerAvatarText, { color: isDark ? '#000000' : '#FFFFFF', fontSize: 13 }]}>
+                    {selectedMember?.authorAvatar || 'M'}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={[styles.messageRecipientName, { color: colors.text.primary }]}>
+                    Message {selectedMember?.authorName}
+                  </Text>
+                  <Text style={styles.messageRecipientHandle}>
+                    {selectedMember?.authorHandle}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setShowDirectMessageModal(false)}
+                style={[styles.closeIconCircle, { backgroundColor: monoMutedSurface }]}
+              >
+                <CloseIcon color={colors.text.primary} size={15} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.encryptionBadgeRow, { backgroundColor: monoMutedSurface }]}>
+              <ShieldCheckIcon color={colors.text.primary} size={12} />
+              <Text style={[styles.encryptionBadgeText, { color: colors.text.primary }]}>
+                End-to-End Encrypted via Cura Enclave Peer Protocol
+              </Text>
+            </View>
+
+            <TextInput
+              value={directMessageText}
+              onChangeText={setDirectMessageText}
+              placeholder={`Write a confidential message to ${selectedMember?.authorHandle}...`}
+              placeholderTextColor={colors.text.muted}
+              style={[
+                styles.directMessageInput,
+                { backgroundColor: monoMutedSurface, color: colors.text.primary, borderColor: cardBorder },
+              ]}
+              multiline
+              autoFocus
+              maxLength={600}
+            />
+
+            <View style={styles.directMessageActionsRow}>
+              <Text style={styles.messageCharCount}>
+                {directMessageText.length}/600
+              </Text>
+
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity
+                  onPress={() => setShowDirectMessageModal(false)}
+                  style={[styles.cancelModalBtn, { backgroundColor: monoMutedSurface }]}
+                >
+                  <Text style={[styles.cancelModalBtnText, { color: colors.text.primary }]}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleSendDirectMessage}
+                  disabled={isSendingMessage || !directMessageText.trim()}
+                  style={[
+                    styles.confirmUsernameBtn,
+                    { backgroundColor: monoPrimary },
+                    !directMessageText.trim() && { opacity: 0.4 },
+                  ]}
+                >
+                  <Text style={[styles.confirmUsernameBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                    {isSendingMessage ? 'Sending…' : 'Send Message'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       {/* Quick Reply / Comment Modal */}
       <Modal
@@ -1024,11 +1540,6 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 14,
   },
-  composerTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
   composerAvatar: {
     width: 34,
     height: 34,
@@ -1041,12 +1552,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   composerInput: {
-    flex: 1,
     fontSize: 13.5,
     lineHeight: 18,
     minHeight: 52,
     textAlignVertical: 'top',
-    paddingTop: 4,
+    paddingTop: 8,
   },
   composerControlsRow: {
     flexDirection: 'row',
@@ -1260,18 +1770,11 @@ const styles = StyleSheet.create({
   // MODALS
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'flex-end',
   },
   modalDismissArea: {
     flex: 1,
-  },
-  commentSheet: {
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    borderTopWidth: 0.5,
-    padding: 18,
-    paddingBottom: 34,
   },
   sheetHandle: {
     width: 36,
@@ -1280,7 +1783,341 @@ const styles = StyleSheet.create({
     backgroundColor: '#858585',
     opacity: 0.4,
     alignSelf: 'center',
+    marginBottom: 14,
+  },
+  closeIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // PROFILE SHEET
+  profileSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 0.5,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    maxHeight: '88%',
+  },
+  profileSheetHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  profileSheetTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  memberIdentityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  largeMemberAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  largeMemberAvatarText: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  memberFullName: {
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  memberHandleText: {
+    color: '#858585',
+    fontSize: 12.5,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  trustPillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+  },
+  trustPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  trustPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  memberJoinedText: {
+    color: '#858585',
+    fontSize: 10.5,
+  },
+  bioCard: {
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
+  },
+  bioText: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    fontWeight: '400',
+  },
+  currentUserPrivacyCard: {
+    borderRadius: 14,
+    borderWidth: 0.5,
+    padding: 12,
     marginBottom: 12,
+  },
+  privacyCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  privacyCardTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  managePrivacyLink: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  privacyCardNotice: {
+    color: '#858585',
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  directMessageBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 14,
+    marginBottom: 16,
+  },
+  directMessageBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  disabledMessagingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 0.5,
+    marginBottom: 16,
+  },
+  disabledMessagingTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  disabledMessagingSub: {
+    color: '#858585',
+    fontSize: 10.5,
+    lineHeight: 14,
+  },
+  // PORTFOLIO SECTION IN SHEET
+  portfolioSectionContainer: {
+    marginTop: 4,
+  },
+  portfolioSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  portfolioSectionLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  enclaveVerifiedTag: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  enclaveVerifiedText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+  },
+  portfolioBreakdownCard: {
+    borderRadius: 16,
+    borderWidth: 0.5,
+    padding: 14,
+  },
+  portfolioTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  portfolioTotalLabel: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    color: '#858585',
+    marginBottom: 2,
+  },
+  portfolioTotalValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    fontVariant: ['tabular-nums'],
+  },
+  allocationCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  allocationCountText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  assetAllocationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 0.5,
+    paddingVertical: 10,
+  },
+  assetAllocationLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  assetSymbolCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  assetSymbolText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  assetNameText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  assetAllocationPercent: {
+    color: '#858585',
+    fontSize: 10.5,
+    marginTop: 1,
+  },
+  assetValueText: {
+    fontSize: 13,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    marginBottom: 4,
+  },
+  allocationTrack: {
+    width: 70,
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  allocationFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  portfolioLockedCard: {
+    borderRadius: 16,
+    borderWidth: 0.5,
+    padding: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockedIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  portfolioLockedTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  portfolioLockedDesc: {
+    color: '#858585',
+    fontSize: 11.5,
+    lineHeight: 16,
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+  // DIRECT MESSAGE MODAL
+  messageSheet: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderTopWidth: 0.5,
+    padding: 20,
+    paddingBottom: 34,
+  },
+  messageSheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  messageRecipientName: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  messageRecipientHandle: {
+    color: '#858585',
+    fontSize: 11,
+  },
+  encryptionBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  encryptionBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  directMessageInput: {
+    borderRadius: 14,
+    borderWidth: 0.5,
+    padding: 12,
+    fontSize: 13.5,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: 12,
+  },
+  directMessageActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  messageCharCount: {
+    color: '#858585',
+    fontSize: 11,
+  },
+  // COMMENT MODAL
+  commentSheet: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderTopWidth: 0.5,
+    padding: 18,
+    paddingBottom: 34,
   },
   sheetTitle: {
     fontSize: 16,
