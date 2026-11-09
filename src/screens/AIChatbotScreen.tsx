@@ -7,6 +7,7 @@ import {
   ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
   Keyboard, StatusBar,
 } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { AIService } from '../services/AIService';
@@ -30,7 +31,7 @@ const SUGGESTIONS = [
 let msgIdCounter = 0;
 const nextId = () => ++msgIdCounter;
 
-export default function AIChatbotScreen() {
+export default function AIChatbotScreen({ navigation }: { navigation?: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
@@ -126,9 +127,19 @@ export default function AIChatbotScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={88}
       >
-        {/* Header */}
+        {/* Header with Back Navigation */}
         <View style={[styles.header, { borderBottomColor: colors.border.subtle, paddingTop: Math.max(16, insets.top + 6) }]}>
           <View style={styles.headerLeft}>
+            <TouchableOpacity
+              onPress={() => navigation?.goBack?.()}
+              style={[styles.backBtn, { backgroundColor: isDark ? '#202020' : '#F2F2F2' }]}
+              activeOpacity={0.7}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M15 18l-6-6 6-6" />
+              </Svg>
+            </TouchableOpacity>
             <View style={[styles.avatar, { backgroundColor: colors.primary.DEFAULT }]}>
               <Text style={[styles.avatarText, { color: colors.text.inverse }]}>AI</Text>
             </View>
@@ -244,7 +255,14 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatar: {
     width: 38,

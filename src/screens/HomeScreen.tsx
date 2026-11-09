@@ -157,6 +157,20 @@ const DEFAULT_ASSETS = [
   { symbol: 'USDC', name: 'USD Coin', balance: '89,790.00', price: '$1.00', change: '0.0%', positive: true, usd: '$89,790.00', network: 'ERC-20' },
 ];
 
+const TOP_GAINERS = [
+  { symbol: 'SOL', name: 'Solana', price: '$168.20', change: '+12.4%', positive: true },
+  { symbol: 'AVAX', name: 'Avalanche', price: '$34.80', change: '+8.6%', positive: true },
+  { symbol: 'NEAR', name: 'NEAR Protocol', price: '$5.12', change: '+6.1%', positive: true },
+  { symbol: 'RENDER', name: 'Render', price: '$7.45', change: '+5.8%', positive: true },
+];
+
+const TOP_LOSERS = [
+  { symbol: 'ARB', name: 'Arbitrum', price: '$0.82', change: '-6.4%', positive: false },
+  { symbol: 'MATIC', name: 'Polygon', price: '$0.54', change: '-4.8%', positive: false },
+  { symbol: 'OP', name: 'Optimism', price: '$1.95', change: '-4.2%', positive: false },
+  { symbol: 'LINK', name: 'Chainlink', price: '$14.10', change: '-3.1%', positive: false },
+];
+
 const TIME_RANGES = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
@@ -178,6 +192,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [showFaceIdModal, setShowFaceIdModal] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
+  const [moversTab, setMoversTab] = useState<'gainers' | 'losers'>('gainers');
 
   const screenFadeAnim = useRef(new Animated.Value(0)).current;
   const toastAnim = useRef(new Animated.Value(-60)).current;
@@ -263,7 +278,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             style={[styles.chainSelectorPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
             <View style={[styles.chainStatusDot, { backgroundColor: monoPrimary }]} />
-            <Text style={[styles.chainSelectorText, { color: colors.text.primary }]}>
+            <Text
+              style={[styles.chainSelectorText, { color: colors.text.primary }]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {currentChainObj.name}
             </Text>
             <ChevronDownIcon color={colors.text.muted} size={11} />
@@ -272,17 +291,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* AI Assistant Quick Trigger */}
           <SpringButton
             onPress={() => navigation.navigate('AIChatbot')}
-            style={[styles.iconButton, { backgroundColor: cardBg, borderColor: cardBorder }]}
+            style={[styles.aiButtonPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
-            <SparkIcon color={monoPrimary} size={17} />
-          </SpringButton>
-
-          {/* Security Vault Trigger */}
-          <SpringButton
-            onPress={triggerFaceId}
-            style={[styles.iconButton, { backgroundColor: cardBg, borderColor: cardBorder }]}
-          >
-            <ShieldIcon color={monoPrimary} size={16} />
+            <SparkIcon color={monoPrimary} size={15} />
+            <Text style={[styles.aiButtonText, { color: colors.text.primary }]}>AI</Text>
           </SpringButton>
         </View>
       </View>
@@ -303,23 +315,35 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* PORTFOLIO HERO BENTO CARD                                */}
         {/* ======================================================== */}
         <View style={[styles.bentoHeroCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          <View style={styles.heroTopRow}>
-            <View>
-              <View style={styles.balanceHeaderRow}>
-                <Text style={styles.heroLabel}>Total Balance</Text>
-                <TouchableOpacity onPress={() => setShowBalance(!showBalance)} style={styles.eyeBtn}>
-                  {showBalance ? <EyeIcon size={14} color="#858585" /> : <EyeOffIcon size={14} color="#858585" />}
-                </TouchableOpacity>
-              </View>
+          <View style={styles.balanceHeaderRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.heroLabel}>Total Balance</Text>
+              <TouchableOpacity
+                onPress={() => setShowBalance(!showBalance)}
+                style={styles.eyeBtn}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                {showBalance ? <EyeIcon size={14} color="#858585" /> : <EyeOffIcon size={14} color="#858585" />}
+              </TouchableOpacity>
+            </View>
+          </View>
 
-              <Text style={[styles.heroBalanceText, { color: colors.text.primary }]}>
-                {showBalance ? `$${displayTotalUsd}` : '••••••••••••'}
+          <Text
+            style={[styles.heroBalanceText, { color: colors.text.primary }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            {showBalance ? `$${displayTotalUsd}` : '••••••••••••'}
+          </Text>
+
+          {/* Responsive P&L Delta Row (never overflows or cuts off) */}
+          <View style={styles.deltaRow}>
+            <View style={[styles.deltaPill, { backgroundColor: monoMutedSurface }]}>
+              <Text style={[styles.deltaPillText, { color: colors.text.primary }]}>
+                +$48,190.20 (+2.68%)
               </Text>
             </View>
-
-            <View style={[styles.deltaPill, { backgroundColor: monoMutedSurface }]}>
-              <Text style={[styles.deltaPillText, { color: colors.text.primary }]}>+$48,190.20 (+2.68%)</Text>
-            </View>
+            <Text style={[styles.deltaPeriodText, { color: colors.text.muted }]}>Past 24 hours</Text>
           </View>
 
           {/* Solid Anti-Aliased Portfolio Line Chart (Strict Monochrome) */}
@@ -428,36 +452,87 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* ======================================================== */}
-        {/* VALUE ENGINES: STAKING SAAS & MEV SHIELD                 */}
+        {/* MARKET MOVERS: TOP GAINERS & TOP LOSERS                  */}
         {/* ======================================================== */}
-        <View style={styles.valueEnginesRow}>
-          <SpringButton
-            onPress={() => navigation.navigate('Swap')}
-            style={[styles.valueEngineCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-          >
-            <View style={styles.cardHeaderSmall}>
-              <Text style={styles.cardSmallTitle}>STAKING SAAS</Text>
-              <View style={[styles.statusDotSmall, { backgroundColor: monoPrimary }]} />
-            </View>
-            <Text style={[styles.cardStatLarge, { color: colors.text.primary }]}>
-              +4.82% <Text style={styles.cardStatUnit}>APR</Text>
-            </Text>
-            <Text style={styles.cardStatDesc}>Lido & RocketPool Node</Text>
-          </SpringButton>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeading}>MARKET MOVERS</Text>
+          <View style={[styles.moversSegmentPill, { backgroundColor: monoMutedSurface }]}>
+            <TouchableOpacity
+              onPress={() => setMoversTab('gainers')}
+              style={[
+                styles.moversTabBtn,
+                moversTab === 'gainers' && { backgroundColor: monoPrimary },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.moversTabText,
+                moversTab === 'gainers'
+                  ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
+                  : { color: colors.text.muted }
+              ]}>
+                Gainers
+              </Text>
+            </TouchableOpacity>
 
-          <SpringButton
-            onPress={triggerFaceId}
-            style={[styles.valueEngineCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-          >
-            <View style={styles.cardHeaderSmall}>
-              <Text style={styles.cardSmallTitle}>MEV SHIELD</Text>
-              <View style={[styles.statusDotSmall, { backgroundColor: monoPrimary }]} />
-            </View>
-            <Text style={[styles.cardStatLarge, { color: colors.text.primary }]}>
-              Protected <Text style={styles.cardStatUnit}>✓</Text>
-            </Text>
-            <Text style={styles.cardStatDesc}>Flashbots Private Relay</Text>
-          </SpringButton>
+            <TouchableOpacity
+              onPress={() => setMoversTab('losers')}
+              style={[
+                styles.moversTabBtn,
+                moversTab === 'losers' && { backgroundColor: monoPrimary },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.moversTabText,
+                moversTab === 'losers'
+                  ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
+                  : { color: colors.text.muted }
+              ]}>
+                Losers
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          {(moversTab === 'gainers' ? TOP_GAINERS : TOP_LOSERS).map((token, index, arr) => {
+            const isLast = index === arr.length - 1;
+            return (
+              <SpringButton
+                key={token.symbol}
+                onPress={() => navigation.navigate('TokenDetail', { ...token, usd: token.price })}
+                style={[styles.assetRowItem, !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}
+              >
+                <View style={styles.assetLeftCol}>
+                  <View style={[styles.moverAvatar, { backgroundColor: monoMutedSurface }]}>
+                    <Text style={[styles.moverAvatarText, { color: colors.text.primary }]}>
+                      {token.symbol.slice(0, 3)}
+                    </Text>
+                  </View>
+                  <View style={{ marginLeft: 12 }}>
+                    <Text style={[styles.assetTitleText, { color: colors.text.primary }]}>{token.name}</Text>
+                    <Text style={styles.assetSubtitleText}>{token.symbol}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.assetRightCol}>
+                  <Text style={[styles.assetValueText, { color: colors.text.primary }]}>{token.price}</Text>
+                  <View style={[
+                    styles.moverBadge,
+                    { backgroundColor: token.positive ? monoMutedSurface : (isDark ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2') }
+                  ]}>
+                    <Text style={[
+                      styles.moverChangeText,
+                      { color: token.positive ? colors.text.primary : '#EF4444' }
+                    ]}>
+                      {token.positive ? `↑ ${token.change}` : `↓ ${token.change}`}
+                    </Text>
+                  </View>
+                </View>
+              </SpringButton>
+            );
+          })}
         </View>
 
         {/* ======================================================== */}
@@ -666,6 +741,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 0.5,
     gap: 6,
+    maxWidth: 130,
   },
   chainStatusDot: {
     width: 7,
@@ -675,6 +751,19 @@ const styles = StyleSheet.create({
   chainSelectorText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  aiButtonPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 0.5,
+    gap: 5,
+  },
+  aiButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   iconButton: {
     width: 34,
@@ -726,6 +815,17 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     fontVariant: ['tabular-nums'],
     marginTop: 4,
+  },
+  deltaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  deltaPeriodText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   deltaPill: {
     paddingHorizontal: 9,
@@ -825,49 +925,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  // VALUE ENGINES
-  valueEnginesRow: {
+  // MARKET MOVERS (GAINERS & LOSERS)
+  moversSegmentPill: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+    borderRadius: 14,
+    padding: 3,
+    gap: 2,
   },
-  valueEngineCard: {
-    flex: 1,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    padding: 14,
+  moversTabBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 11,
   },
-  cardHeaderSmall: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  moversTabText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  moverAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'center',
   },
-  cardSmallTitle: {
-    color: '#64748B',
-    fontSize: 10,
+  moverAvatarText: {
+    fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 0.8,
   },
-  statusDotSmall: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+  moverBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginTop: 4,
   },
-  cardStatLarge: {
-    fontSize: 17,
-    fontWeight: '800',
+  moverChangeText: {
+    fontSize: 11,
+    fontWeight: '700',
     fontVariant: ['tabular-nums'],
-  },
-  cardStatUnit: {
-    fontSize: 11,
-    fontWeight: '400',
-    color: '#64748B',
-  },
-  cardStatDesc: {
-    color: '#64748B',
-    fontSize: 11,
-    marginTop: 2,
   },
   // SECTION HEADERS
   sectionHeaderRow: {

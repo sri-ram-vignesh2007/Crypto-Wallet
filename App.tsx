@@ -2,11 +2,12 @@
 import './src/polyfills';
 
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { PaperProvider } from 'react-native-paper';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { useWalletStore } from './src/store/walletStore';
 import { useProfileStore } from './src/store/profileStore';
@@ -127,6 +128,7 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
 
 // Main Tab Navigator
 function MainTabs() {
+  const insets = useSafeAreaInsets();
   const { hasWallet } = useWalletStore();
   const { isUnlocked } = useAppLock();
   const { theme } = useTheme();
@@ -135,6 +137,10 @@ function MainTabs() {
   if (!hasWallet || !isUnlocked) {
     return null;
   }
+
+  // Adaptive safe area bottom padding across all iPhone & Android models
+  const bottomPadding = insets.bottom > 0 ? insets.bottom + 2 : (Platform.OS === 'android' ? 12 : 10);
+  const tabHeight = 56 + bottomPadding;
 
   return (
     <Tab.Navigator
@@ -146,14 +152,18 @@ function MainTabs() {
           backgroundColor: colors.bg.surface,
           borderTopColor: colors.border.subtle,
           borderTopWidth: 0.5,
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 6,
+          height: tabHeight,
+          paddingBottom: bottomPadding,
+          paddingTop: 8,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
           letterSpacing: -0.2,
+          marginTop: 2,
+        },
+        tabBarIconStyle: {
+          marginBottom: 0,
         },
       }}
     >
