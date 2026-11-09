@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cura Desk Manager — Enterprise Organization Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              canvas: '#09090b',
+              surface: '#141417',
+              elevated: '#1e1e24',
+              border: '#27272a',
+              subtle: '#3f3f46',
+              primary: '#ffffff',
+              accent: '#22c55e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #09090b;
+      color: #fafafa;
+      font-family: 'Inter', sans-serif;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+    .phone-mockup {
+      width: 320px;
+      height: 640px;
+      border: 10px solid #27272a;
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-white selection:text-black">
+
+  <!-- ======================================================== -->
+  <!-- TOP ENTERPRISE HEADER                                    -->
+  <!-- ======================================================== -->
+  <header class="border-b border-brand-border bg-brand-surface sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Organization Selector -->
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-bold text-black text-sm tracking-tighter">
+            C
+          </div>
+          <div class="flex flex-col">
+            <span class="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5">
+              CURA <span class="text-xs px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-mono font-medium">ORGANIZATION PORTAL</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="h-5 w-px bg-brand-border hidden md:block"></div>
+
+        <!-- Desk Switcher Dropdown -->
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-zinc-400 font-medium hidden sm:inline">Active Desk:</label>
+          <div class="relative">
+            <select id="deskSelector" onchange="switchDesk(this.value)" class="bg-brand-elevated border border-brand-border text-white text-xs font-semibold rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:border-zinc-400 appearance-none cursor-pointer">
+              <option value="Enterprise Desk">Enterprise Desk (@enterprise_desk)</option>
+              <option value="Crypto & Bitcoin Desk">Crypto & Bitcoin Desk (@crypto_desk)</option>
+              <option value="DeFi Engine Desk">DeFi Engine Desk (@defi_desk)</option>
+              <option value="Layer 1 Systems Desk">Layer 1 Systems Desk (@l1_systems)</option>
+              <option value="Rollup & Scaling Desk">Rollup & Scaling Desk (@rollup_desk)</option>
+              <option value="Tokenized Assets Desk">Tokenized Assets Desk (@rwa_desk)</option>
+              <option value="Interoperability Desk">Interoperability Desk (@crosschain_desk)</option>
+              <option value="Security & Enclave Desk">Security & Enclave Desk (@security_desk)</option>
+              <option value="Agentic Compute Desk">Agentic Compute Desk (@compute_desk)</option>
+              <option value="Macro & Policy Desk">Macro & Policy Desk (@macro_desk)</option>
+              <option value="CUSTOM">+ Add Custom Organization</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-zinc-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Actions & Shield Indicator -->
+      <div class="flex items-center gap-4">
+        <div class="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Zero-Knowledge User Shield Active
+        </div>
+
+        <button onclick="syncWithBackend()" id="syncBtn" class="flex items-center gap-1.5 text-xs text-zinc-300 hover:text-white bg-brand-elevated border border-brand-border px-3 py-1.5 rounded-lg transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="syncIcon"></i>
+          <span>Sync API</span>
+        </button>
+
+        <div class="flex items-center gap-2 pl-2 border-l border-brand-border">
+          <div class="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white">
+            ADM
+          </div>
+          <span class="text-xs font-medium text-zinc-300 hidden sm:inline">Owner / Admin</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- MAIN WORKSPACE LAYOUT                                    -->
+  <!-- ======================================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- LEFT & CENTER: COMPOSER, DISPATCHES, INQUIRIES (8 Cols) -->
+    <div class="lg:col-span-8 flex flex-col gap-8">
+
+      <!-- STATS BAR -->
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-brand-surface border border-brand-border rounded-xl p-4">
+          <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Live Dispatches</span>
+          <div class="text-2xl font-bold text-white mt-1" id="statDispatchesCount">10</div>
+          <span class="text-[11px] text-zinc-500 mt-1 block">Verified broadcasts live</span>
+        </div>
+        <div class="bg-brand-surface border border-brand-border rounded-xl p-4">
+          <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Total User Views</span>
+          <div class="text-2xl font-bold text-white mt-1" id="statTotalViews">342,850</div>
+          <span class="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+            <i data-lucide="trending-up" class="w-3 h-3"></i> +14.2% this week
+          </span>
+        </div>
+        <div class="bg-brand-surface border border-brand-border rounded-xl p-4">
+          <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Shielded Inquiries</span>
+          <div class="text-2xl font-bold text-white mt-1" id="statInquiriesCount">4</div>
+          <span class="text-[11px] text-zinc-500 mt-1 block">100% anonymized tokens</span>
+        </div>
+      </div>
+
+      <!-- DISPATCH COMPOSER CARD -->
+      <div class="bg-brand-surface border border-brand-border rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between pb-4 border-b border-brand-border">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="radio" class="w-4 h-4 text-emerald-400"></i>
+              Broadcast Live Dispatch
+            </h2>
+            <p class="text-xs text-zinc-400 mt-0.5">
+              Publish official announcement directly to Cura Wallet Community feed.
+            </p>
+          </div>
+          <span id="publishingAsBadge" class="text-xs px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-mono font-medium">
+            @enterprise_desk
+          </span>
+        </div>
+
+        <form id="dispatchForm" onsubmit="handlePublishDispatch(event)" class="mt-5 space-y-4">
+          
+          <!-- Category Selector -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">Category</label>
+            <div class="flex flex-wrap gap-2" id="categoryChips">
+              <button type="button" onclick="selectCategory('Business')" class="cat-pill active px-3 py-1 rounded-lg text-xs font-medium bg-white text-black transition">Business</button>
+              <button type="button" onclick="selectCategory('Crypto')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">Crypto</button>
+              <button type="button" onclick="selectCategory('DeFi')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">DeFi</button>
+              <button type="button" onclick="selectCategory('Layer 1')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">Layer 1</button>
+              <button type="button" onclick="selectCategory('Layer 2')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">Layer 2</button>
+              <button type="button" onclick="selectCategory('RWA')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">RWA</button>
+              <button type="button" onclick="selectCategory('Cross-Chain')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">Cross-Chain</button>
+              <button type="button" onclick="selectCategory('Security')" class="cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition">Security</button>
+            </div>
+            <input type="hidden" id="selectedCategory" value="Business">
+          </div>
+
+          <!-- Headline -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">Headline</label>
+            <input
+              type="text"
+              id="dispatchTitle"
+              required
+              placeholder="e.g. Fortune 500 Enterprise Treasury Operations Automate Instant On-Chain Payroll"
+              oninput="updateLivePreview()"
+              class="w-full bg-brand-elevated border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+            />
+          </div>
+
+          <!-- Content Body -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Announcement Content</label>
+              <span id="charCount" class="text-[11px] text-zinc-500 font-mono">0 / 600</span>
+            </div>
+            <textarea
+              id="dispatchContent"
+              required
+              rows="4"
+              maxlength="600"
+              placeholder="Provide technical metrics, milestone data, and protocol details for wallet users..."
+              oninput="updateLivePreview()"
+              class="w-full bg-brand-elevated border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+            ></textarea>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">Cashtags / Tags (Comma separated)</label>
+            <input
+              type="text"
+              id="dispatchTags"
+              placeholder="$USDC, Enterprise, Payroll, Settlement"
+              oninput="updateLivePreview()"
+              class="w-full bg-brand-elevated border border-brand-border rounded-xl px-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+            />
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-xs text-zinc-500 flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              Cryptographically verified organization signature
+            </span>
+
+            <button
+              type="submit"
+              class="bg-white hover:bg-zinc-200 text-black font-bold text-xs px-6 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2"
+            >
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              Publish Live Dispatch
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- PUBLISHED DISPATCHES FEED & MANAGEMENT -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-zinc-400"></i>
+            Published Dispatches Feed
+          </h3>
+          <span class="text-xs text-zinc-400 font-medium">Live on Cura Mobile App</span>
+        </div>
+
+        <div id="dispatchesList" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ZERO-KNOWLEDGE USER INQUIRIES & REPLIES -->
+      <div class="bg-brand-surface border border-brand-border rounded-2xl p-6">
+        <div class="flex items-center justify-between pb-4 border-b border-brand-border">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="message-square" class="w-4 h-4 text-blue-400"></i>
+              Shielded User Inquiries & Q&A
+            </h3>
+            <p class="text-xs text-zinc-400 mt-0.5">
+              Inquiries use internal zero-knowledge tokens. User names, balances, and addresses remain 100% shielded.
+            </p>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono">
+            ZK Anonymized
+          </span>
+        </div>
+
+        <div id="inquiriesList" class="mt-4 space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: LIVE PHONE SIMULATOR (4 Cols) -->
+    <div class="lg:col-span-4 flex flex-col items-center">
+      <div class="sticky top-24 flex flex-col items-center">
+        <div class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5 text-zinc-400"></i>
+          Live Mobile Feed Preview
+        </div>
+
+        <!-- Phone Mockup Frame -->
+        <div class="phone-mockup bg-black flex flex-col relative select-none">
+          <!-- Notch / Dynamic Island -->
+          <div class="w-24 h-4 bg-zinc-900 rounded-full mx-auto mt-2.5"></div>
+
+          <!-- Mobile App Header -->
+          <div class="px-4 py-3 flex items-center justify-between border-b border-zinc-900">
+            <span class="text-xs font-black tracking-tight text-white">Community</span>
+            <div class="flex items-center gap-1.5">
+              <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+              <span class="text-[10px] text-zinc-400 font-mono">LIVE FEED</span>
+            </div>
+          </div>
+
+          <!-- Preview Content Scroll -->
+          <div class="flex-1 p-3 overflow-y-auto space-y-3" id="phonePreviewScroll">
+            <!-- Active Draft Preview Card -->
+            <div class="bg-zinc-900 border border-emerald-500/40 rounded-xl p-3 shadow">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-6 h-6 rounded-full bg-white text-black font-bold text-[10px] flex items-center justify-center" id="prevLogo">
+                  E
+                </div>
+                <div>
+                  <div class="flex items-center gap-1">
+                    <span class="text-[11px] font-bold text-white" id="prevOrgName">Enterprise Desk</span>
+                    <i data-lucide="check-circle" class="w-2.5 h-2.5 text-blue-400 fill-blue-400"></i>
+                  </div>
+                  <span class="text-[9px] text-zinc-500" id="prevHandle">@enterprise_desk • Just now</span>
+                </div>
+              </div>
+
+              <h4 class="text-xs font-bold text-white line-clamp-2" id="prevTitle">
+                Enter a headline above to see live preview...
+              </h4>
+              <p class="text-[10px] text-zinc-400 mt-1 line-clamp-3 leading-relaxed" id="prevContent">
+                Announcement details will appear here formatted as mobile wallet cards.
+              </p>
+
+              <div class="flex flex-wrap gap-1 mt-2" id="prevTags">
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">$USDC</span>
+              </div>
+
+              <div class="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[9px] text-zinc-500">
+                <span class="flex items-center gap-1"><i data-lucide="eye" class="w-2.5 h-2.5"></i> 1 view</span>
+                <span class="text-white font-medium bg-zinc-800 px-2 py-0.5 rounded">Ask Question</span>
+              </div>
+            </div>
+
+            <!-- Existing sample item on mobile -->
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 opacity-70">
+              <div class="flex items-center gap-2 mb-1.5">
+                <div class="w-5 h-5 rounded-full bg-orange-500 text-white font-bold text-[9px] flex items-center justify-center">
+                  B
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold text-white">Crypto & Bitcoin Desk</span>
+                  <span class="text-[8px] text-zinc-500 block">@crypto_desk • 35m ago</span>
+                </div>
+              </div>
+              <h5 class="text-[11px] font-bold text-white">Bitcoin Institutional Accumulation Accelerates</h5>
+            </div>
+          </div>
+
+          <!-- Bottom Tab Bar Mockup -->
+          <div class="h-12 bg-zinc-950 border-t border-zinc-900 flex items-center justify-around text-zinc-600">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+            <i data-lucide="message-square" class="w-4 h-4 text-white"></i>
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-zinc-500 mt-3 text-center">
+          Exact pixel rendering inside Cura Wallet mobile app
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ADD CUSTOM DESK                                   -->
+  <!-- ======================================================== -->
+  <div id="customDeskModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-brand-surface border border-brand-border rounded-2xl max-w-md w-full p-6">
+      <h3 class="text-base font-bold text-white mb-1">Add Custom Organization / Desk</h3>
+      <p class="text-xs text-zinc-400 mb-4">Register an enterprise desk or partner company for official broadcasts.</p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-zinc-300 mb-1">Organization Name</label>
+          <input type="text" id="newOrgName" placeholder="e.g. Stargate Finance" class="w-full bg-brand-elevated border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-300 mb-1">Handle</label>
+          <input type="text" id="newOrgHandle" placeholder="e.g. @stargate_io" class="w-full bg-brand-elevated border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-400">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 mt-6">
+        <button onclick="closeCustomDeskModal()" class="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-white transition">Cancel</button>
+        <button onclick="saveCustomDesk()" class="px-4 py-2 text-xs font-bold bg-white text-black rounded-xl hover:bg-zinc-200 transition">Save Desk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT LOGIC & STATE PERSISTENCE                     -->
+  <!-- ======================================================== -->
+  <script>
+    const STORAGE_KEY = 'cura_portal_dispatches_v1';
+    const INQUIRIES_STORAGE_KEY = 'cura_portal_inquiries_v1';
+
+    const INITIAL_BROADCASTS = [
+      {
+        id: 'broadcast-1',
+        orgName: 'Enterprise Desk',
+        orgHandle: '@enterprise_desk',
+        orgLogoInitial: 'E',
+        orgCategory: 'Business',
+        timeAgo: '12m ago',
+        title: 'Fortune 500 Enterprise Treasury Operations Automate Instant On-Chain Payroll',
+        content: 'Enterprise Desk has integrated zero-slippage B2B settlements for multinational enterprise treasuries. Autonomous payroll smart vaults now execute multi-currency settlements with sub-cent transaction overhead and continuous cryptographic audit logs.',
+        tags: ['$USDC', 'Enterprise', 'Payroll', 'Treasury'],
+        viewCount: 46210,
+      },
+      {
+        id: 'broadcast-2',
+        orgName: 'Crypto & Bitcoin Desk',
+        orgHandle: '@crypto_desk',
+        orgLogoInitial: 'B',
+        orgCategory: 'Crypto',
+        timeAgo: '35m ago',
+        title: 'Bitcoin Institutional Accumulation Accelerates: Weekly Net Inflows Cross $1.8B',
+        content: 'Sovereign Desk models indicate aggressive institutional custody accumulation above $68,000. Mining hash rate difficulty reached new all-time highs as sovereign allocation desks expand multi-year reserves.',
+        tags: ['$BTC', 'Bitcoin', 'Macro', 'Reserves'],
+        viewCount: 52180,
+      },
+      {
+        id: 'broadcast-3',
+        orgName: 'DeFi Engine Desk',
+        orgHandle: '@defi_desk',
+        orgLogoInitial: 'D',
+        orgCategory: 'DeFi',
+        timeAgo: '50m ago',
+        title: 'Automated Concentrated Liquidity Rebalancing Captures 42% Fee Compression',
+        content: 'DeFi Engine telemetry reports record liquidity efficiency across top AMM pools. Dynamic rebalancing algorithms minimized impermanent loss for high-volume trading pairs during volatility spikes.',
+        tags: ['$ETH', 'DeFi', 'Liquidity', 'Yield'],
+        viewCount: 38450,
+      },
+    ];
+
+    const INITIAL_INQUIRIES = [
+      {
+        id: 'inq-1',
+        broadcastTitle: 'Fortune 500 Enterprise Treasury Operations Automate Instant On-Chain Payroll',
+        userAnonToken: 'INQ-92841',
+        question: 'What is the maximum single-transaction settlement cap supported under the new enterprise payroll enclave?',
+        timeAgo: '22m ago',
+        reply: 'Enterprise Treasury enclaves currently process single atomic settlement batches up to $50M USDC with instant multi-sig quorum confirmation.',
+      },
+      {
+        id: 'inq-2',
+        broadcastTitle: 'Bitcoin Institutional Accumulation Accelerates: Weekly Net Inflows Cross $1.8B',
+        userAnonToken: 'INQ-44810',
+        question: 'Are custody allocations verified through Proof-of-Reserves or cryptographic audit attestation?',
+        timeAgo: '1h ago',
+        reply: null,
+      },
+    ];
+
+    let state = {
+      activeDesk: 'Enterprise Desk',
+      activeHandle: '@enterprise_desk',
+      dispatches: [],
+      inquiries: [],
+    };
+
+    function init() {
+      const savedDispatches = localStorage.getItem(STORAGE_KEY);
+      const savedInquiries = localStorage.getItem(INQUIRIES_STORAGE_KEY);
+
+      state.dispatches = savedDispatches ? JSON.parse(savedDispatches) : INITIAL_BROADCASTS;
+      state.inquiries = savedInquiries ? JSON.parse(savedInquiries) : INITIAL_INQUIRIES;
+
+      renderDispatches();
+      renderInquiries();
+      updateStats();
+      updateLivePreview();
+      lucide.createIcons();
+    }
+
+    function switchDesk(deskName) {
+      if (deskName === 'CUSTOM') {
+        document.getElementById('customDeskModal').classList.remove('hidden');
+        return;
+      }
+      state.activeDesk = deskName;
+      const cleanHandle = '@' + deskName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      state.activeHandle = cleanHandle;
+      document.getElementById('publishingAsBadge').innerText = cleanHandle;
+      updateLivePreview();
+    }
+
+    function selectCategory(cat) {
+      document.getElementById('selectedCategory').value = cat;
+      const buttons = document.querySelectorAll('.cat-pill');
+      buttons.forEach(btn => {
+        if (btn.innerText === cat) {
+          btn.className = 'cat-pill active px-3 py-1 rounded-lg text-xs font-medium bg-white text-black transition';
+        } else {
+          btn.className = 'cat-pill px-3 py-1 rounded-lg text-xs font-medium bg-brand-elevated border border-brand-border text-zinc-300 hover:text-white transition';
+        }
+      });
+    }
+
+    function updateLivePreview() {
+      const title = document.getElementById('dispatchTitle').value.trim();
+      const content = document.getElementById('dispatchContent').value.trim();
+      const tags = document.getElementById('dispatchTags').value.trim();
+
+      document.getElementById('prevOrgName').innerText = state.activeDesk;
+      document.getElementById('prevHandle').innerText = `${state.activeHandle} • Just now`;
+      document.getElementById('prevLogo').innerText = state.activeDesk.charAt(0).toUpperCase();
+
+      document.getElementById('prevTitle').innerText = title || 'Enter a headline above to see live preview...';
+      document.getElementById('prevContent').innerText = content || 'Announcement details will appear here formatted as mobile wallet cards.';
+      document.getElementById('charCount').innerText = `${content.length} / 600`;
+
+      const tagsContainer = document.getElementById('prevTags');
+      if (tags) {
+        tagsContainer.innerHTML = tags.split(',').map(t => `<span class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">${t.trim()}</span>`).join('');
+      } else {
+        tagsContainer.innerHTML = '<span class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500">No tags</span>';
+      }
+    }
+
+    function handlePublishDispatch(e) {
+      e.preventDefault();
+      const title = document.getElementById('dispatchTitle').value.trim();
+      const content = document.getElementById('dispatchContent').value.trim();
+      const rawTags = document.getElementById('dispatchTags').value.trim();
+      const category = document.getElementById('selectedCategory').value;
+
+      if (!title || !content) return;
+
+      const tagsArray = rawTags ? rawTags.split(',').map(t => t.trim()) : [category, 'Verified'];
+
+      const newDispatch = {
+        id: `broadcast-${Date.now()}`,
+        orgName: state.activeDesk,
+        orgHandle: state.activeHandle,
+        orgLogoInitial: state.activeDesk.charAt(0).toUpperCase(),
+        orgCategory: category,
+        timeAgo: 'Just now',
+        title: title,
+        content: content,
+        tags: tagsArray,
+        viewCount: 1,
+      };
+
+      state.dispatches.unshift(newDispatch);
+      saveState();
+
+      // Clear form
+      document.getElementById('dispatchTitle').value = '';
+      document.getElementById('dispatchContent').value = '';
+      document.getElementById('dispatchTags').value = '';
+
+      renderDispatches();
+      updateStats();
+      updateLivePreview();
+      lucide.createIcons();
+    }
+
+    function renderDispatches() {
+      const container = document.getElementById('dispatchesList');
+      if (state.dispatches.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-xs text-zinc-500 bg-brand-surface border border-brand-border rounded-xl">No active dispatches. Broadcast one above!</div>';
+        return;
+      }
+
+      container.innerHTML = state.dispatches.map(d => `
+        <div class="bg-brand-surface border border-brand-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-start gap-3 flex-1">
+            <div class="w-9 h-9 rounded-full bg-white text-black font-extrabold flex items-center justify-center text-xs flex-shrink-0">
+              ${d.orgLogoInitial}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-white">${d.orgName}</span>
+                <span class="text-[11px] text-zinc-500">${d.orgHandle}</span>
+                <span class="text-[11px] text-zinc-500">• ${d.timeAgo}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">${d.orgCategory}</span>
+              </div>
+              <h4 class="text-sm font-semibold text-white mt-1">${d.title}</h4>
+              <p class="text-xs text-zinc-400 mt-1 line-clamp-2">${d.content}</p>
+              <div class="flex items-center gap-2 mt-2">
+                ${d.tags.map(t => `<span class="text-[10px] text-zinc-500 font-mono">#${t.replace('$', '')}</span>`).join(' ')}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-brand-border">
+            <div class="text-right">
+              <span class="text-xs font-bold text-white block">${d.viewCount.toLocaleString()}</span>
+              <span class="text-[10px] text-zinc-500">Live Views</span>
+            </div>
+            <button onclick="deleteDispatch('${d.id}')" class="text-zinc-500 hover:text-red-400 p-2 rounded-lg hover:bg-zinc-800/60 transition" title="Delete Dispatch">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function deleteDispatch(id) {
+      if (!confirm('Are you sure you want to retract this live dispatch?')) return;
+      state.dispatches = state.dispatches.filter(d => d.id !== id);
+      saveState();
+      renderDispatches();
+      updateStats();
+    }
+
+    function renderInquiries() {
+      const container = document.getElementById('inquiriesList');
+      if (state.inquiries.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-xs text-zinc-500">No active user inquiries.</div>';
+        return;
+      }
+
+      container.innerHTML = state.inquiries.map(inq => `
+        <div class="bg-brand-elevated border border-brand-border rounded-xl p-4">
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="font-mono text-blue-400 font-semibold flex items-center gap-1.5">
+              <i data-lucide="shield" class="w-3.5 h-3.5"></i> User Token: ${inq.userAnonToken}
+            </span>
+            <span class="text-zinc-500 text-[11px]">${inq.timeAgo}</span>
+          </div>
+
+          <p class="text-xs font-medium text-white mb-2">
+            "${inq.question}"
+          </p>
+
+          <span class="text-[10px] text-zinc-500 block mb-3">On dispatch: ${inq.broadcastTitle}</span>
+
+          ${inq.reply ? `
+            <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-xs">
+              <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">Official Response Sent:</span>
+              <p class="text-zinc-300">${inq.reply}</p>
+            </div>
+          ` : `
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                id="reply-input-${inq.id}"
+                placeholder="Type official verified response..."
+                class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400"
+              />
+              <button
+                onclick="sendReply('${inq.id}')"
+                class="bg-white text-black text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-zinc-200 transition"
+              >
+                Send Reply
+              </button>
+            </div>
+          `}
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function sendReply(inquiryId) {
+      const input = document.getElementById(`reply-input-${inquiryId}`);
+      if (!input || !input.value.trim()) return;
+
+      const inq = state.inquiries.find(i => i.id === inquiryId);
+      if (inq) {
+        inq.reply = input.value.trim();
+        saveState();
+        renderInquiries();
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statDispatchesCount').innerText = state.dispatches.length;
+      document.getElementById('statInquiriesCount').innerText = state.inquiries.length;
+      const totalViews = state.dispatches.reduce((acc, curr) => acc + (curr.viewCount || 1), 0);
+      document.getElementById('statTotalViews').innerText = totalViews.toLocaleString();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.dispatches));
+      localStorage.setItem(INQUIRIES_STORAGE_KEY, JSON.stringify(state.inquiries));
+    }
+
+    async function syncWithBackend() {
+      const icon = document.getElementById('syncIcon');
+      icon.classList.add('animate-spin');
+
+      try {
+        const res = await fetch('http://localhost:8000/api/community/dispatches');
+        if (res.ok) {
+          const remoteData = await res.json();
+          if (Array.isArray(remoteData) && remoteData.length > 0) {
+            state.dispatches = remoteData;
+            saveState();
+            renderDispatches();
+            updateStats();
+            alert('Successfully synchronized live dispatches with FastAPI backend!');
+          }
+        } else {
+          alert('Backend returned response status: ' + res.status);
+        }
+      } catch (err) {
+        alert('Local storage is synchronized! (To sync over network, start backend server: python -m backend.main)');
+      } finally {
+        icon.classList.remove('animate-spin');
+      }
+    }
+
+    function closeCustomDeskModal() {
+      document.getElementById('customDeskModal').classList.add('hidden');
+    }
+
+    function saveCustomDesk() {
+      const name = document.getElementById('newOrgName').value.trim();
+      const handle = document.getElementById('newOrgHandle').value.trim();
+      if (!name) return;
+
+      const selector = document.getElementById('deskSelector');
+      const option = document.createElement('option');
+      option.value = name;
+      option.innerText = `${name} (${handle || '@' + name.toLowerCase()})`;
+      selector.insertBefore(option, selector.lastElementChild);
+      selector.value = name;
+      switchDesk(name);
+      closeCustomDeskModal();
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

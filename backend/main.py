@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .routers import ai, wallet, market, swap
+from .routers import ai, wallet, market, swap, community
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,6 +29,7 @@ app.include_router(ai.router, prefix=settings.API_PREFIX)
 app.include_router(wallet.router, prefix=settings.API_PREFIX)
 app.include_router(market.router, prefix=settings.API_PREFIX)
 app.include_router(swap.router, prefix=settings.API_PREFIX)
+app.include_router(community.router, prefix=settings.API_PREFIX)
 
 @app.get("/", tags=["Health Check"])
 async def root_health_check():
