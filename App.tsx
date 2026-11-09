@@ -80,34 +80,43 @@ type RootStackParamList = {
 
 type TabParamList = {
   Home: undefined;
-  Explore: undefined;
+  Assets: undefined;
+  Swap: undefined;
   Activity: undefined;
   Settings: undefined;
 };
 
-// Apple SF Symbols Inspired Tab Icons
+// Institutional Fintech Tab Icons
 const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: boolean; color: string; size?: number }) => {
+  const strokeW = focused ? 2.2 : 1.7;
   const icons: Record<string, React.ReactNode> = {
     Home: (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={focused ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <Rect x="2" y="5" width="20" height="14" rx="3" />
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+        <Rect x="2" y="4" width="20" height="16" rx="3" />
         <Path d="M2 10h20" />
+        <Circle cx="18" cy="15" r="1.5" fill={color} />
       </Svg>
     ),
-    Explore: (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={focused ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-        <Circle cx="12" cy="12" r="10" />
-        <Path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" />
+    Assets: (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <Path d="M2 17l10 5 10-5" />
+        <Path d="M2 12l10 5 10-5" />
+      </Svg>
+    ),
+    Swap: (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
       </Svg>
     ),
     Activity: (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={focused ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
         <Circle cx="12" cy="12" r="10" />
         <Path d="M12 6v6l4 2" />
       </Svg>
     ),
     Settings: (
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={focused ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
         <Circle cx="12" cy="12" r="3" />
         <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
       </Svg>
@@ -120,7 +129,8 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
 function MainTabs() {
   const { hasWallet } = useWalletStore();
   const { isUnlocked } = useAppLock();
-  const colors = useTheme().theme.colors;
+  const { theme } = useTheme();
+  const colors = theme.colors;
 
   if (!hasWallet || !isUnlocked) {
     return null;
@@ -131,7 +141,7 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary.DEFAULT,
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarInactiveTintColor: colors.text.muted,
         tabBarStyle: {
           backgroundColor: colors.bg.surface,
           borderTopColor: colors.border.subtle,
@@ -152,15 +162,23 @@ function MainTabs() {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} />,
-          tabBarLabel: 'Wallet',
+          tabBarLabel: 'Home',
         }}
       />
       <Tab.Screen
-        name="Explore"
+        name="Assets"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Explore" focused={focused} color={color} />,
-          tabBarLabel: 'Discover',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Assets" focused={focused} color={color} />,
+          tabBarLabel: 'Assets',
+        }}
+      />
+      <Tab.Screen
+        name="Swap"
+        component={SwapScreen}
+        options={{
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} />,
+          tabBarLabel: 'Swap',
         }}
       />
       <Tab.Screen
@@ -168,7 +186,7 @@ function MainTabs() {
         component={ActivityScreen}
         options={{
           tabBarIcon: ({ focused, color }) => <TabIcon name="Activity" focused={focused} color={color} />,
-          tabBarLabel: 'History',
+          tabBarLabel: 'Activity',
         }}
       />
       <Tab.Screen

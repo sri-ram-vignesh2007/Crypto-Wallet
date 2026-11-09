@@ -8,7 +8,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
-import { useColors, useIsDark } from '../theme/ThemeContext';
+import { useColors, useIsDark, useTheme } from '../theme/ThemeContext';
 import { useWalletStore } from '../store/walletStore';
 import { SecureKeyManager } from '../core/SecureKeyManager';
 import { CHAINS } from '../core/ChainConfig';
@@ -193,15 +193,17 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
     );
   };
 
-  const primaryBlue = isDark ? '#0A84FF' : '#007AFF';
-  const cardBg = isDark ? '#1C1C1E' : '#FFFFFF';
-  const hairline = isDark ? '#2C2C2E' : '#E5E5EA';
+  const { toggleTheme } = useTheme();
+  const primaryGreen = isDark ? '#10B981' : '#166B52';
+  const cardBg = isDark ? '#1F2937' : '#FFFFFF';
+  const hairline = isDark ? '#2A3441' : '#E2E8F0';
+  const canvasBg = isDark ? '#171C24' : '#F8FAFC';
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#000000' : '#F2F2F7' }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: canvasBg }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* Apple Large Title Navigation Header */}
+      {/* Large Title Navigation Header */}
       <View style={[styles.largeHeader, { paddingTop: insets.top + 10 }]}>
         <Text style={[styles.largeTitle, { color: colors.text.primary }]}>Settings</Text>
       </View>
@@ -210,20 +212,20 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         contentContainerStyle={[styles.content, { paddingBottom: Math.max(34, insets.bottom + 24) }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Apple Inset Wallet Profile Card */}
+        {/* Wallet Profile Card */}
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
           <View style={styles.walletProfileRow}>
-            <View style={[styles.walletAvatar, { backgroundColor: primaryBlue }]}>
+            <View style={[styles.walletAvatar, { backgroundColor: primaryGreen }]}>
               <Text style={styles.walletAvatarEmoji}>💎</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={[styles.walletTitle, { color: colors.text.primary }]}>Crypto Wallet</Text>
+              <Text style={[styles.walletTitle, { color: colors.text.primary }]}>CryptoVault</Text>
               <Text style={[styles.walletSubtitle, { color: colors.text.muted }]}>
                 {displayAddress.slice(0, 8)}...{displayAddress.slice(-6)}
               </Text>
             </View>
-            <View style={[styles.activeCapsule, { backgroundColor: isDark ? 'rgba(48,209,88,0.18)' : '#E8F8EE' }]}>
-              <Text style={[styles.activeCapsuleText, { color: isDark ? '#30D158' : '#34C759' }]}>Active</Text>
+            <View style={[styles.activeCapsule, { backgroundColor: isDark ? 'rgba(16,185,129,0.18)' : '#E6F4EA' }]}>
+              <Text style={[styles.activeCapsuleText, { color: primaryGreen }]}>Active</Text>
             </View>
           </View>
 
@@ -233,24 +235,41 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           <View style={styles.keyActionsContainer}>
             <SpringButton
               onPress={viewPublicAddress}
-              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}
+              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
             >
-              <Text style={[styles.keyPillBtnText, { color: primaryBlue }]}>Public Address</Text>
+              <Text style={[styles.keyPillBtnText, { color: primaryGreen }]}>Public Address</Text>
             </SpringButton>
 
             <SpringButton
               onPress={viewSecretPhrase}
-              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}
+              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
             >
-              <Text style={[styles.keyPillBtnText, { color: isDark ? '#FF9F0A' : '#FF9500' }]}>Seed Phrase</Text>
+              <Text style={[styles.keyPillBtnText, { color: isDark ? '#F59E0B' : '#D97706' }]}>Seed Phrase</Text>
             </SpringButton>
 
             <SpringButton
               onPress={viewPrivateKey}
-              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' }]}
+              style={[styles.keyPillBtn, { backgroundColor: isDark ? '#283548' : '#F1F5F9' }]}
             >
-              <Text style={[styles.keyPillBtnText, { color: isDark ? '#FF453A' : '#FF3B30' }]}>Private Key</Text>
+              <Text style={[styles.keyPillBtnText, { color: isDark ? '#EF4444' : '#DC2626' }]}>Private Key</Text>
             </SpringButton>
+          </View>
+        </View>
+
+        {/* Section: Appearance */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>APPEARANCE</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <View style={styles.settingsRow}>
+            <View style={[styles.iconCapsule, { backgroundColor: isDark ? '#283548' : '#E2E8F0' }]}>
+              <Text style={{ fontSize: 13 }}>{isDark ? '🌙' : '☀️'}</Text>
+            </View>
+            <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Dark Mode</Text>
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              trackColor={{ false: '#CBD5E1', true: primaryGreen }}
+              thumbColor="#FFFFFF"
+            />
           </View>
         </View>
 
@@ -258,14 +277,14 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>SECURITY</Text>
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
           <View style={styles.settingsRow}>
-            <View style={[styles.iconCapsule, { backgroundColor: isDark ? '#30D158' : '#34C759' }]}>
+            <View style={[styles.iconCapsule, { backgroundColor: primaryGreen }]}>
               <ShieldIcon color="#FFFFFF" size={17} />
             </View>
             <Text style={[styles.settingsLabel, { color: colors.text.primary }]}>Face ID / Biometrics</Text>
             <Switch
               value={biometricEnabled}
               onValueChange={setBiometricEnabled}
-              trackColor={{ false: isDark ? '#3A3A3C' : '#E5E5EA', true: isDark ? '#30D158' : '#34C759' }}
+              trackColor={{ false: isDark ? '#3A3A3C' : '#E5E5EA', true: primaryGreen }}
               thumbColor="#FFFFFF"
             />
           </View>
@@ -278,7 +297,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
             onPress={() => navigation.navigate('NetworkSettings')}
             style={styles.settingsRow}
           >
-            <View style={[styles.iconCapsule, { backgroundColor: primaryBlue }]}>
+            <View style={[styles.iconCapsule, { backgroundColor: primaryGreen }]}>
               <GlobeIcon color="#FFFFFF" size={17} />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
@@ -364,7 +383,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
 
             <SpringButton
               onPress={copySecret}
-              style={[styles.primarySheetBtn, { backgroundColor: primaryBlue }]}
+              style={[styles.primarySheetBtn, { backgroundColor: primaryGreen }]}
             >
               <Text style={styles.primarySheetBtnText}>
                 {copied ? 'Copied to Clipboard' : 'Copy to Clipboard'}

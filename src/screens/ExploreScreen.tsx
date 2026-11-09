@@ -92,37 +92,41 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
       >
         {/* Search Bar */}
         <View style={styles.searchBar}>
-          <View style={styles.searchInputWrapper}>
-            <SearchIcon color={colors.text.muted} size={20} />
+          <View style={[styles.searchInputWrapper, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: colors.border.subtle, borderWidth: 0.5 }]}>
+            <SearchIcon color={colors.text.muted} size={18} />
             <TextInput
-              style={styles.searchInput}
-              placeholder="Search tokens, chains, news..."
+              style={[styles.searchInput, { color: colors.text.primary }]}
+              placeholder="Search tokens, chains, contracts..."
               placeholderTextColor={colors.text.muted}
               value={searchText}
               onChangeText={setSearchText}
               autoCapitalize="none"
             />
           </View>
-          <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
-            <FilterIcon color={colors.text.secondary} size={22} />
+          <TouchableOpacity
+            style={[styles.filterButton, { backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderColor: colors.border.subtle, borderWidth: 0.5 }]}
+            onPress={() => navigation.navigate('CustomToken')}
+            activeOpacity={0.7}
+          >
+            <Text style={{ color: colors.primary.DEFAULT, fontSize: 18, fontWeight: '700' }}>+</Text>
           </TouchableOpacity>
         </View>
 
         {/* Tab Selector */}
-        <View style={styles.tabSelector}>
+        <View style={[styles.tabSelector, { backgroundColor: isDark ? '#1F2937' : '#F1F5F9' }]}>
           {['markets', 'news', 'chains'].map((tab) => (
             <TouchableOpacity
               key={tab}
               style={[
                 styles.tabButton,
-                activeTab === tab ? styles.tabButtonActive : null,
+                activeTab === tab ? [styles.tabButtonActive, { backgroundColor: isDark ? '#283548' : '#FFFFFF' }] : null,
               ]}
               onPress={() => setActiveTab(tab as any)}
               activeOpacity={0.7}
             >
               <Text style={[
                 styles.tabButtonText,
-                activeTab === tab ? { color: colors.primary.DEFAULT, fontWeight: '600' } : { color: colors.text.muted },
+                activeTab === tab ? { color: colors.primary.DEFAULT, fontWeight: '700' } : { color: colors.text.muted },
               ]}>
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>

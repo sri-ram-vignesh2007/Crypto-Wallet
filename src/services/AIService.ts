@@ -7,9 +7,9 @@ const PYTHON_BACKEND_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 
 const OPENROUTER_API_KEY = '';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
-const SYSTEM_PROMPT = `You are Crypto Wallet AI, an expert, friendly Web3 crypto wallet assistant.
+const SYSTEM_PROMPT = `You are CryptoVaultAI Intelligence, an institutional-grade Web3 & Fintech assistant.
 You help users understand crypto tokens (ETH, BTC, SOL, MATIC, BNB, etc.), gas fees, DeFi protocols, smart contract safety, and portfolio balance.
-Keep answers concise, clear, and easy for beginners. Never ask for or mention private keys.`;
+Keep answers concise, structured, and easy for beginners. CRITICAL: Never request or mention private keys or seed phrases, and transactions must be authorized by user hardware.`;
 
 export const FREE_MODELS = [
   { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B' },

@@ -11,290 +11,290 @@ export const moderateScale = (size: number, factor = 0.5) => size + (scale - 1) 
 export const verticalScale = (size: number) => size * scale;
 
 // ============================================
-// LIGHT PALETTE — Apple iOS Human Interface
+// LIGHT PALETTE — Institutional Solid Fintech
 // ============================================
 export const lightColors = {
   // Base
   bg: {
-    canvas: '#F2F2F7',           // Apple System Grouped Background
-    surface: '#FFFFFF',          // Apple Secondary System Background / Inset Card
-    surfaceElevated: '#FFFFFF',
-    surfaceMuted: '#E5E5EA',
-    surfacePressed: '#E5E5EA',
-    toString() { return '#F2F2F7'; },
+    canvas: '#F8FAFC',           // Off White (#F8FAFC)
+    surface: '#FFFFFF',          // Pure White
+    surfaceElevated: '#FFFFFF',  // Elevated Card
+    surfaceMuted: '#F1F5F9',     // Muted Surface
+    surfacePressed: '#E2E8F0',   // Border Grey pressed state
+    toString() { return '#F8FAFC'; },
   },
 
   // Text
   text: {
-    primary: '#000000',          // iOS Primary Label
-    secondary: '#6C6C70',        // iOS Secondary Label
-    muted: '#8E8E93',            // iOS Tertiary Label
+    primary: '#111827',          // Midnight Navy (#111827)
+    secondary: '#64748B',        // Slate (#64748B)
+    muted: '#94A3B8',            // Light Slate
     inverse: '#FFFFFF',
     onPrimary: '#FFFFFF',
-    toString() { return '#000000'; },
+    toString() { return '#111827'; },
   },
 
-  // Primary - Official Apple iOS Blue
+  // Primary - Forest Green (#166B52)
   primary: {
-    DEFAULT: '#007AFF',
-    pressed: '#0056CC',
-    muted: '#E5F1FF',
-    container: '#E5F1FF',
-    onContainer: '#007AFF',
-    light: '#4DA6FF',
-    dark: '#0056CC',
-    toString() { return '#007AFF'; },
+    DEFAULT: '#166B52',
+    pressed: '#0F4C3A',
+    muted: '#E6F4EA',
+    container: '#E6F4EA',
+    onContainer: '#166B52',
+    light: '#2E8B6E',
+    dark: '#0F4C3A',
+    toString() { return '#166B52'; },
   },
 
   // Semantic
   success: {
-    DEFAULT: '#34C759',
-    light: '#5DD072',
-    muted: '#EBF9EE',
-    container: '#EBF9EE',
-    onContainer: '#248A3D',
-    toString() { return '#34C759'; },
+    DEFAULT: '#166B52',          // Muted Forest Green
+    light: '#2E8B6E',
+    muted: '#E6F4EA',
+    container: '#E6F4EA',
+    onContainer: '#166B52',
+    toString() { return '#166B52'; },
   },
 
   danger: {
-    DEFAULT: '#FF3B30',
-    light: '#FF6B66',
-    muted: '#FEECEB',
-    container: '#FEECEB',
-    onContainer: '#D70015',
-    toString() { return '#FF3B30'; },
+    DEFAULT: '#DC2626',          // Professional Red
+    light: '#EF4444',
+    muted: '#FEF2F2',
+    container: '#FEF2F2',
+    onContainer: '#991B1B',
+    toString() { return '#DC2626'; },
   },
 
   warning: {
-    DEFAULT: '#FF9500',
-    light: '#FFB340',
-    muted: '#FFF4E5',
-    container: '#FFF4E5',
-    onContainer: '#C97700',
-    toString() { return '#FF9500'; },
+    DEFAULT: '#D97706',          // Restrained Amber
+    light: '#F59E0B',
+    muted: '#FFFBEB',
+    container: '#FFFBEB',
+    onContainer: '#92400E',
+    toString() { return '#D97706'; },
   },
 
   info: {
-    DEFAULT: '#007AFF',
-    light: '#4DA6FF',
-    muted: '#E5F1FF',
-    container: '#E5F1FF',
-    onContainer: '#0056CC',
-    toString() { return '#007AFF'; },
+    DEFAULT: '#2563EB',          // Muted Blue
+    light: '#3B82F6',
+    muted: '#EFF6FF',
+    container: '#EFF6FF',
+    onContainer: '#1D4ED8',
+    toString() { return '#2563EB'; },
   },
 
   // Borders
   border: {
-    subtle: '#E5E5EA',
-    DEFAULT: '#D1D1D6',
-    strong: '#8E8E93',
+    subtle: '#E2E8F0',           // Border Grey (#E2E8F0)
+    DEFAULT: '#CBD5E1',
+    strong: '#94A3B8',
     highlight: '#FFFFFF',
-    shadow: '#E5E5EA',
-    divider: '#E5E5EA',
-    toString() { return '#E5E5EA'; },
+    shadow: '#E2E8F0',
+    divider: '#E2E8F0',
+    toString() { return '#E2E8F0'; },
   },
 
-  // Gradients
+  // Gradients (Subtle flat depth)
   gradient: {
-    primary: ['#007AFF', '#0056CC'],
-    hero: ['#F2F2F7', '#E5E5EA'],
-    success: ['#34C759', '#248A3D'],
-    danger: ['#FF3B30', '#D70015'],
-    warning: ['#FF9500', '#C97700'],
-    chatBot: ['#007AFF', '#0056CC'],
+    primary: ['#166B52', '#0F4C3A'],
+    hero: ['#FFFFFF', '#F8FAFC'],
+    success: ['#166B52', '#0F4C3A'],
+    danger: ['#DC2626', '#B91C1C'],
+    warning: ['#D97706', '#B45309'],
+    chatBot: ['#1F2937', '#111827'],
   },
 
   // Clay / Shadow
   clay: {
-    overlay: 'rgba(0, 0, 0, 0.04)',
+    overlay: 'rgba(0, 0, 0, 0.02)',
     cardBorderHighlight: '#FFFFFF',
-    cardBorderShadow: '#E5E5EA',
+    cardBorderShadow: '#E2E8F0',
   },
 
   shadow: {
-    color: '#000000',
+    color: '#111827',
     opacity: 0.04,
     opacityStrong: 0.08,
   },
 
-  overlay: 'rgba(0, 0, 0, 0.3)',
-  overlayStrong: 'rgba(0, 0, 0, 0.5)',
+  overlay: 'rgba(17, 24, 39, 0.4)',
+  overlayStrong: 'rgba(17, 24, 39, 0.7)',
 
-  online: '#34C759',
-  offline: '#8E8E93',
-  pending: '#FF9500',
+  online: '#166B52',
+  offline: '#94A3B8',
+  pending: '#D97706',
 
   network: {
     ethereum: '#627EEA',
     polygon: '#8247E5',
     bsc: '#F0B90B',
     arbitrum: '#28A0F0',
-    base: '#007AFF',
-    optimism: '#FF3B30',
+    base: '#0052FF',
+    optimism: '#FF0420',
     avalanche: '#E84142',
-    fantom: '#5856D6',
-    cronos: '#007AFF',
-    solana: '#AF52DE',
+    fantom: '#1969FF',
+    cronos: '#002D74',
+    solana: '#14F195',
     sepolia: '#627EEA',
   },
 
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceMuted: '#E5E5EA',
-  surfacePressed: '#E5E5EA',
-  background: '#F2F2F7',
-  textPrimary: '#000000',
-  textSecondary: '#6C6C70',
-  textMuted: '#8E8E93',
+  surfaceMuted: '#F1F5F9',
+  surfacePressed: '#E2E8F0',
+  background: '#F8FAFC',
+  textPrimary: '#111827',
+  textSecondary: '#64748B',
+  textMuted: '#94A3B8',
   textInverse: '#FFFFFF',
   textOnPrimary: '#FFFFFF',
-  borderLight: '#E5E5EA',
+  borderLight: '#E2E8F0',
   borderHighlight: '#FFFFFF',
-  borderShadow: '#E5E5EA',
-  shadowColor: '#000000',
-  primaryMuted: '#E5F1FF',
-  warningContainer: '#FFF4E5',
-  divider: '#E5E5EA',
+  borderShadow: '#E2E8F0',
+  shadowColor: '#111827',
+  primaryMuted: '#E6F4EA',
+  warningContainer: '#FFFBEB',
+  divider: '#E2E8F0',
 };
 
 // ============================================
-// DARK PALETTE — Institutional Obsidian & Neon Emerald / Surgical Cyan
+// DARK PALETTE — Deep Charcoal & Graphite Institutional
 // ============================================
 export const darkColors = {
   bg: {
-    canvas: '#0B0B0C',           // Deep obsidian black base
-    surface: '#121316',          // Rich midnight slate
-    surfaceElevated: '#1A1C22',  // Dimensional slate
-    surfaceMuted: '#16171B',
-    surfacePressed: '#22252D',
-    toString() { return '#0B0B0C'; },
+    canvas: '#171C24',           // Deep Charcoal (#171C24)
+    surface: '#1F2937',          // Graphite (#1F2937)
+    surfaceElevated: '#283548',  // Elevated Graphite
+    surfaceMuted: '#111827',     // Midnight Navy (#111827)
+    surfacePressed: '#374151',
+    toString() { return '#171C24'; },
   },
 
   text: {
-    primary: '#FFFFFF',          // Razor sharp label
-    secondary: '#8E8E93',        // Secondary label
-    muted: '#636366',            // Tertiary label
-    inverse: '#0B0B0C',
-    onPrimary: '#0B0B0C',
+    primary: '#FFFFFF',          // Solid White
+    secondary: '#94A3B8',        // Slate Light
+    muted: '#64748B',            // Slate (#64748B)
+    inverse: '#111827',
+    onPrimary: '#FFFFFF',
     toString() { return '#FFFFFF'; },
   },
 
   primary: {
-    DEFAULT: '#00F0FF',          // Surgical Cyan Blue
-    pressed: '#00B8CC',
-    muted: 'rgba(0, 240, 255, 0.12)',
-    container: 'rgba(0, 240, 255, 0.12)',
-    onContainer: '#00F0FF',
-    light: '#66F6FF',
-    dark: '#00A3B3',
-    toString() { return '#00F0FF'; },
+    DEFAULT: '#166B52',          // Forest Green (#166B52)
+    pressed: '#0F4C3A',
+    muted: 'rgba(22, 107, 82, 0.2)',
+    container: 'rgba(22, 107, 82, 0.25)',
+    onContainer: '#34D399',
+    light: '#2E8B6E',
+    dark: '#0F4C3A',
+    toString() { return '#166B52'; },
   },
 
   success: {
-    DEFAULT: '#00F5A0',          // Hyper-saturated Neon Emerald Green
-    light: '#5DFFC5',
-    muted: 'rgba(0, 245, 160, 0.14)',
-    container: 'rgba(0, 245, 160, 0.14)',
-    onContainer: '#00F5A0',
-    toString() { return '#00F5A0'; },
+    DEFAULT: '#10B981',          // Muted Green (Solid, non-neon)
+    light: '#34D399',
+    muted: 'rgba(16, 185, 129, 0.15)',
+    container: 'rgba(16, 185, 129, 0.15)',
+    onContainer: '#34D399',
+    toString() { return '#10B981'; },
   },
 
   danger: {
-    DEFAULT: '#FF453A',
-    light: '#FF6B66',
-    muted: '#3D1514',
-    container: '#3D1514',
-    onContainer: '#FF453A',
-    toString() { return '#FF453A'; },
+    DEFAULT: '#EF4444',          // Professional Red
+    light: '#F87171',
+    muted: 'rgba(239, 68, 68, 0.15)',
+    container: 'rgba(239, 68, 68, 0.15)',
+    onContainer: '#F87171',
+    toString() { return '#EF4444'; },
   },
 
   warning: {
-    DEFAULT: '#FF9F0A',
-    light: '#FFB340',
-    muted: '#3B2605',
-    container: '#3B2605',
-    onContainer: '#FF9F0A',
-    toString() { return '#FF9F0A'; },
+    DEFAULT: '#F59E0B',          // Restrained Amber
+    light: '#FBBF24',
+    muted: 'rgba(245, 158, 11, 0.15)',
+    container: 'rgba(245, 158, 11, 0.15)',
+    onContainer: '#FBBF24',
+    toString() { return '#F59E0B'; },
   },
 
   info: {
-    DEFAULT: '#0A84FF',
-    light: '#64A9FF',
-    muted: '#0F2744',
-    container: '#0F2744',
-    onContainer: '#64A9FF',
-    toString() { return '#0A84FF'; },
+    DEFAULT: '#3B82F6',          // Muted Blue
+    light: '#60A5FA',
+    muted: 'rgba(59, 130, 246, 0.15)',
+    container: 'rgba(59, 130, 246, 0.15)',
+    onContainer: '#60A5FA',
+    toString() { return '#3B82F6'; },
   },
 
   border: {
-    subtle: '#2C2C2E',
-    DEFAULT: '#38383A',
-    strong: '#636366',
-    highlight: '#38383A',
-    shadow: '#000000',
-    divider: '#2C2C2E',
-    toString() { return '#2C2C2E'; },
+    subtle: '#2A3441',           // Subtle Slate/Graphite Border
+    DEFAULT: '#374151',          // Standard Border
+    strong: '#4B5563',
+    highlight: '#374151',
+    shadow: '#111827',
+    divider: '#2A3441',
+    toString() { return '#2A3441'; },
   },
 
   gradient: {
-    primary: ['#0A84FF', '#007AFF'],
-    hero: ['#1C1C1E', '#2C2C2E'],
-    success: ['#30D158', '#248A3D'],
-    danger: ['#FF453A', '#D70015'],
-    warning: ['#FF9F0A', '#C97700'],
-    chatBot: ['#0A84FF', '#007AFF'],
+    primary: ['#166B52', '#0F4C3A'],
+    hero: ['#1F2937', '#171C24'],
+    success: ['#10B981', '#166B52'],
+    danger: ['#EF4444', '#DC2626'],
+    warning: ['#F59E0B', '#D97706'],
+    chatBot: ['#1F2937', '#111827'],
   },
 
   clay: {
-    overlay: 'rgba(255, 255, 255, 0.05)',
-    cardBorderHighlight: '#2C2C2E',
-    cardBorderShadow: '#000000',
+    overlay: 'rgba(255, 255, 255, 0.02)',
+    cardBorderHighlight: '#2A3441',
+    cardBorderShadow: '#111827',
   },
 
   shadow: {
     color: '#000000',
-    opacity: 0.2,
-    opacityStrong: 0.35,
+    opacity: 0.25,
+    opacityStrong: 0.45,
   },
 
-  overlay: 'rgba(0, 0, 0, 0.6)',
-  overlayStrong: 'rgba(0, 0, 0, 0.8)',
+  overlay: 'rgba(0, 0, 0, 0.7)',
+  overlayStrong: 'rgba(0, 0, 0, 0.85)',
 
-  online: '#30D158',
-  offline: '#636366',
-  pending: '#FF9F0A',
+  online: '#10B981',
+  offline: '#64748B',
+  pending: '#F59E0B',
 
   network: {
     ethereum: '#627EEA',
     polygon: '#8247E5',
     bsc: '#F0B90B',
     arbitrum: '#28A0F0',
-    base: '#007AFF',
-    optimism: '#FF3B30',
+    base: '#0052FF',
+    optimism: '#FF0420',
     avalanche: '#E84142',
-    fantom: '#5856D6',
-    cronos: '#007AFF',
-    solana: '#AF52DE',
+    fantom: '#1969FF',
+    cronos: '#002D74',
+    solana: '#14F195',
     sepolia: '#627EEA',
   },
 
-  surface: '#1C1C1E',
-  surfaceElevated: '#2C2C2E',
-  surfaceMuted: '#1C1C1E',
-  surfacePressed: '#2C2C2E',
-  background: '#000000',
+  surface: '#1F2937',
+  surfaceElevated: '#283548',
+  surfaceMuted: '#111827',
+  surfacePressed: '#374151',
+  background: '#171C24',
   textPrimary: '#FFFFFF',
-  textSecondary: '#8E8E93',
-  textMuted: '#636366',
-  textInverse: '#000000',
+  textSecondary: '#94A3B8',
+  textMuted: '#64748B',
+  textInverse: '#111827',
   textOnPrimary: '#FFFFFF',
-  borderLight: '#2C2C2E',
-  borderHighlight: '#38383A',
-  borderShadow: '#000000',
+  borderLight: '#2A3441',
+  borderHighlight: '#374151',
+  borderShadow: '#111827',
   shadowColor: '#000000',
-  primaryMuted: '#0F2744',
-  warningContainer: '#3B2605',
-  divider: '#2C2C2E',
+  primaryMuted: 'rgba(22, 107, 82, 0.2)',
+  warningContainer: 'rgba(245, 158, 11, 0.15)',
+  divider: '#2A3441',
 };
 
 // ============================================
