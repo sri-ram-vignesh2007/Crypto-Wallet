@@ -1,10 +1,10 @@
-// src/screens/SwapScreen.tsx - Institutional-Grade Fintech Token Swapper for Cura Wallet
+// src/screens/SwapScreen.tsx - Institutional-Grade Fintech Token Swapper with Inbuilt Keypad & Slide-to-Swap (Trust Wallet & Coinbase Scale)
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
-  SafeAreaView, StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
-  Animated, Pressable, Dimensions,
+  View, ScrollView, Text, StyleSheet, TouchableOpacity,
+  SafeAreaView, StatusBar, Modal, Animated, Pressable, Dimensions,
+  PanResponder,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
@@ -14,7 +14,7 @@ import { TokenLogo } from '../components/TokenLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Spring Button Component with full width support
+// Reusable Spring Pressable Component
 const SpringButton: React.FC<{
   onPress: () => void;
   style?: any;
@@ -22,7 +22,7 @@ const SpringButton: React.FC<{
   children: React.ReactNode;
   activeScale?: number;
   disabled?: boolean;
-}> = ({ onPress, style, containerStyle, children, activeScale = 0.96, disabled = false }) => {
+}> = ({ onPress, style, containerStyle, children, activeScale = 0.94, disabled = false }) => {
   const scale = useRef(new Animated.Value(1)).current;
 
   return (
@@ -56,185 +56,172 @@ const SpringButton: React.FC<{
   );
 };
 
-// Fintech Vector Glyphs
-const ChevronDownIcon = ({ color = '#858585', size = 12 }: { color?: string; size?: number }) => (
+// Vector Glyphs
+const ChevronDownIcon = ({ color = '#858585', size = 14 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M6 9l6 6 6-6" />
   </Svg>
 );
 
-const SwapFlipIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
+const SwapFlipIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
   </Svg>
 );
 
-const SearchIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+const BackspaceIcon = ({ color = '#FFFFFF', size = 22 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="11" cy="11" r="8" />
-    <Path d="M21 21l-4.35-4.35" />
+    <Path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+    <Path d="M18 9l-6 6M12 9l6 6" />
   </Svg>
 );
 
-const SettingsIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+const SliderArrowIcon = ({ color = '#000000', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M5 12h14M12 5l7 7-7 7" />
+  </Svg>
+);
+
+const SettingsIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="12" cy="12" r="3" />
     <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </Svg>
 );
 
-const CheckIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+const CheckIcon = ({ color = '#FFFFFF', size = 26 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M20 6L9 17l-5-5" />
   </Svg>
 );
 
-// High-Res Vector Logos
-const EthLogo = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="rgba(98, 126, 234, 0.15)" stroke="#627EEA" strokeWidth={0.8} />
-    <Path d="M12 4v6.2l5 2.3L12 4z" fill="#94A3B8" />
-    <Path d="M12 4L7 12.5l5-2.3V4z" fill="#FFFFFF" />
-    <Path d="M12 13.5v6.5l5-7-5 .5z" fill="#94A3B8" />
-    <Path d="M12 13.5L7 13l5 7v-6.5z" fill="#FFFFFF" />
-  </Svg>
-);
-
-const BtcLogo = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="rgba(247, 147, 26, 0.15)" stroke="#F7931A" strokeWidth={0.8} />
-    <Path d="M14.5 10.5c.8-.4 1.2-1.2 1.2-2 0-1.5-1.1-2.5-2.8-2.5H10v9h3.3c1.9 0 3-.9 3-2.6 0-1-.5-1.6-1.8-1.9zM11.5 7.5h1.2c.8 0 1.3.4 1.3 1.1s-.5 1.1-1.3 1.1h-1.2v-2.2zm1.6 6h-1.6v-2.4h1.6c.9 0 1.4.5 1.4 1.2s-.5 1.2-1.4 1.2z" fill="#F7931A" />
-  </Svg>
-);
-
-const SolLogo = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="rgba(20, 241, 149, 0.15)" stroke="#14F195" strokeWidth={0.8} />
-    <Path d="M6.5 15.5l2-2h9l-2 2h-9z" fill="#14F195" />
-    <Path d="M8.5 12l-2-2h9l2 2h-9z" fill="#9945FF" />
-    <Path d="M6.5 8.5l2-2h9l-2 2h-9z" fill="#14F195" />
-  </Svg>
-);
-
-const UsdcLogo = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="11" fill="rgba(39, 117, 202, 0.15)" stroke="#2775CA" strokeWidth={0.8} />
-    <Path d="M12 7v10M14 9.5a2 2 0 0 0-4 0c0 2 4 1.5 4 3.5a2 2 0 0 1-4 0" stroke="#2775CA" strokeWidth={1.6} strokeLinecap="round" />
-  </Svg>
-);
-
-const TOKEN_LOGOS: Record<string, () => React.ReactElement> = {
-  ETH: EthLogo,
-  BTC: BtcLogo,
-  SOL: SolLogo,
-  USDC: UsdcLogo,
-};
-
 interface SwapAsset {
   symbol: string;
   name: string;
+  network: string;
   balance: string;
   priceUsd: number;
-  network: string;
 }
 
 const BASE_SWAP_ASSETS: SwapAsset[] = [
-  { symbol: 'ETH', name: 'Ethereum', balance: '306.45', priceUsd: 3420.50, network: 'Ethereum' },
-  { symbol: 'USDC', name: 'USD Coin', balance: '89790.00', priceUsd: 1.00, network: 'Multi-Chain' },
-  { symbol: 'SOL', name: 'Solana', balance: '1095.00', priceUsd: 168.20, network: 'Solana' },
-  { symbol: 'BTC', name: 'Bitcoin', balance: '7.70', priceUsd: 67540.00, network: 'Bitcoin' },
+  { symbol: 'ETH', name: 'Ethereum', network: 'Ethereum', balance: '2.54', priceUsd: 2700.00 },
+  { symbol: 'USDC', name: 'USD Coin', network: 'Multi-Chain', balance: '1,250.00', priceUsd: 1.00 },
+  { symbol: 'BTC', name: 'Bitcoin', network: 'Bitcoin', balance: '0.0452', priceUsd: 67540.00 },
+  { symbol: 'SOL', name: 'Solana', network: 'Solana', balance: '18.40', priceUsd: 168.20 },
+  { symbol: 'USDT', name: 'Tether USD', network: 'Ethereum', balance: '3,450.00', priceUsd: 1.00 },
+  { symbol: 'BNB', name: 'BNB Chain', network: 'BNB Chain', balance: '1.20', priceUsd: 592.40 },
+  { symbol: 'ARB', name: 'Arbitrum', network: 'Arbitrum', balance: '850.00', priceUsd: 0.58 },
+  { symbol: 'POL', name: 'Polygon', network: 'Polygon', balance: '1,250.00', priceUsd: 0.38 },
+  { symbol: 'OP', name: 'Optimism', network: 'Optimism', balance: '320.00', priceUsd: 1.65 },
+  { symbol: 'LINK', name: 'Chainlink', network: 'Ethereum', balance: '65.00', priceUsd: 11.80 },
 ];
 
-export default function SwapScreen({ navigation }: { navigation: any }) {
+export default function SwapScreen({ navigation }: { navigation?: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
 
-  const { balances, executeSwap, loadTransactions } = useTransactionStore();
+  const { balances: liveBalances, executeSwap, loadTransactions } = useTransactionStore();
+
+  const [fromAsset, setFromAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[0]);
+  const [toAsset, setToAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[1]);
+  const [fromAmount, setFromAmount] = useState<string>('0');
+  const [slippage, setSlippage] = useState<string>('0.5%');
+  const [showSlippageModal, setShowSlippageModal] = useState<boolean>(false);
+  const [selectorTarget, setSelectorTarget] = useState<'from' | 'to' | null>(null);
+  const [tokenSearchQuery, setTokenSearchQuery] = useState<string>('');
+  const [swapping, setSwapping] = useState<boolean>(false);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
   useEffect(() => {
     loadTransactions();
   }, [loadTransactions]);
 
-  const [fromAsset, setFromAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[0]);
-  const [toAsset, setToAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[1]);
-  const [fromAmount, setFromAmount] = useState('');
-  const [toAmount, setToAmount] = useState('');
-  const [slippage, setSlippage] = useState('0.5%');
-
-  // Modals
-  const [selectorTarget, setSelectorTarget] = useState<'from' | 'to' | null>(null);
-  const [showSlippageModal, setShowSlippageModal] = useState(false);
-  const [tokenSearchQuery, setTokenSearchQuery] = useState('');
-  const [swapping, setSwapping] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // Dynamic user live balances
-  const getLiveBalance = (symbol: string): number => {
-    const key = symbol.toUpperCase() as keyof typeof balances;
-    return balances[key] !== undefined ? balances[key] : 0;
-  };
-
-  const fromAvailableBalance = getLiveBalance(fromAsset.symbol);
-  const toAvailableBalance = getLiveBalance(toAsset.symbol);
-
-  // Formatted balances for display
-  const fromBalanceFormatted = fromAvailableBalance.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: fromAvailableBalance < 1 ? 4 : 2,
-  });
-
-  const toBalanceFormatted = toAvailableBalance.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: toAvailableBalance < 1 ? 4 : 2,
-  });
-
-  // Monochrome Theme Tokens
   const cardBg = isDark ? '#171717' : '#FFFFFF';
-  const cardBorder = isDark ? '#303030' : '#E5E5E5';
+  const cardBorder = isDark ? '#2B2B2B' : '#E8E8E8';
   const monoPrimary = isDark ? '#FFFFFF' : '#111111';
   const monoMutedSurface = isDark ? '#202020' : '#F2F2F2';
 
-  // Exchange rate calculation
-  const exchangeRate = fromAsset.priceUsd / toAsset.priceUsd;
-
-  // Amount synchronizer
-  useEffect(() => {
-    const parsed = parseFloat(fromAmount);
-    if (!isNaN(parsed) && parsed > 0) {
-      const calculated = parsed * exchangeRate;
-      setToAmount(calculated >= 1 ? calculated.toFixed(4) : calculated.toFixed(6));
-    } else {
-      setToAmount('');
+  // Live balance from transaction store
+  const getLiveBalance = (symbol: string): number => {
+    const symKey = symbol as keyof typeof liveBalances;
+    if (liveBalances && liveBalances[symKey] !== undefined) {
+      return liveBalances[symKey];
     }
-  }, [fromAmount, fromAsset, toAsset, exchangeRate]);
-
-  // Flip assets
-  const handleFlipAssets = () => {
-    const oldFrom = fromAsset;
-    const oldTo = toAsset;
-    setFromAsset(oldTo);
-    setToAsset(oldFrom);
-    setFromAmount(toAmount);
+    const found = BASE_SWAP_ASSETS.find(a => a.symbol === symbol);
+    return found ? parseFloat(found.balance.replace(/,/g, '')) : 0;
   };
 
-  // Max balance fill
-  const handleMaxPress = () => {
-    setFromAmount(fromAvailableBalance > 0 ? fromAvailableBalance.toString() : '0');
-  };
+  const fromLiveBalance = getLiveBalance(fromAsset.symbol);
+  const toLiveBalance = getLiveBalance(toAsset.symbol);
 
-  // Balance & Input Validation
+  const fromBalanceFormatted = fromLiveBalance.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: fromLiveBalance < 1 ? 4 : 2,
+  });
+
+  const toBalanceFormatted = toLiveBalance.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: toLiveBalance < 1 ? 4 : 2,
+  });
+
+  // Calculate quoted output
   const numericFromAmount = parseFloat(fromAmount) || 0;
-  const isInsufficientFunds = numericFromAmount > fromAvailableBalance;
+  const quoteRatio = fromAsset.priceUsd / toAsset.priceUsd;
+  const numericToAmount = numericFromAmount * quoteRatio;
+  const toAmount = numericFromAmount > 0
+    ? numericToAmount.toFixed(numericToAmount < 1 ? 6 : 4)
+    : '0.00';
+
+  const isInsufficientFunds = numericFromAmount > fromLiveBalance;
   const isInputEmpty = numericFromAmount <= 0;
 
-  // Execute Swap with real balance deduction and activity log
+  // Inbuilt Number Keypad Handler
+  const handleKeypadPress = (val: string) => {
+    if (val === 'backspace') {
+      if (fromAmount.length <= 1 || fromAmount === '0') {
+        setFromAmount('0');
+      } else {
+        setFromAmount(fromAmount.slice(0, -1));
+      }
+      return;
+    }
+
+    if (val === '.') {
+      if (!fromAmount.includes('.')) {
+        setFromAmount(fromAmount + '.');
+      }
+      return;
+    }
+
+    // Number digits 0-9
+    if (fromAmount === '0') {
+      setFromAmount(val);
+    } else {
+      const parts = fromAmount.split('.');
+      if (parts.length > 1 && parts[1].length >= 6) return;
+      setFromAmount(fromAmount + val);
+    }
+  };
+
+  const handlePercentPress = (pct: number) => {
+    const val = fromLiveBalance * (pct / 100);
+    setFromAmount(val <= 0 ? '0' : val.toFixed(val < 1 ? 4 : 2));
+  };
+
+  const handleFlipAssets = () => {
+    const temp = fromAsset;
+    setFromAsset(toAsset);
+    setToAsset(temp);
+    setFromAmount('0');
+  };
+
+  // Execute Swap Logic
   const handleExecuteSwap = () => {
     if (isInputEmpty || isInsufficientFunds || swapping) return;
 
     setSwapping(true);
     setTimeout(() => {
-      const numericToAmount = parseFloat(toAmount) || (numericFromAmount * exchangeRate);
       const usdEquivalent = `$${(numericFromAmount * fromAsset.priceUsd).toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -244,21 +231,55 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
 
       setSwapping(false);
       setShowSuccessModal(true);
-    }, 900);
+      setFromAmount('0');
+    }, 850);
   };
 
-  const FromLogo = TOKEN_LOGOS[fromAsset.symbol] || EthLogo;
-  const ToLogo = TOKEN_LOGOS[toAsset.symbol] || UsdcLogo;
+  // ── SLIDE TO SWAP PAN RESPONDER ────────────────────────────────
+  const sliderTrackWidth = SCREEN_WIDTH - 40;
+  const thumbWidth = 56;
+  const maxSlideDistance = sliderTrackWidth - thumbWidth - 8;
 
-  const SWAP_ASSETS: SwapAsset[] = BASE_SWAP_ASSETS.map(asset => ({
-    ...asset,
-    balance: getLiveBalance(asset.symbol).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: getLiveBalance(asset.symbol) < 1 ? 4 : 2,
-    }),
-  }));
+  const slideX = useRef(new Animated.Value(0)).current;
 
-  const filteredAssets = SWAP_ASSETS.filter(a =>
+  const slidePanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => !isInputEmpty && !isInsufficientFunds && !swapping,
+      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 5,
+      onPanResponderMove: (_, gesture) => {
+        const clampedX = Math.max(0, Math.min(gesture.dx, maxSlideDistance));
+        slideX.setValue(clampedX);
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx >= maxSlideDistance * 0.65) {
+          Animated.timing(slideX, {
+            toValue: maxSlideDistance,
+            duration: 140,
+            useNativeDriver: true,
+          }).start(() => {
+            handleExecuteSwap();
+            setTimeout(() => {
+              Animated.spring(slideX, {
+                toValue: 0,
+                useNativeDriver: true,
+                damping: 18,
+                stiffness: 240,
+              }).start();
+            }, 1000);
+          });
+        } else {
+          Animated.spring(slideX, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 18,
+            stiffness: 240,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const filteredAssets = BASE_SWAP_ASSETS.filter(a =>
     tokenSearchQuery
       ? a.name.toLowerCase().includes(tokenSearchQuery.toLowerCase()) ||
         a.symbol.toLowerCase().includes(tokenSearchQuery.toLowerCase())
@@ -269,200 +290,271 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
-        {/* Top Header Bar */}
-        <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
-          <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Swap</Text>
+      {/* Top Header Bar */}
+      <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Swap</Text>
 
-          <TouchableOpacity
-            onPress={() => setShowSlippageModal(true)}
-            style={[styles.slippageHeaderPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
-            activeOpacity={0.7}
-          >
-            <SettingsIcon color={colors.text.muted} size={13} />
-            <Text style={[styles.slippageHeaderText, { color: colors.text.primary }]}>{slippage}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 36 }]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+        <TouchableOpacity
+          onPress={() => setShowSlippageModal(true)}
+          style={[styles.slippageHeaderPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
+          activeOpacity={0.7}
         >
-          {/* ======================================================== */}
-          {/* SWAP CARDS CONTAINER                                     */}
-          {/* ======================================================== */}
-          <View style={styles.swapBoxesWrapper}>
-            {/* 1. YOU PAY CARD */}
-            <View style={[styles.swapCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardHeaderLabel}>YOU PAY</Text>
-                <View style={styles.balanceRightRow}>
-                  <Text style={styles.balanceText}>
-                    Bal: {fromBalanceFormatted} {fromAsset.symbol}
-                  </Text>
-                  <TouchableOpacity onPress={handleMaxPress} style={[styles.maxPill, { backgroundColor: monoMutedSurface }]}>
-                    <Text style={[styles.maxPillText, { color: colors.text.primary }]}>MAX</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+          <SettingsIcon color={colors.text.muted} size={15} />
+          <Text style={[styles.slippageHeaderText, { color: colors.text.primary }]}>{slippage}</Text>
+        </TouchableOpacity>
+      </View>
 
-              <View style={styles.inputRow}>
-                <TextInput
-                  value={fromAmount}
-                  onChangeText={setFromAmount}
-                  placeholder="0"
-                  placeholderTextColor={colors.text.muted}
-                  keyboardType="decimal-pad"
-                  style={[
-                    styles.amountInput,
-                    { color: isInsufficientFunds ? '#EF4444' : colors.text.primary },
-                  ]}
-                  autoCapitalize="none"
-                />
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ======================================================== */}
+        {/* SWAP CARDS: YOU PAY & YOU RECEIVE                        */}
+        {/* ======================================================== */}
+        <View style={styles.swapBoxesWrapper}>
+          {/* 1. YOU PAY CARD */}
+          <View style={[styles.swapCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardHeaderLabel}>YOU PAY</Text>
+              <Text style={styles.balanceText}>
+                Bal: {fromBalanceFormatted} {fromAsset.symbol}
+              </Text>
+            </View>
 
-                <TouchableOpacity
-                  onPress={() => setSelectorTarget('from')}
-                  style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-                  activeOpacity={0.7}
-                >
-                  <TokenLogo symbol={fromAsset.symbol} size={24} />
-                  <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
-                    {fromAsset.symbol}
-                  </Text>
-                  <ChevronDownIcon color={colors.text.muted} size={11} />
-                </TouchableOpacity>
-              </View>
+            <View style={styles.inputDisplayRow}>
+              <Text
+                style={[
+                  styles.amountDisplayText,
+                  { color: isInsufficientFunds ? '#EF4444' : colors.text.primary },
+                ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {fromAmount}
+              </Text>
 
+              <TouchableOpacity
+                onPress={() => setSelectorTarget('from')}
+                style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+                activeOpacity={0.7}
+              >
+                <TokenLogo symbol={fromAsset.symbol} size={28} />
+                <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
+                  {fromAsset.symbol}
+                </Text>
+                <ChevronDownIcon color={colors.text.muted} size={12} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.cardFooterRow}>
               <Text style={styles.usdEquivalentText}>
                 {numericFromAmount > 0
                   ? `≈ $${(numericFromAmount * fromAsset.priceUsd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                   : '≈ $0.00'}
               </Text>
+              {isInsufficientFunds && (
+                <Text style={styles.insufficientWarning}>Insufficient Balance</Text>
+              )}
+            </View>
+          </View>
+
+          {/* FLOATING FLIP SWITCH BUTTON */}
+          <View style={styles.floatingFlipContainer}>
+            <TouchableOpacity
+              onPress={handleFlipAssets}
+              style={[
+                styles.flipButtonCircle,
+                { backgroundColor: monoPrimary, borderColor: colors.bg.canvas },
+              ]}
+              activeOpacity={0.8}
+            >
+              <SwapFlipIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
+            </TouchableOpacity>
+          </View>
+
+          {/* 2. YOU RECEIVE CARD */}
+          <View style={[styles.swapCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.cardHeaderRow}>
+              <Text style={styles.cardHeaderLabel}>YOU RECEIVE</Text>
+              <Text style={styles.balanceText}>
+                Bal: {toBalanceFormatted} {toAsset.symbol}
+              </Text>
             </View>
 
-            {/* FLOATING FLIP SWITCH BUTTON */}
-            <View style={styles.floatingFlipContainer}>
-              <TouchableOpacity
-                onPress={handleFlipAssets}
+            <View style={styles.inputDisplayRow}>
+              <Text
                 style={[
-                  styles.flipButtonCircle,
-                  { backgroundColor: monoPrimary, borderColor: colors.bg.canvas },
+                  styles.amountDisplayText,
+                  { color: toAmount !== '0.00' ? colors.text.primary : colors.text.muted },
                 ]}
-                activeOpacity={0.8}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
-                <SwapFlipIcon color={isDark ? '#000000' : '#FFFFFF'} size={18} />
+                {toAmount}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => setSelectorTarget('to')}
+                style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+                activeOpacity={0.7}
+              >
+                <TokenLogo symbol={toAsset.symbol} size={28} />
+                <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
+                  {toAsset.symbol}
+                </Text>
+                <ChevronDownIcon color={colors.text.muted} size={12} />
               </TouchableOpacity>
             </View>
 
-            {/* 2. YOU RECEIVE CARD */}
-            <View style={[styles.swapCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-              <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardHeaderLabel}>YOU RECEIVE</Text>
-                <Text style={styles.balanceText}>
-                  Bal: {toBalanceFormatted} {toAsset.symbol}
-                </Text>
-              </View>
-
-              <View style={styles.inputRow}>
-                <Text
-                  style={[
-                    styles.amountOutputText,
-                    { color: toAmount ? colors.text.primary : colors.text.muted },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {toAmount || '0.00'}
-                </Text>
-
-                <TouchableOpacity
-                  onPress={() => setSelectorTarget('to')}
-                  style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-                  activeOpacity={0.7}
-                >
-                  <TokenLogo symbol={toAsset.symbol} size={24} />
-                  <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
-                    {toAsset.symbol}
-                  </Text>
-                  <ChevronDownIcon color={colors.text.muted} size={11} />
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.usdEquivalentText}>
-                {parseFloat(toAmount) > 0
-                  ? `≈ $${(parseFloat(toAmount) * toAsset.priceUsd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : '≈ $0.00'}
-              </Text>
-            </View>
+            <Text style={styles.usdEquivalentText}>
+              {parseFloat(toAmount) > 0
+                ? `≈ $${(parseFloat(toAmount) * toAsset.priceUsd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : '≈ $0.00'}
+            </Text>
           </View>
+        </View>
 
-          {/* ======================================================== */}
-          {/* MARKET & ROUTE DETAILS ACCORDION                         */}
-          {/* ======================================================== */}
-          <View style={[styles.detailsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Rate</Text>
-              <Text style={[styles.detailValue, { color: colors.text.primary }]}>
-                1 {fromAsset.symbol} = {exchangeRate >= 1 ? exchangeRate.toFixed(4) : exchangeRate.toFixed(6)} {toAsset.symbol}
+        {/* ── PERCENTAGE SHORTCUT PILLS ──────────────────────────── */}
+        <View style={styles.percentagePillRow}>
+          {[25, 50, 75, 100].map((pct) => (
+            <TouchableOpacity
+              key={pct}
+              onPress={() => handlePercentPress(pct)}
+              style={[styles.percentBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.percentBtnText, { color: colors.text.primary }]}>
+                {pct === 100 ? 'MAX' : `${pct}%`}
               </Text>
-            </View>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Network Cost</Text>
-              <Text style={[styles.detailValue, { color: colors.text.primary }]}>
-                ≈ $1.42 (12 Gwei)
-              </Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Price Impact</Text>
-              <Text style={[styles.detailValue, { color: colors.text.primary }]}>&lt; 0.05%</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Routing Source</Text>
-              <Text style={[styles.detailValue, { color: colors.text.primary }]}>
-                Cura Smart Aggregator (Uniswap V3)
-              </Text>
-            </View>
-
-            <View style={[styles.detailRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-              <Text style={styles.detailLabel}>Slippage Tolerance</Text>
-              <TouchableOpacity onPress={() => setShowSlippageModal(true)}>
-                <Text style={[styles.detailValue, { color: colors.text.primary, fontWeight: '700' }]}>
-                  {slippage} (Tap to change)
-                </Text>
+        {/* ======================================================== */}
+        {/* INBUILT NUMERIC KEYPAD                                   */}
+        {/* ======================================================== */}
+        <View style={[styles.keypadContainer, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          <View style={styles.keypadRow}>
+            {['1', '2', '3'].map((key) => (
+              <TouchableOpacity
+                key={key}
+                onPress={() => handleKeypadPress(key)}
+                style={styles.keypadKey}
+                activeOpacity={0.65}
+              >
+                <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>{key}</Text>
               </TouchableOpacity>
-            </View>
+            ))}
           </View>
 
-          {/* ======================================================== */}
-          {/* PRIMARY SWAP ACTION BUTTON                               */}
-          {/* ======================================================== */}
-          <SpringButton
-            onPress={handleExecuteSwap}
-            disabled={isInputEmpty || isInsufficientFunds || swapping}
+          <View style={styles.keypadRow}>
+            {['4', '5', '6'].map((key) => (
+              <TouchableOpacity
+                key={key}
+                onPress={() => handleKeypadPress(key)}
+                style={styles.keypadKey}
+                activeOpacity={0.65}
+              >
+                <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>{key}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.keypadRow}>
+            {['7', '8', '9'].map((key) => (
+              <TouchableOpacity
+                key={key}
+                onPress={() => handleKeypadPress(key)}
+                style={styles.keypadKey}
+                activeOpacity={0.65}
+              >
+                <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>{key}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.keypadRow}>
+            <TouchableOpacity
+              onPress={() => handleKeypadPress('.')}
+              style={styles.keypadKey}
+              activeOpacity={0.65}
+            >
+              <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>.</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => handleKeypadPress('0')}
+              style={styles.keypadKey}
+              activeOpacity={0.65}
+            >
+              <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>0</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => handleKeypadPress('backspace')}
+              style={styles.keypadKey}
+              activeOpacity={0.65}
+            >
+              <BackspaceIcon color={colors.text.primary} size={22} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* ======================================================== */}
+        {/* SLIDE TO SWAP INTERACTIVE SLIDER                         */}
+        {/* ======================================================== */}
+        <View style={styles.slideContainer}>
+          <View
             style={[
-              styles.actionButton,
-              { backgroundColor: monoPrimary },
-              (isInputEmpty || isInsufficientFunds || swapping) && { opacity: 0.4 },
+              styles.slideTrack,
+              {
+                backgroundColor: isInputEmpty || isInsufficientFunds
+                  ? monoMutedSurface
+                  : (isDark ? '#222222' : '#E8E8E8'),
+                borderColor: cardBorder,
+              },
             ]}
           >
-            <Text style={[styles.actionButtonText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+            {/* Background shimmer / instruction text */}
+            <Text
+              style={[
+                styles.slideTrackLabel,
+                {
+                  color: isInsufficientFunds
+                    ? '#EF4444'
+                    : isInputEmpty
+                    ? colors.text.muted
+                    : colors.text.primary,
+                },
+              ]}
+            >
               {swapping
-                ? 'Routing & Swapping…'
+                ? 'Routing & Executing Swap…'
                 : isInsufficientFunds
                 ? `Insufficient ${fromAsset.symbol} Balance`
                 : isInputEmpty
-                ? 'Enter an Amount'
-                : `Swap ${fromAsset.symbol} for ${toAsset.symbol}`}
+                ? 'Enter an Amount to Swap'
+                : `Slide to Swap ${fromAsset.symbol} →`}
             </Text>
-          </SpringButton>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+            {/* Draggable Slider Thumb */}
+            <Animated.View
+              {...slidePanResponder.panHandlers}
+              style={[
+                styles.slideThumb,
+                {
+                  backgroundColor: isInputEmpty || isInsufficientFunds
+                    ? (isDark ? '#333333' : '#CCCCCC')
+                    : monoPrimary,
+                  transform: [{ translateX: slideX }],
+                },
+              ]}
+            >
+              <SliderArrowIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
+            </Animated.View>
+          </View>
+        </View>
+      </ScrollView>
 
       {/* ======================================================== */}
       {/* TOKEN SELECTOR BOTTOM SHEET MODAL                        */}
@@ -479,34 +571,21 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
             <View style={styles.sheetHandle} />
             <Text style={[styles.sheetTitle, { color: colors.text.primary }]}>Select a Token</Text>
 
-            {/* Token Search */}
-            <View style={[styles.sheetSearchBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
-              <SearchIcon color={colors.text.muted} size={15} />
-              <TextInput
-                value={tokenSearchQuery}
-                onChangeText={setTokenSearchQuery}
-                placeholder="Search by token name or symbol..."
-                placeholderTextColor={colors.text.muted}
-                style={[styles.sheetSearchInput, { color: colors.text.primary }]}
-                autoCapitalize="none"
-              />
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 340 }}>
-              {filteredAssets.map(asset => {
-                const isSelected = selectorTarget === 'from' ? fromAsset.symbol === asset.symbol : toAsset.symbol === asset.symbol;
-                const Logo = TOKEN_LOGOS[asset.symbol] || EthLogo;
+            <ScrollView style={{ maxHeight: 360 }}>
+              {filteredAssets.map((asset) => {
+                const isSelected =
+                  selectorTarget === 'from'
+                    ? asset.symbol === fromAsset.symbol
+                    : asset.symbol === toAsset.symbol;
 
                 return (
                   <TouchableOpacity
                     key={asset.symbol}
                     onPress={() => {
                       if (selectorTarget === 'from') {
-                        if (toAsset.symbol === asset.symbol) handleFlipAssets();
-                        else setFromAsset(asset);
+                        setFromAsset(asset);
                       } else {
-                        if (fromAsset.symbol === asset.symbol) handleFlipAssets();
-                        else setToAsset(asset);
+                        setToAsset(asset);
                       }
                       setSelectorTarget(null);
                       setTokenSearchQuery('');
@@ -518,12 +597,12 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                     activeOpacity={0.7}
                   >
                     <View style={styles.tokenItemLeft}>
-                      <TokenLogo symbol={asset.symbol} size={30} />
-                      <View style={{ marginLeft: 12 }}>
+                      <TokenLogo symbol={asset.symbol} size={36} />
+                      <View style={{ marginLeft: 14 }}>
                         <Text style={[styles.tokenItemSymbol, { color: colors.text.primary }]}>
                           {asset.symbol}
                         </Text>
-                        <Text style={styles.tokenItemName}>{asset.name}</Text>
+                        <Text style={[styles.tokenItemName, { color: colors.text.muted }]}>{asset.name}</Text>
                       </View>
                     </View>
 
@@ -531,8 +610,8 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
                       <Text style={[styles.tokenItemBalance, { color: colors.text.primary }]}>
                         {asset.balance}
                       </Text>
-                      <Text style={styles.tokenItemUsd}>
-                        ${(parseFloat(asset.balance.replace(',', '')) * asset.priceUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      <Text style={[styles.tokenItemUsd, { color: colors.text.muted }]}>
+                        ${(parseFloat(asset.balance.replace(/,/g, '')) * asset.priceUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -544,7 +623,7 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
       </Modal>
 
       {/* ======================================================== */}
-      {/* SLIPPAGE SETTING BOTTOM SHEET MODAL                      */}
+      {/* SLIPPAGE SETTINGS MODAL                                  */}
       {/* ======================================================== */}
       <Modal
         visible={showSlippageModal}
@@ -558,69 +637,63 @@ export default function SwapScreen({ navigation }: { navigation: any }) {
             <View style={styles.sheetHandle} />
             <Text style={[styles.sheetTitle, { color: colors.text.primary }]}>Slippage Tolerance</Text>
             <Text style={styles.slippageSubtitle}>
-              Your swap will revert automatically if the execution price shifts unfavorably by more than this percentage.
+              Transactions will revert if the execution rate slips below this limit.
             </Text>
 
             <View style={styles.slippagePillRow}>
-              {['0.1%', '0.5%', '1.0%', 'Auto'].map(opt => {
-                const active = slippage === opt;
-                return (
-                  <TouchableOpacity
-                    key={opt}
-                    onPress={() => {
-                      setSlippage(opt);
-                      setShowSlippageModal(false);
-                    }}
+              {['0.1%', '0.5%', '1.0%', '2.0%'].map((slip) => (
+                <TouchableOpacity
+                  key={slip}
+                  onPress={() => {
+                    setSlippage(slip);
+                    setShowSlippageModal(false);
+                  }}
+                  style={[
+                    styles.slippageChoiceBtn,
+                    {
+                      backgroundColor: slippage === slip ? monoPrimary : monoMutedSurface,
+                      borderColor: cardBorder,
+                    },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.slippageChoiceBtn,
-                      { backgroundColor: active ? monoPrimary : monoMutedSurface },
+                      styles.slippageChoiceText,
+                      { color: slippage === slip ? (isDark ? '#000000' : '#FFFFFF') : colors.text.primary },
                     ]}
                   >
-                    <Text style={[
-                      styles.slippageChoiceText,
-                      active
-                        ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
-                        : { color: colors.text.primary },
-                    ]}>
-                      {opt}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                    {slip}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         </View>
       </Modal>
 
       {/* ======================================================== */}
-      {/* SWAP SUCCESS MODAL                                       */}
+      {/* SUCCESS CONFIRMATION MODAL                               */}
       {/* ======================================================== */}
-      <Modal
-        visible={showSuccessModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSuccessModal(false)}
-      >
+      <Modal visible={showSuccessModal} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
           <View style={[styles.successModalCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
             <View style={[styles.successIconCircle, { backgroundColor: monoPrimary }]}>
-              <CheckIcon color={isDark ? '#000000' : '#FFFFFF'} size={26} />
+              <CheckIcon color={isDark ? '#000000' : '#FFFFFF'} size={28} />
             </View>
+
             <Text style={[styles.successTitle, { color: colors.text.primary }]}>Swap Executed</Text>
             <Text style={styles.successSub}>
-              Successfully exchanged {fromAmount} {fromAsset.symbol} for ≈ {toAmount} {toAsset.symbol} via Cura Smart Aggregator.
+              Successfully routed and exchanged through Cura Smart Aggregator.
             </Text>
-            <TouchableOpacity
-              onPress={() => {
-                setShowSuccessModal(false);
-                setFromAmount('');
-                setToAmount('');
-              }}
-              style={[styles.successCloseBtn, { backgroundColor: monoPrimary, width: '100%', alignSelf: 'stretch' }]}
-              activeOpacity={0.8}
+
+            <SpringButton
+              onPress={() => setShowSuccessModal(false)}
+              style={[styles.successCloseBtn, { backgroundColor: monoPrimary }]}
             >
-              <Text style={[styles.successCloseText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Done</Text>
-            </TouchableOpacity>
+              <Text style={[styles.successCloseText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                Done
+              </Text>
+            </SpringButton>
           </View>
         </View>
       </Modal>
@@ -634,10 +707,10 @@ const styles = StyleSheet.create({
   },
   headerBar: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 10,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 12,
   },
   headerTitle: {
     fontSize: 28,
@@ -647,234 +720,255 @@ const styles = StyleSheet.create({
   slippageHeaderPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 0.5,
-    gap: 5,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   slippageHeaderText: {
-    fontSize: 11.5,
+    fontSize: 13,
     fontWeight: '700',
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 8,
   },
   swapBoxesWrapper: {
     position: 'relative',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   swapCard: {
-    borderRadius: 20,
-    borderWidth: 0.5,
-    padding: 16,
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 18,
+    marginBottom: 8,
   },
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   cardHeaderLabel: {
     color: '#858585',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-  },
-  balanceRightRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.8,
   },
   balanceText: {
     color: '#858585',
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: '600',
   },
-  maxPill: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  maxPillText: {
-    fontSize: 10,
-    fontWeight: '800',
-  },
-  inputRow: {
+  inputDisplayRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    minHeight: 48,
   },
-  amountInput: {
-    flex: 1,
+  amountDisplayText: {
     fontSize: 32,
     fontWeight: '800',
-    letterSpacing: -0.6,
-    paddingVertical: 4,
-    marginRight: 10,
-    backgroundColor: 'transparent',
-  },
-  amountOutputText: {
+    fontVariant: ['tabular-nums'],
     flex: 1,
-    fontSize: 32,
-    fontWeight: '800',
-    letterSpacing: -0.6,
-    paddingVertical: 4,
-    marginRight: 10,
+    marginRight: 12,
   },
   tokenSelectorPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    gap: 6,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   tokenSymbolText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
-  usdEquivalentText: {
-    color: '#858585',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  floatingFlipContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 18,
-    zIndex: 10,
-  },
-  flipButtonCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  detailsCard: {
-    borderRadius: 18,
-    borderWidth: 0.5,
-    padding: 14,
-    marginBottom: 16,
-    gap: 10,
-  },
-  detailRow: {
+  cardFooterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 6,
   },
-  detailLabel: {
+  usdEquivalentText: {
     color: '#858585',
-    fontSize: 11.5,
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 4,
   },
-  detailValue: {
-    fontSize: 12,
-    fontWeight: '600',
+  insufficientWarning: {
+    color: '#EF4444',
+    fontSize: 11,
+    fontWeight: '700',
   },
-  actionButton: {
-    height: 52,
-    borderRadius: 16,
+  floatingFlipContainer: {
+    position: 'absolute',
+    top: '49%',
+    left: '50%',
+    marginLeft: -22,
+    marginTop: -22,
+    zIndex: 10,
+  },
+  flipButtonCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    borderWidth: 3,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 4,
   },
-  actionButtonText: {
+  percentagePillRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginVertical: 12,
+  },
+  percentBtn: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  percentBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  keypadContainer: {
+    borderRadius: 22,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+  },
+  keypadRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+  keypadKey: {
+    flex: 1,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+  },
+  keypadDigit: {
+    fontSize: 24,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  slideContainer: {
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  slideTrack: {
+    width: '100%',
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1,
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  slideTrackLabel: {
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
-  // MODALS
+  slideThumb: {
+    position: 'absolute',
+    left: 4,
+    top: 4,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.72)',
     justifyContent: 'flex-end',
   },
   modalDismissArea: {
     flex: 1,
   },
   sheetCard: {
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    borderTopWidth: 0.5,
-    padding: 20,
-    paddingBottom: 36,
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    borderTopWidth: 1,
+    padding: 22,
+    paddingBottom: 40,
   },
   sheetHandle: {
-    width: 36,
+    width: 38,
     height: 4,
     borderRadius: 2,
     backgroundColor: '#858585',
     opacity: 0.4,
     alignSelf: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   sheetTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  sheetSearchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    height: 40,
-    borderRadius: 12,
-    borderWidth: 0.5,
-    gap: 8,
     marginBottom: 14,
-  },
-  sheetSearchInput: {
-    flex: 1,
-    fontSize: 13.5,
+    textAlign: 'center',
   },
   tokenItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 14,
   },
   tokenItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   tokenItemSymbol: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
   tokenItemName: {
-    color: '#858585',
-    fontSize: 11,
-    marginTop: 1,
+    fontSize: 12,
+    marginTop: 2,
   },
   tokenItemRight: {
     alignItems: 'flex-end',
   },
   tokenItemBalance: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
   },
   tokenItemUsd: {
-    color: '#858585',
-    fontSize: 11,
-    marginTop: 1,
+    fontSize: 12,
+    marginTop: 2,
   },
   slippageSubtitle: {
     color: '#858585',
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   slippagePillRow: {
     flexDirection: 'row',
@@ -882,53 +976,54 @@ const styles = StyleSheet.create({
   },
   slippageChoiceBtn: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   slippageChoiceText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
   },
   successModalCard: {
     margin: 24,
-    borderRadius: 24,
-    borderWidth: 0.5,
-    padding: 24,
+    borderRadius: 26,
+    borderWidth: 1,
+    padding: 26,
     alignItems: 'center',
     alignSelf: 'center',
-    width: SCREEN_WIDTH - 48,
+    width: SCREEN_WIDTH - 44,
   },
   successIconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   successTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   successSub: {
     color: '#858585',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   successCloseBtn: {
     width: '100%',
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 15,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   successCloseText: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

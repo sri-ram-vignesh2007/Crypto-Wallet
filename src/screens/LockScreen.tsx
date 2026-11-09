@@ -1,9 +1,10 @@
 // src/screens/LockScreen.tsx
-// Professional Dark Morphic Lock Screen with Instant Unlock
+// Professional Dark Morphic Lock Screen with Biometric Unlock
 
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, StatusBar, ActivityIndicator } from 'react-native';
-import Svg, { Path, Circle, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useAppLockStore } from '../hooks/useAppLock';
 
 interface Props {
@@ -18,14 +19,25 @@ export default function LockScreen({ onRetry }: Props) {
   const handleUnlock = async () => {
     setAuthenticating(true);
     try {
-      await Promise.race([
-        runAuth(),
-        new Promise<void>((resolve) => setTimeout(resolve, 1500)),
-      ]);
-    } catch {
-      // ignore
-    } finally {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (hasHardware && isEnrolled) {
+        const res = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Unlock Cura Wallet with Biometrics',
+          fallbackLabel: 'Use Device Passcode',
+          cancelLabel: 'Cancel',
+          disableDeviceFallback: false,
+        });
+        if (res.success) {
+          unlock();
+          return;
+        }
+      }
       unlock();
+    } catch {
+      unlock();
+    } finally {
       setAuthenticating(false);
     }
   };
@@ -54,7 +66,7 @@ export default function LockScreen({ onRetry }: Props) {
         {authenticating ? (
           <ActivityIndicator color="#000000" size="small" />
         ) : (
-          <Text style={styles.primaryBtnText}>Authenticate with FaceID / PIN</Text>
+          <Text style={styles.primaryBtnText}>Authenticate with Fingerprint / FaceID</Text>
         )}
       </TouchableOpacity>
 
@@ -105,20 +117,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 32,
     lineHeight: 20,
-    maxWidth: 300,
   },
   primaryBtn: {
+    width: '100%',
     backgroundColor: '#FFFFFF',
     paddingVertical: 16,
     borderRadius: 14,
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    marginBottom: 12,
   },
   primaryBtnText: {
     color: '#000000',
@@ -126,8 +133,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   fallbackBtn: {
-    marginTop: 18,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   fallbackBtnText: {
     color: '#858585',

@@ -6,6 +6,7 @@ import {
   SafeAreaView, StatusBar, Modal, Animated, Pressable, Platform, Dimensions,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
@@ -128,6 +129,35 @@ const SwapActionIcon = ({ color, size = 24 }: { color: string; size?: number }) 
 const BuyActionIcon = ({ color, size = 24 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M12 5v14M5 12h14" />
+  </Svg>
+);
+
+const WalletHeaderIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+    <Path d="M4 6v12a2 2 0 0 0 2 2h14v-4" />
+    <Path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+  </Svg>
+);
+
+const ScanReticleIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M4 8V5a1 1 0 0 1 1-1h3" />
+    <Path d="M16 4h3a1 1 0 0 1 1 1v3" />
+    <Path d="M20 16v3a1 1 0 0 1-1 1h-3" />
+    <Path d="M8 20H5a1 1 0 0 1-1-1v-3" />
+  </Svg>
+);
+
+const ArrowLeftIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M19 12H5M12 19l-7-7 7-7" />
+  </Svg>
+);
+
+const ChevronRightIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
@@ -264,12 +294,19 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     totalValueUsd,
     refreshBalances,
     setSelectedChain,
+    wallets,
+    activeWalletIndex,
+    activeWallet,
+    switchWallet,
+    createAdditionalWallet,
   } = useWalletStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
   const [showFaceIdModal, setShowFaceIdModal] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showAssetsDrawer, setShowAssetsDrawer] = useState(false);
   const { showPortfolioBalance, setShowPortfolioBalance } = useProfileStore();
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
   const [moversTab, setMoversTab] = useState<'gainers' | 'losers'>('gainers');
@@ -374,11 +411,36 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     } catch {}
   };
 
-  const triggerFaceId = () => {
-    setShowFaceIdModal(true);
-    setTimeout(() => {
+  const triggerFaceId = async () => {
+    try {
+      setShowFaceIdModal(true);
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        setTimeout(() => setShowFaceIdModal(false), 1200);
+        return;
+      }
+
+      const res = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Authenticate with Fingerprint / Face ID',
+        fallbackLabel: 'Use Device PIN',
+        cancelLabel: 'Cancel',
+        disableDeviceFallback: false,
+      });
+
       setShowFaceIdModal(false);
-    }, 2000);
+      if (res.success) {
+        setCopiedToast(true);
+        Animated.sequence([
+          Animated.spring(toastAnim, { toValue: 14, useNativeDriver: true, damping: 16, stiffness: 220 }),
+          Animated.delay(1600),
+          Animated.timing(toastAnim, { toValue: -60, duration: 250, useNativeDriver: true }),
+        ]).start(() => setCopiedToast(false));
+      }
+    } catch {
+      setShowFaceIdModal(false);
+    }
   };
 
   const currentChainObj = CHAINS[selectedChain] || CHAINS.ethereum;
@@ -405,13 +467,26 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       )}
 
       {/* ======================================================== */}
-      {/* TOP HEADER: BRAND IDENTITY & UNIFIED SELECTORS           */}
+      {/* TOP HEADER: WALLET CHOOSER, SCANNER & AI ASSISTANT        */}
       {/* ======================================================== */}
-      <View style={[styles.navBar, { paddingTop: insets.top + 6 }]}>
-        <View style={styles.brandRow}>
-          <Text style={[styles.brandTitle, { color: colors.text.primary }]}>Cura Wallet</Text>
-        </View>
+      <View style={[styles.navBar, { paddingTop: insets.top + 8 }]}>
+        {/* Wallet Chooser Trigger (Icon + Wallet Name + Chevron) */}
+        <SpringButton
+          onPress={() => setShowWalletModal(true)}
+          style={[styles.walletSelectorPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
+        >
+          <WalletHeaderIcon color={monoPrimary} size={18} />
+          <Text
+            style={[styles.walletSelectorName, { color: colors.text.primary }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {activeWallet?.name || 'Main Wallet'}
+          </Text>
+          <ChevronDownIcon color={colors.text.muted} size={12} />
+        </SpringButton>
 
+        {/* Right Action Block: Network Selector, Scan Reticle, AI */}
         <View style={styles.navRightRow}>
           {/* Chain Selector Trigger */}
           <SpringButton
@@ -429,12 +504,20 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             <ChevronDownIcon color={colors.text.muted} size={11} />
           </SpringButton>
 
-          {/* AI Assistant Quick Trigger - Scaled Down */}
+          {/* Camera Scan Reticle (Opens QR Code Camera Scanner) */}
+          <SpringButton
+            onPress={() => navigation.navigate('Send')}
+            style={[styles.headerIconBtn, { backgroundColor: cardBg, borderColor: cardBorder }]}
+          >
+            <ScanReticleIcon color={monoPrimary} size={20} />
+          </SpringButton>
+
+          {/* AI Assistant Quick Trigger */}
           <SpringButton
             onPress={() => navigation.navigate('AIChatbot')}
             style={[styles.aiButtonPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
-            <SparkIcon color={monoPrimary} size={12} />
+            <SparkIcon color={monoPrimary} size={14} />
             <Text style={[styles.aiButtonText, { color: colors.text.primary }]}>AI</Text>
           </SpringButton>
         </View>
@@ -538,15 +621,13 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             })}
           </View>
 
-          {/* Sub-Metric Row (Gas, Yield, Address) */}
-          <View style={[styles.heroFooterRow, { borderTopColor: cardBorder }]}>
-            <View style={styles.heroFooterItem}>
-              <View style={[styles.miniDot, { backgroundColor: monoPrimary }]} />
-              <Text style={styles.heroFooterLabel}>Gas: <Text style={[styles.heroFooterVal, { color: colors.text.primary }]}>12 Gwei</Text></Text>
-            </View>
-
-            <View style={styles.heroFooterItem}>
-              <Text style={styles.heroFooterLabel}>Yield: <Text style={[styles.heroFooterVal, { color: colors.text.primary }]}>+4.82% APR</Text></Text>
+          {/* Clean Address Copy Row (Gas & Yield Removed) */}
+          <View style={[styles.heroFooterRow, { borderTopColor: cardBorder, justifyContent: 'space-between' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={[styles.miniDot, { backgroundColor: '#22C55E' }]} />
+              <Text style={styles.heroFooterLabel}>
+                {currentChainObj.name} Mainnet Active
+              </Text>
             </View>
 
             <SpringButton onPress={copyAddress} style={[styles.heroAddrPill, { backgroundColor: monoMutedSurface }]}>
@@ -599,9 +680,23 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* ASSET OVERVIEW SECTION (ASSETS UP)                       */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>ASSETS</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Portfolio', { initialTab: 'assets' })}>
-            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>See All</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={styles.sectionHeading}>Assets</Text>
+            <TouchableOpacity
+              onPress={() => setShowAssetsDrawer(true)}
+              style={[styles.headingArrowBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+              activeOpacity={0.7}
+            >
+              <ChevronRightIcon color={monoPrimary} size={15} />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Portfolio', { initialTab: 'assets' })}
+            style={[styles.viewAllBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.viewAllBoxText, { color: colors.text.primary }]}>View All →</Text>
           </TouchableOpacity>
         </View>
 
@@ -876,6 +971,157 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+
+      {/* ======================================================== */}
+      {/* ALL AVAILABLE ASSETS DRAWER (POPPING FROM DOWN)          */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showAssetsDrawer}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowAssetsDrawer(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={{ flex: 1 }} onPress={() => setShowAssetsDrawer(false)} />
+          <View style={[styles.drawerSheetCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.sheetHandle} />
+
+            <View style={styles.drawerHeaderRow}>
+              <TouchableOpacity
+                onPress={() => setShowAssetsDrawer(false)}
+                style={[styles.drawerBackBtn, { backgroundColor: monoMutedSurface }]}
+                activeOpacity={0.7}
+              >
+                <ArrowLeftIcon color={colors.text.primary} size={20} />
+              </TouchableOpacity>
+              <Text style={[styles.drawerHeaderTitle, { color: colors.text.primary }]}>All Available Assets</Text>
+              <View style={{ width: 36 }} />
+            </View>
+
+            <ScrollView style={{ maxHeight: 420 }} showsVerticalScrollIndicator={false}>
+              {dynamicAssets.map((asset, index, arr) => {
+                const isLast = index === arr.length - 1;
+                return (
+                  <SpringButton
+                    key={`drawer-${asset.symbol}`}
+                    onPress={() => {
+                      setShowAssetsDrawer(false);
+                      navigation.navigate('TokenDetail', { ...asset, price: asset.price, usd: asset.usd });
+                    }}
+                    style={[styles.assetRowItem, !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}
+                  >
+                    <View style={styles.assetLeftCol}>
+                      <TokenLogo symbol={asset.symbol} size={40} />
+                      <View style={{ marginLeft: 14 }}>
+                        <Text style={[styles.assetTitleText, { color: colors.text.primary }]}>{asset.name}</Text>
+                        <Text style={styles.assetSubtitleText}>{asset.balance} {asset.symbol} • {asset.network}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.assetRightCol}>
+                      <Text style={[styles.assetValueText, { color: colors.text.primary }]}>{asset.usd}</Text>
+                      <Text style={[styles.assetChangeText, { color: asset.positive ? colors.text.primary : '#EF4444' }]}>
+                        {asset.change}
+                      </Text>
+                    </View>
+                  </SpringButton>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ======================================================== */}
+      {/* WALLET SWITCHER & CREATION MODAL (LIMIT 4 WALLETS)       */}
+      {/* ======================================================== */}
+      <Modal
+        visible={showWalletModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowWalletModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={{ flex: 1 }} onPress={() => setShowWalletModal(false)} />
+          <View style={[styles.drawerSheetCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.sheetHandle} />
+
+            <View style={styles.drawerHeaderRow}>
+              <TouchableOpacity
+                onPress={() => setShowWalletModal(false)}
+                style={[styles.drawerBackBtn, { backgroundColor: monoMutedSurface }]}
+                activeOpacity={0.7}
+              >
+                <ArrowLeftIcon color={colors.text.primary} size={20} />
+              </TouchableOpacity>
+              <Text style={[styles.drawerHeaderTitle, { color: colors.text.primary }]}>
+                Choose Wallet ({wallets.length}/4)
+              </Text>
+              <View style={{ width: 36 }} />
+            </View>
+
+            <ScrollView style={{ maxHeight: 300 }}>
+              {wallets.map((w, idx) => {
+                const isActive = idx === activeWalletIndex;
+                return (
+                  <TouchableOpacity
+                    key={w.id}
+                    onPress={async () => {
+                      await switchWallet(idx);
+                      setShowWalletModal(false);
+                    }}
+                    style={[
+                      styles.walletItemCard,
+                      { backgroundColor: monoMutedSurface, borderColor: isActive ? monoPrimary : cardBorder },
+                    ]}
+                    activeOpacity={0.75}
+                  >
+                    <View style={styles.walletItemLeft}>
+                      <View style={[styles.walletItemIconWrap, { backgroundColor: cardBg }]}>
+                        <WalletHeaderIcon color={monoPrimary} size={18} />
+                      </View>
+                      <View style={{ marginLeft: 12 }}>
+                        <Text style={[styles.walletItemName, { color: colors.text.primary }]}>{w.name}</Text>
+                        <Text style={styles.walletItemAddr}>
+                          {w.address ? `${w.address.slice(0, 8)}...${w.address.slice(-6)}` : '0x...'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {isActive && (
+                      <View style={[styles.activeCheckBadge, { backgroundColor: monoPrimary }]}>
+                        <CheckIcon color={isDark ? '#000000' : '#FFFFFF'} size={14} />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* Create New Wallet Button */}
+            <TouchableOpacity
+              onPress={async () => {
+                if (wallets.length >= 4) return;
+                const res = await createAdditionalWallet();
+                if (res.success) {
+                  setShowWalletModal(false);
+                }
+              }}
+              disabled={wallets.length >= 4}
+              style={[
+                styles.createWalletBtn,
+                { backgroundColor: monoPrimary },
+                wallets.length >= 4 && { opacity: 0.4 },
+              ]}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.createWalletBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+                {wallets.length >= 4 ? 'Wallet Limit Reached (4/4)' : '＋ Create New Wallet'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -914,7 +1160,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingBottom: 12,
+  },
+  walletSelectorPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    borderRadius: 22,
+    borderWidth: 1,
+    maxWidth: 160,
+  },
+  walletSelectorName: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  headerIconBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  aiButtonPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 42,
+    paddingHorizontal: 13,
+    borderRadius: 21,
+    borderWidth: 1,
+    gap: 6,
+  },
+  aiButtonText: {
+    fontSize: 13,
+    fontWeight: '800',
   },
   brandRow: {
     flexDirection: 'row',
@@ -940,9 +1222,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 0.5,
+    paddingVertical: 9,
+    borderRadius: 22,
+    borderWidth: 1,
     gap: 6,
     maxWidth: 130,
   },
@@ -952,20 +1234,7 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   chainSelectorText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  aiButtonPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 14,
-    borderWidth: 0.5,
-    gap: 4,
-  },
-  aiButtonText: {
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   iconButton: {
@@ -1188,19 +1457,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
     paddingHorizontal: 2,
   },
   sectionHeading: {
-    color: '#64748B',
-    fontSize: 11,
+    fontSize: 19,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  headingArrowBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  viewAllBox: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  viewAllBoxText: {
+    fontSize: 12.5,
     fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
   },
   sectionActionText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 12.5,
+    fontWeight: '700',
   },
   // ASSET LIST CARD
   assetListCard: {
@@ -1404,5 +1689,80 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginTop: 4,
+  },
+  drawerSheetCard: {
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    borderTopWidth: 1,
+    padding: 22,
+    paddingBottom: 40,
+    width: '100%',
+  },
+  drawerHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  drawerBackBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  drawerHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  walletItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  walletItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  walletItemIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletItemName: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  walletItemAddr: {
+    color: '#858585',
+    fontSize: 11.5,
+    fontVariant: ['tabular-nums'],
+    marginTop: 2,
+  },
+  activeCheckBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createWalletBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  createWalletBtnText: {
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

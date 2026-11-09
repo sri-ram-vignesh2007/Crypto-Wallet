@@ -1,7 +1,9 @@
 // src/store/walletStore.ts
-// MULTI-CHAIN WALLET STATE — supports ALL chains and ALL tokens
+// MULTI-CHAIN & MULTI-WALLET STATE — supports up to 4 distinct wallets, ALL chains and ALL tokens
 
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ethers } from 'ethers';
 import { WalletManager } from '../core/WalletManager';
 import { rpcManager } from '../core/RPCManager';
 import { Token } from '../core/ChainConfig';
@@ -11,6 +13,16 @@ export interface TokenBalance {
   balance: string;
   valueUsd: number;
 }
+
+export interface MultiWalletItem {
+  id: string;
+  name: string;
+  address: string;
+  createdAt: number;
+}
+
+const STORAGE_MULTI_WALLETS = 'cura_multi_wallets_v3';
+const STORAGE_ACTIVE_INDEX = 'cura_active_wallet_idx_v3';
 
 interface WalletState {
   address: string | null;
@@ -22,6 +34,11 @@ interface WalletState {
   hasWallet: boolean;
   totalValueUsd: number;
 
+  // Multi-wallet properties (up to 4 wallets)
+  wallets: MultiWalletItem[];
+  activeWalletIndex: number;
+  activeWallet: MultiWalletItem | null;
+
   setSelectedChain: (chain: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -30,6 +47,10 @@ interface WalletState {
   refreshBalances: () => Promise<void>;
   createWallet: () => Promise<{ address: string; warning: string }>;
   importWallet: (mnemonic: string) => Promise<{ address: string }>;
+  createAdditionalWallet: (customName?: string) => Promise<{ success: boolean; wallet?: MultiWalletItem; error?: string }>;
+  switchWallet: (index: number) => Promise<void>;
+  renameWallet: (id: string, newName: string) => Promise<void>;
+  deleteWallet: (id: string) => Promise<{ success: boolean; error?: string }>;
   sendCrypto: (
     toAddress: string,
     amount: string,
@@ -47,6 +68,21 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   error: null,
   hasWallet: false,
   totalValueUsd: 0,
+  wallets: [
+    {
+      id: 'wallet-1',
+      name: 'Main Wallet',
+      address: '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A',
+      createdAt: Date.now(),
+    },
+  ],
+  activeWalletIndex: 0,
+  activeWallet: {
+    id: 'wallet-1',
+    name: 'Main Wallet',
+    address: '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A',
+    createdAt: Date.now(),
+  },
 
   setSelectedChain: (selectedChain) => {
     set({ selectedChain });
@@ -62,18 +98,150 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       const exists = await WalletManager.hasWallet();
       set({ hasWallet: exists });
 
+      let primaryAddress = '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A';
       if (exists) {
-        const address = await WalletManager.getReceiveAddress();
-        set({ address });
-        if (address) {
-          await get().refreshBalances();
-        }
+        const addr = await WalletManager.getReceiveAddress();
+        if (addr) primaryAddress = addr;
       }
+
+      // Load saved multi-wallets from storage
+      let savedWallets: MultiWalletItem[] = [];
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_MULTI_WALLETS);
+        if (raw) savedWallets = JSON.parse(raw);
+      } catch {}
+
+      if (!savedWallets || savedWallets.length === 0) {
+        savedWallets = [
+          {
+            id: 'wallet-1',
+            name: 'Main Wallet',
+            address: primaryAddress,
+            createdAt: Date.now(),
+          },
+        ];
+        await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify(savedWallets));
+      }
+
+      let activeIdx = 0;
+      try {
+        const savedIdx = await AsyncStorage.getItem(STORAGE_ACTIVE_INDEX);
+        if (savedIdx !== null) {
+          const parsed = parseInt(savedIdx, 10);
+          if (!isNaN(parsed) && parsed >= 0 && parsed < savedWallets.length) {
+            activeIdx = parsed;
+          }
+        }
+      } catch {}
+
+      const active = savedWallets[activeIdx] || savedWallets[0];
+      set({
+        wallets: savedWallets,
+        activeWalletIndex: activeIdx,
+        activeWallet: active,
+        address: active.address,
+      });
+
+      await get().refreshBalances();
     } catch (err: any) {
       set({ error: err.message });
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  switchWallet: async (index: number) => {
+    const { wallets } = get();
+    if (index < 0 || index >= wallets.length) return;
+
+    const selected = wallets[index];
+    set({
+      activeWalletIndex: index,
+      activeWallet: selected,
+      address: selected.address,
+    });
+    try {
+      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, index.toString());
+    } catch {}
+
+    await get().refreshBalances();
+  },
+
+  createAdditionalWallet: async (customName?: string) => {
+    const { wallets } = get();
+    if (wallets.length >= 4) {
+      return { success: false, error: 'Maximum limit of 4 wallets reached' };
+    }
+
+    try {
+      // Generate a new random Ethereum address for this secondary wallet
+      const randomWallet = ethers.Wallet.createRandom();
+      const newWallet: MultiWalletItem = {
+        id: `wallet-${Date.now()}`,
+        name: customName?.trim() || `Wallet ${wallets.length + 1}`,
+        address: randomWallet.address,
+        createdAt: Date.now(),
+      };
+
+      const updated = [...wallets, newWallet];
+      const newIdx = updated.length - 1;
+
+      set({
+        wallets: updated,
+        activeWalletIndex: newIdx,
+        activeWallet: newWallet,
+        address: newWallet.address,
+      });
+
+      await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify(updated));
+      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, newIdx.toString());
+
+      await get().refreshBalances();
+      return { success: true, wallet: newWallet };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Failed to create wallet' };
+    }
+  },
+
+  renameWallet: async (id: string, newName: string) => {
+    const { wallets, activeWalletIndex } = get();
+    const updated = wallets.map(w => w.id === id ? { ...w, name: newName.trim() || w.name } : w);
+    set({
+      wallets: updated,
+      activeWallet: updated[activeWalletIndex] || updated[0],
+    });
+    try {
+      await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify(updated));
+    } catch {}
+  },
+
+  deleteWallet: async (id: string) => {
+    const { wallets, activeWalletIndex } = get();
+    if (wallets.length <= 1) {
+      return { success: false, error: 'Cannot delete your only wallet.' };
+    }
+
+    const filtered = wallets.filter(w => w.id !== id);
+    let newIdx = activeWalletIndex;
+    if (newIdx >= filtered.length) {
+      newIdx = filtered.length - 1;
+    }
+
+    const active = filtered[newIdx];
+    set({
+      wallets: filtered,
+      activeWalletIndex: newIdx,
+      activeWallet: active,
+      address: active.address,
+    });
+
+    try {
+      await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify(filtered));
+      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, newIdx.toString());
+    } catch {}
+
+    await get().refreshBalances();
+    return { success: true };
   },
 
   refreshBalances: async () => {
@@ -116,12 +284,23 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await WalletManager.createWallet();
+      const initialWallet: MultiWalletItem = {
+        id: 'wallet-1',
+        name: 'Main Wallet',
+        address: result.address,
+        createdAt: Date.now(),
+      };
       set({
         address: result.address,
         hasWallet: true,
         balance: '0',
         balances: [],
+        wallets: [initialWallet],
+        activeWalletIndex: 0,
+        activeWallet: initialWallet,
       });
+      await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify([initialWallet]));
+      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, '0');
       return result;
     } catch (err: any) {
       set({ error: err.message });
@@ -135,12 +314,23 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await WalletManager.importWallet(mnemonic);
+      const initialWallet: MultiWalletItem = {
+        id: 'wallet-1',
+        name: 'Imported Wallet',
+        address: result.address,
+        createdAt: Date.now(),
+      };
       set({
         address: result.address,
         hasWallet: true,
         balance: '0',
         balances: [],
+        wallets: [initialWallet],
+        activeWalletIndex: 0,
+        activeWallet: initialWallet,
       });
+      await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify([initialWallet]));
+      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, '0');
       return result;
     } catch (err: any) {
       set({ error: err.message });
@@ -177,6 +367,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       if (await WalletManager.hasWallet()) {
         await WalletManager.deleteWallet();
       }
+      await AsyncStorage.removeItem(STORAGE_MULTI_WALLETS);
+      await AsyncStorage.removeItem(STORAGE_ACTIVE_INDEX);
       set({
         address: null,
         selectedChain: 'ethereum',
@@ -184,6 +376,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         balances: [],
         hasWallet: false,
         totalValueUsd: 0,
+        wallets: [],
+        activeWalletIndex: 0,
+        activeWallet: null,
         error: null,
       });
     } catch (err: any) {

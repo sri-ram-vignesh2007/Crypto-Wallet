@@ -41,21 +41,21 @@ export function WalletsScreen({ navigation }: { navigation?: any }) {
   const colors = useColors();
   const isDark = useIsDark();
   const insets = useSafeAreaInsets();
-  const { address } = useWalletStore();
+  const { wallets, activeWalletIndex, switchWallet, createAdditionalWallet } = useWalletStore();
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg.canvas, paddingTop: insets.top }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text.primary }]}>Manage Wallets</Text>
-        <Text style={[styles.subtitle, { color: colors.text.secondary }]}>Your active multi-chain accounts</Text>
+        <Text style={[styles.title, { color: colors.text.primary }]}>Manage Wallets ({wallets.length}/4)</Text>
+        <Text style={[styles.subtitle, { color: colors.text.secondary }]}>Switch active account or create up to 4 accounts</Text>
       </View>
       <View style={[styles.card, { backgroundColor: colors.bg.surface, borderColor: colors.border.subtle }]}>
         <View style={styles.rowBetween}>
           <View>
             <Text style={[styles.cardTitle, { color: colors.text.primary }]}>Primary Vault Wallet</Text>
             <Text style={[styles.cardSub, { color: colors.text.secondary }]}>
-              {address ? `${address.slice(0, 10)}...${address.slice(-8)}` : '0x71C...389A'}
+              {wallets[activeWalletIndex]?.address ? `${wallets[activeWalletIndex].address.slice(0, 10)}...${wallets[activeWalletIndex].address.slice(-8)}` : '0x71C...389A'}
             </Text>
           </View>
           <View style={[styles.activePill, { backgroundColor: isDark ? '#202020' : '#F2F2F2' }]}>

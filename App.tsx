@@ -21,6 +21,7 @@ import LockScreen from './src/screens/LockScreen';
 
 // Main app screens
 import HomeScreen from './src/screens/HomeScreen';
+import MarketScreen from './src/screens/MarketScreen';
 import PortfolioScreen from './src/screens/PortfolioScreen';
 import ExploreScreen from './src/screens/ExploreScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
@@ -55,6 +56,7 @@ type RootStackParamList = {
   Welcome: undefined;
   SeedPhrase: { mode: 'create' | 'import' } | undefined;
   Main: undefined;
+  Market: undefined;
   Portfolio: { initialTab?: 'assets' | 'transactions' } | undefined;
   LiveDesk: undefined;
   Community: undefined;
@@ -88,7 +90,7 @@ type RootStackParamList = {
 
 type TabParamList = {
   Home: undefined;
-  Portfolio: { initialTab?: 'assets' | 'transactions' } | undefined;
+  Market: undefined;
   Swap: undefined;
   Community: undefined;
   Settings: undefined;
@@ -100,9 +102,13 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
   const icons: Record<string, React.ReactNode> = {
     Home: (
       <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
-        <Rect x="2" y="4" width="20" height="16" rx="3" />
-        <Path d="M2 10h20" />
-        <Circle cx="18" cy="15" r="1.5" fill={color} />
+        <Path d="M3 9.5L12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z" />
+        <Path d="M9 22V12h6v10" />
+      </Svg>
+    ),
+    Market: (
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M18 20V10M12 20V4M6 20v-6" />
       </Svg>
     ),
     Community: (
@@ -224,23 +230,23 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={23} />,
           tabBarLabel: 'Home',
         }}
       />
       <Tab.Screen
-        name="Portfolio"
-        component={PortfolioScreen}
+        name="Market"
+        component={MarketScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Portfolio" focused={focused} color={color} />,
-          tabBarLabel: 'Portfolio',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={23} />,
+          tabBarLabel: 'Market',
         }}
       />
       <Tab.Screen
         name="Swap"
         component={SwapScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={23} />,
           tabBarLabel: 'Swap',
         }}
       />
@@ -248,7 +254,7 @@ function MainTabs() {
         name="Community"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={23} />,
           tabBarLabel: 'Community',
         }}
       />
@@ -256,7 +262,7 @@ function MainTabs() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={23} />,
           tabBarLabel: 'Settings',
         }}
       />
@@ -315,6 +321,7 @@ function AppContent() {
           ) : (
             <>
               <Stack.Screen name="Main" component={MainTabs} />
+              <Stack.Screen name="Market" component={MarketScreen} options={{ title: 'Markets' }} />
               <Stack.Screen name="Portfolio" component={PortfolioScreen} options={{ title: 'Portfolio' }} />
               <Stack.Screen name="LiveDesk" component={ExploreScreen} options={{ title: 'Live Desk' }} />
               <Stack.Screen name="Community" component={ExploreScreen} options={{ title: 'Live Desk' }} />
