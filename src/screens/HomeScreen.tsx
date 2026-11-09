@@ -13,6 +13,7 @@ import { useProfileStore } from '../store/profileStore';
 import { useTransactionStore } from '../store/transactionStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
+import { TokenLogo } from '../components/TokenLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -582,16 +583,15 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
         <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
           {dynamicAssets.map((asset, index) => {
-            const Logo = TOKEN_LOGOS[asset.symbol] || EthLogo;
             const isLast = index === dynamicAssets.length - 1;
             return (
               <SpringButton
                 key={asset.symbol}
-                onPress={() => navigation.navigate('AssetDetail', { asset })}
+                onPress={() => navigation.navigate('TokenDetail', { ...asset, price: asset.price, usd: asset.usd })}
                 style={[styles.assetRowItem, !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}
               >
                 <View style={styles.assetLeftCol}>
-                  <Logo />
+                  <TokenLogo symbol={asset.symbol} size={36} />
                   <View style={{ marginLeft: 12 }}>
                     <Text style={[styles.assetTitleText, { color: colors.text.primary }]}>{asset.name}</Text>
                     <Text style={styles.assetSubtitleText}>{asset.balance} {asset.symbol} • {asset.network}</Text>
@@ -663,11 +663,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                 style={[styles.assetRowItem, !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder }]}
               >
                 <View style={styles.assetLeftCol}>
-                  <View style={[styles.moverAvatar, { backgroundColor: monoMutedSurface }]}>
-                    <Text style={[styles.moverAvatarText, { color: colors.text.primary }]}>
-                      {token.symbol.slice(0, 3)}
-                    </Text>
-                  </View>
+                  <TokenLogo symbol={token.symbol} size={36} />
                   <View style={{ marginLeft: 12 }}>
                     <Text style={[styles.assetTitleText, { color: colors.text.primary }]}>{token.name}</Text>
                     <Text style={styles.assetSubtitleText}>{token.symbol}</Text>
@@ -678,13 +674,13 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   <Text style={[styles.assetValueText, { color: colors.text.primary }]}>{token.price}</Text>
                   <View style={[
                     styles.moverBadge,
-                    { backgroundColor: token.positive ? monoMutedSurface : (isDark ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2') }
+                    { backgroundColor: token.positive ? (isDark ? 'rgba(34, 197, 94, 0.16)' : '#DCFCE7') : (isDark ? 'rgba(239, 68, 68, 0.16)' : '#FEE2E2') }
                   ]}>
                     <Text style={[
                       styles.moverChangeText,
-                      { color: token.positive ? colors.text.primary : '#EF4444' }
+                      { color: token.positive ? '#22C55E' : '#EF4444', fontWeight: '700' }
                     ]}>
-                      {token.positive ? `↑ ${token.change}` : `↓ ${token.change}`}
+                      {token.change}
                     </Text>
                   </View>
                 </View>

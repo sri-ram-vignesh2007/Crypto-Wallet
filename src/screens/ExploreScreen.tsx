@@ -576,19 +576,9 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       )}
 
-      {/* Top Header Bar (Clean: "Community" title with "+ Post Dispatch" button on the right) */}
+      {/* Top Header Bar (Clean: "Community" title) */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
         <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Community</Text>
-
-        <TouchableOpacity
-          onPress={handleOpenPostDispatch}
-          style={[styles.orgSubmitBtn, { backgroundColor: monoPrimary }]}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.orgSubmitBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-            + Post Dispatch
-          </Text>
-        </TouchableOpacity>
       </View>
 
       {/* Search Bar */}

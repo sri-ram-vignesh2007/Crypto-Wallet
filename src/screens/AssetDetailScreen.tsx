@@ -16,6 +16,7 @@ import {
 } from '../theme/ThemeContext';
 import { Card } from '../components/Card';
 import { AIAssistantFAB } from '../components/AIAssistantFAB';
+import { TokenLogo } from '../components/TokenLogo';
 
 interface Props {
   navigation?: any;
@@ -326,9 +327,9 @@ export default function AssetDetailScreen({ navigation, route }: Props) {
           <View style={styles.assetHeaderTop}>
             <View style={[
               styles.assetLogoWrap,
-              { backgroundColor: asset.networkColor + '15' },
+              { backgroundColor: 'transparent' },
             ]}>
-              <LogoComponent />
+              <TokenLogo symbol={asset.symbol} size={46} />
             </View>
             <View style={styles.assetHeaderInfo}>
               <View style={styles.assetHeaderNameRow}>

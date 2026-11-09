@@ -208,3 +208,4 @@ export const useTransactionStore = create<TransactionStoreState>((set, get) => (
     AsyncStorage.removeItem(BALANCES_STORAGE_KEY).catch(() => {});
   },
 }));
+

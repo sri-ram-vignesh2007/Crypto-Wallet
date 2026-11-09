@@ -324,56 +324,6 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
 
-        {/* Section: Live Desk & Anonymity */}
-        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>LIVE DESK & ANONYMITY</Text>
-        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
-          <View style={styles.settingsRow}>
-            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
-              <Text style={{ fontSize: 13 }}>🛡️</Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
-                Zero-Knowledge Inquirer Shield
-              </Text>
-              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
-                Organizations only see views; your wallet & profile remain 100% hidden
-              </Text>
-            </View>
-            <View style={styles.switchWrapper}>
-              <Switch
-                value={allowPublicPortfolio}
-                onValueChange={setAllowPublicPortfolio}
-                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
-                thumbColor={isDark ? '#000000' : '#FFFFFF'}
-              />
-            </View>
-          </View>
-
-          <View style={[styles.rowDivider, { backgroundColor: hairline }]} />
-
-          <View style={styles.settingsRow}>
-            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
-              <Text style={{ fontSize: 13 }}>💬</Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
-                Organization Reply Delivery
-              </Text>
-              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
-                Deliver verified company answers to your anonymous question threads
-              </Text>
-            </View>
-            <View style={styles.switchWrapper}>
-              <Switch
-                value={allowDirectMessages}
-                onValueChange={setAllowDirectMessages}
-                trackColor={{ false: isDark ? '#303030' : '#E5E5E5', true: monoPrimary }}
-                thumbColor={isDark ? '#000000' : '#FFFFFF'}
-              />
-            </View>
-          </View>
-        </View>
-
         {/* Section: Security */}
         <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>SECURITY</Text>
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
