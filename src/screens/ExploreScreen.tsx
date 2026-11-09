@@ -1417,7 +1417,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   orgNameText: {
-    fontSize: 14,
+    fontSize: 15.5,
     fontWeight: '800',
   },
   verifiedBadge: {
@@ -1429,25 +1429,25 @@ const styles = StyleSheet.create({
   },
   orgHandleText: {
     color: '#858585',
-    fontSize: 11,
+    fontSize: 12,
   },
   dotDivider: {
     color: '#858585',
-    fontSize: 11,
+    fontSize: 12,
   },
   timeAgoText: {
     color: '#858585',
-    fontSize: 11,
+    fontSize: 12,
   },
   broadcastTitle: {
-    fontSize: 15,
+    fontSize: 16.5,
     fontWeight: '800',
-    lineHeight: 21,
+    lineHeight: 22,
     marginBottom: 8,
   },
   broadcastBody: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
     fontWeight: '400',
     marginBottom: 12,
   },
@@ -1550,14 +1550,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   newsTitle: {
-    fontSize: 14.5,
+    fontSize: 16,
     fontWeight: '700',
-    lineHeight: 20,
+    lineHeight: 22,
     marginBottom: 6,
   },
   newsSummary: {
-    fontSize: 12.5,
-    lineHeight: 18,
+    fontSize: 13.5,
+    lineHeight: 19,
     marginBottom: 12,
   },
   newsFooter: {

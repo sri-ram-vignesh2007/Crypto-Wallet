@@ -722,7 +722,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: 14.5,
+    fontWeight: '700',
   },
   filterBarRow: {
     paddingVertical: 4,
@@ -740,8 +741,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   filterChipText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
   },
   filterDivider: {
     width: 1,
@@ -774,7 +775,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tokenSymbolMain: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '800',
     letterSpacing: -0.2,
   },
@@ -784,13 +785,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   chainTagText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   tokenFullName: {
-    fontSize: 13,
+    fontSize: 13.5,
     marginTop: 2,
+    fontWeight: '500',
   },
   tokenSparkWrap: {
     paddingHorizontal: 4,
@@ -800,8 +802,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tokenPriceText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
     fontVariant: ['tabular-nums'],
   },
   tokenActionRow: {
@@ -811,12 +813,12 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   deltaPill: {
-    paddingHorizontal: 6,
-    paddingVertical: 2.5,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   deltaText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
   },
@@ -824,13 +826,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
     borderRadius: 8,
     borderWidth: 0.8,
   },
   quickSwapText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   emptyWrap: {
@@ -847,3 +849,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

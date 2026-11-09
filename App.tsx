@@ -165,13 +165,14 @@ function MainTabs() {
 
   // Adaptive safe area bottom padding across all iPhone & Android models
   const isAndroid = Platform.OS === 'android';
-  const bottomPadding = insets.bottom > 0 ? insets.bottom + 4 : (isAndroid ? 10 : 8);
-  const tabHeight = 62 + bottomPadding;
+  const bottomPadding = insets.bottom > 0 ? insets.bottom : (isAndroid ? 10 : 8);
+  const tabHeight = 58 + bottomPadding;
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarActiveTintColor: colors.primary.DEFAULT,
         tabBarInactiveTintColor: colors.text.muted,
         tabBarStyle: {
@@ -193,19 +194,11 @@ function MainTabs() {
         tabBarItemStyle: {
           justifyContent: 'center',
           alignItems: 'center',
-          paddingVertical: 2,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10.5,
-          fontWeight: '600',
-          letterSpacing: -0.2,
-          lineHeight: 14,
-          includeFontPadding: false,
-          paddingBottom: 2,
+          height: 48,
         },
         tabBarIconStyle: {
-          marginTop: 1,
-          marginBottom: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
         },
         tabBarButton: (props) => (
           <Pressable
@@ -230,40 +223,35 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={23} />,
-          tabBarLabel: 'Home',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Market"
         component={MarketScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={23} />,
-          tabBarLabel: 'Market',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Swap"
         component={SwapScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={23} />,
-          tabBarLabel: 'Swap',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Community"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={23} />,
-          tabBarLabel: 'Community',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={23} />,
-          tabBarLabel: 'Settings',
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={26} />,
         }}
       />
     </Tab.Navigator>

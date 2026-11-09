@@ -539,26 +539,28 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* PORTFOLIO HERO BENTO CARD                                */}
         {/* ======================================================== */}
         <View style={[styles.bentoHeroCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          <View style={styles.balanceHeaderRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={styles.heroLabel}>Total Balance</Text>
-              <TouchableOpacity
-                onPress={() => setShowPortfolioBalance(!showPortfolioBalance)}
-                style={styles.eyeBtn}
-                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              >
-                {showPortfolioBalance ? <EyeIcon size={14} color="#858585" /> : <EyeOffIcon size={14} color="#858585" />}
-              </TouchableOpacity>
-            </View>
+          <View style={styles.heroBalanceRow}>
+            <Text
+              style={[styles.heroBalanceText, { color: colors.text.primary }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {showPortfolioBalance ? `$${displayTotalUsd}` : '••••••••••••'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowPortfolioBalance(!showPortfolioBalance)}
+              style={styles.eyeBtnBesideBalance}
+              hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+              activeOpacity={0.7}
+              accessibilityLabel="Toggle balance visibility"
+            >
+              {showPortfolioBalance ? (
+                <EyeIcon size={22} color={colors.text.secondary || '#94A3B8'} />
+              ) : (
+                <EyeOffIcon size={22} color={colors.text.secondary || '#94A3B8'} />
+              )}
+            </TouchableOpacity>
           </View>
-
-          <Text
-            style={[styles.heroBalanceText, { color: colors.text.primary }]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            {showPortfolioBalance ? `$${displayTotalUsd}` : '••••••••••••'}
-          </Text>
 
           {/* Dynamic P&L Delta Row */}
           <View style={styles.deltaRow}>
@@ -1266,6 +1268,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  heroBalanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  eyeBtnBesideBalance: {
+    padding: 4,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   balanceHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1282,11 +1297,10 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   heroBalanceText: {
-    fontSize: 30,
+    fontSize: 35,
     fontWeight: '800',
     letterSpacing: -0.8,
     fontVariant: ['tabular-nums'],
-    marginTop: 4,
   },
   deltaRow: {
     flexDirection: 'row',
@@ -1296,7 +1310,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   deltaPeriodText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
   },
   deltaPill: {
@@ -1305,7 +1319,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   deltaPillText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
@@ -1329,9 +1343,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   timeRangeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    lineHeight: 14,
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 15,
     includeFontPadding: false,
   },
   heroFooterRow: {
@@ -1402,11 +1416,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   actionBtnLabel: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    lineHeight: 16,
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 17,
     includeFontPadding: false,
-    marginTop: 5,
+    marginTop: 6,
     textAlign: 'center',
   },
   // MARKET MOVERS (GAINERS & LOSERS)
@@ -1425,9 +1439,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   moversTabText: {
-    fontSize: 11,
-    fontWeight: '600',
-    lineHeight: 13,
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 14,
     includeFontPadding: false,
   },
   moverAvatar: {
@@ -1438,8 +1452,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   moverAvatarText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 12.5,
+    fontWeight: '800',
   },
   moverBadge: {
     paddingHorizontal: 8,
@@ -1448,7 +1462,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   moverChangeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
@@ -1461,35 +1475,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   sectionHeading: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   headingArrowBtn: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
   viewAllBox: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     paddingVertical: 6,
     borderRadius: 14,
     borderWidth: 1,
   },
   viewAllBoxText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '700',
   },
   sectionActionText: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '700',
   },
   // ASSET LIST CARD
   assetListCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 0.5,
     marginBottom: 20,
     overflow: 'hidden',
@@ -1499,31 +1513,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 15,
   },
   assetLeftCol: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   assetTitleText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
   },
   assetSubtitleText: {
     color: '#64748B',
-    fontSize: 11,
+    fontSize: 13,
     marginTop: 2,
+    fontWeight: '500',
   },
   assetRightCol: {
     alignItems: 'flex-end',
   },
   assetValueText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   assetChangeText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '600',
     marginTop: 2,
   },
@@ -1546,19 +1561,20 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   sourceBadgeText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
   pulseTimeText: {
     color: '#64748B',
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: '500',
   },
   pulseTitleText: {
-    fontSize: 14,
+    fontSize: 15.5,
     fontWeight: '700',
-    lineHeight: 20,
-    marginBottom: 10,
+    lineHeight: 22,
+    marginBottom: 8,
   },
   pulseCardFooter: {
     flexDirection: 'row',
@@ -1567,10 +1583,11 @@ const styles = StyleSheet.create({
   },
   pulseMetaText: {
     color: '#64748B',
-    fontSize: 11,
+    fontSize: 12.5,
+    fontWeight: '500',
   },
   pulseReadMore: {
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   // RECENT ACTIVITY
@@ -1578,33 +1595,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   activityIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   activityTitle: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '700',
   },
   activitySub: {
     color: '#64748B',
-    fontSize: 11,
+    fontSize: 12.5,
     marginTop: 2,
+    fontWeight: '500',
   },
   activityAmount: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   activityTime: {
     color: '#64748B',
-    fontSize: 10,
+    fontSize: 12,
     marginTop: 2,
+    fontWeight: '500',
   },
   // MODALS
   modalBackdrop: {
