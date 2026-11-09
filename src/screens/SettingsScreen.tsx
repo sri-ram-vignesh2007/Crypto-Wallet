@@ -318,19 +318,19 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
 
-        {/* Section: Community & Member Privacy */}
-        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>COMMUNITY & MESSAGING</Text>
+        {/* Section: Live Desk & Anonymity */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>LIVE DESK & ANONYMITY</Text>
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
           <View style={styles.settingsRow}>
             <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
-              <Text style={{ fontSize: 13 }}>📊</Text>
+              <Text style={{ fontSize: 13 }}>🛡️</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
-                Share Portfolio in Community
+                Zero-Knowledge Inquirer Shield
               </Text>
               <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
-                Allow members to view your assets on profile tap
+                Organizations only see views; your wallet & profile remain 100% hidden
               </Text>
             </View>
             <View style={styles.switchWrapper}>
@@ -351,10 +351,10 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
-                Allow Direct Messages
+                Organization Reply Delivery
               </Text>
               <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
-                Let community members send you direct messages
+                Deliver verified company answers to your anonymous question threads
               </Text>
             </View>
             <View style={styles.switchWrapper}>

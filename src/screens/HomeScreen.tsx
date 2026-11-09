@@ -633,17 +633,17 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* ======================================================== */}
-        {/* CURA PULSE: LATEST NEWS & COMMUNITY HIGHLIGHT           */}
+        {/* CURA LIVE DESK: OFFICIAL BROADCASTS & NEWS             */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>CURA PULSE & NEWS</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Community')}>
-            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>View Feed →</Text>
+          <Text style={styles.sectionHeading}>LIVE DESK & NEWS</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('LiveDesk')}>
+            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>Live Desk →</Text>
           </TouchableOpacity>
         </View>
 
         <SpringButton
-          onPress={() => navigation.navigate('Community')}
+          onPress={() => navigation.navigate('LiveDesk')}
           style={[styles.pulseNewsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
         >
           <View style={styles.pulseCardTop}>
