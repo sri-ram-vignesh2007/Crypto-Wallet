@@ -572,3 +572,4 @@ const styles = StyleSheet.create({
     maxWidth: SCREEN_WIDTH * 0.6,
   },
 });
+

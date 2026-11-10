@@ -163,13 +163,14 @@ function MainTabs() {
 
   // Adaptive safe area bottom padding across all iPhone & Android models
   const isAndroid = Platform.OS === 'android';
-  const bottomPadding = insets.bottom > 0 ? insets.bottom : (isAndroid ? 10 : 8);
-  const tabHeight = 66 + bottomPadding;
+  const bottomPadding = insets.bottom > 0 ? insets.bottom : (isAndroid ? 8 : 6);
+  const tabHeight = 60 + bottomPadding;
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: colors.bg.canvas },
         tabBarShowLabel: false,
         tabBarActiveTintColor: colors.primary.DEFAULT,
         tabBarInactiveTintColor: colors.text.muted,
@@ -177,12 +178,12 @@ function MainTabs() {
           backgroundColor: colors.bg.surface,
           borderTopColor: colors.border.subtle,
           borderTopWidth: 0.5,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
+          borderTopLeftRadius: 22,
+          borderTopRightRadius: 22,
           overflow: 'hidden',
           height: tabHeight,
           paddingBottom: bottomPadding,
-          paddingTop: 8,
+          paddingTop: 6,
           elevation: 10,
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: -3 },
@@ -192,7 +193,7 @@ function MainTabs() {
         tabBarItemStyle: {
           justifyContent: 'center',
           alignItems: 'center',
-          height: 52,
+          height: 48,
         },
         tabBarIconStyle: {
           justifyContent: 'center',
@@ -204,12 +205,12 @@ function MainTabs() {
             android_ripple={{
               color: theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
               borderless: true,
-              radius: 28,
+              radius: 26,
             }}
             style={({ pressed }) => [
               props.style,
               {
-                borderRadius: 24,
+                borderRadius: 22,
                 opacity: pressed ? 0.75 : 1,
               },
             ]}
@@ -221,14 +222,14 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={29} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Market"
         component={MarketScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={29} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
@@ -236,21 +237,21 @@ function MainTabs() {
         component={SwapScreen}
         options={{
           tabBarStyle: { display: 'none' },
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={29} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Community"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={29} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={26} />,
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={29} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={26} />,
         }}
       />
     </Tab.Navigator>
@@ -287,70 +288,72 @@ function AppContent() {
   };
 
   return (
-    <PaperProvider theme={{ colors: { primary: theme.colors.primary.DEFAULT, background: theme.colors.bg.canvas } }}>
-      <NavigationContainer theme={navTheme}>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: theme.colors.bg.canvas },
-            animation: 'slide_from_right',
-            animationDuration: 220,
-            gestureEnabled: true,
-          }}
-        >
-          {isLocked ? (
-            <Stack.Screen name="Lock" component={LockScreen} />
-          ) : !hasWallet ? (
-            <>
-              <Stack.Screen name="Welcome" component={WelcomeScreen} />
-              <Stack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
-            </>
-          ) : (
-            <>
-              <Stack.Screen name="Main" component={MainTabs} />
-              <Stack.Screen name="Market" component={MarketScreen} options={{ title: 'Markets' }} />
-              <Stack.Screen name="Portfolio" component={PortfolioScreen} options={{ title: 'Portfolio' }} />
-              <Stack.Screen name="LiveDesk" component={ExploreScreen} options={{ title: 'Live Desk' }} />
-              <Stack.Screen name="Community" component={ExploreScreen} options={{ title: 'Live Desk' }} />
-              <Stack.Screen name="Explore" component={ExploreScreen} options={{ title: 'Explore' }} />
-              <Stack.Screen name="Assets" component={ExploreScreen} options={{ title: 'Assets' }} />
-              <Stack.Screen name="Send" component={SendScreen} options={{ title: 'Send' }} />
-              <Stack.Screen name="Receive" component={ReceiveScreen} options={{ title: 'Receive' }} />
-              <Stack.Screen name="Swap" component={SwapScreen} options={{ title: 'Swap' }} />
-              <Stack.Screen name="Buy" component={BuyScreen} options={{ title: 'Buy Crypto' }} />
-              <Stack.Screen name="Perpetuals" component={PerpetualsScreen} options={{ title: 'Perpetual Futures' }} />
-              <Stack.Screen name="DAppBrowser" component={DAppBrowserScreen} options={{ title: 'Web3 Browser' }} />
-              <Stack.Screen name="History" component={ActivityScreen} options={{ title: 'History' }} />
-              <Stack.Screen name="AssetDetail" component={AssetDetailScreen} options={{ title: 'Asset' }} />
-              <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ title: 'Transaction' }} />
-              <Stack.Screen name="RiskReview" component={RiskReviewScreen} options={{ title: 'Risk Review' }} />
-              <Stack.Screen name="News" component={NewsScreen} options={{ title: 'News' }} />
-              <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
-              <Stack.Screen name="AIChatbot" component={AIChatbotScreen} options={{ title: 'AI Assistant' }} />
-              <Stack.Screen name="AIAssistant" component={AIChatbotScreen} options={{ title: 'AI Assistant' }} />
-              <Stack.Screen name="TokenDetail" component={TokenDetailScreen} options={{ title: 'Token' }} />
-              <Stack.Screen name="ChainDetail" component={ChainDetailScreen} options={{ title: 'Chain' }} />
-              <Stack.Screen name="CustomToken" component={CustomTokenScreen} options={{ title: 'Import Token' }} />
-              <Stack.Screen name="ConnectedApps" component={ConnectedAppsScreen} options={{ title: 'Connected Apps' }} />
-              <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
-              <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} options={{ title: 'Privacy' }} />
-              <Stack.Screen name="NetworkSettings" component={NetworkSettingsScreen} options={{ title: 'Networks' }} />
-              <Stack.Screen name="DefaultNetwork" component={NetworkSettingsScreen} options={{ title: 'Default Network' }} />
-              <Stack.Screen name="Help" component={HelpScreen} options={{ title: 'Help' }} />
-              <Stack.Screen name="Feedback" component={FeedbackScreen} options={{ title: 'Feedback' }} />
-              <Stack.Screen name="About" component={AboutScreen} options={{ title: 'About' }} />
-              <Stack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
-            </>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
+    <View style={{ flex: 1, backgroundColor: theme.colors.bg.canvas }}>
+      <PaperProvider theme={{ colors: { primary: theme.colors.primary.DEFAULT, background: theme.colors.bg.canvas } }}>
+        <NavigationContainer theme={navTheme}>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.colors.bg.canvas },
+              animation: 'slide_from_right',
+              animationDuration: 220,
+              gestureEnabled: true,
+            }}
+          >
+            {isLocked ? (
+              <Stack.Screen name="Lock" component={LockScreen} />
+            ) : !hasWallet ? (
+              <>
+                <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Main" component={MainTabs} />
+                <Stack.Screen name="Market" component={MarketScreen} options={{ title: 'Markets' }} />
+                <Stack.Screen name="Portfolio" component={PortfolioScreen} options={{ title: 'Portfolio' }} />
+                <Stack.Screen name="LiveDesk" component={ExploreScreen} options={{ title: 'Live Desk' }} />
+                <Stack.Screen name="Community" component={ExploreScreen} options={{ title: 'Live Desk' }} />
+                <Stack.Screen name="Explore" component={ExploreScreen} options={{ title: 'Explore' }} />
+                <Stack.Screen name="Assets" component={ExploreScreen} options={{ title: 'Assets' }} />
+                <Stack.Screen name="Send" component={SendScreen} options={{ title: 'Send' }} />
+                <Stack.Screen name="Receive" component={ReceiveScreen} options={{ title: 'Receive' }} />
+                <Stack.Screen name="Swap" component={SwapScreen} options={{ title: 'Swap' }} />
+                <Stack.Screen name="Buy" component={BuyScreen} options={{ title: 'Buy Crypto' }} />
+                <Stack.Screen name="Perpetuals" component={PerpetualsScreen} options={{ title: 'Perpetual Futures' }} />
+                <Stack.Screen name="DAppBrowser" component={DAppBrowserScreen} options={{ title: 'Web3 Browser' }} />
+                <Stack.Screen name="History" component={ActivityScreen} options={{ title: 'History' }} />
+                <Stack.Screen name="AssetDetail" component={AssetDetailScreen} options={{ title: 'Asset' }} />
+                <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ title: 'Transaction' }} />
+                <Stack.Screen name="RiskReview" component={RiskReviewScreen} options={{ title: 'Risk Review' }} />
+                <Stack.Screen name="News" component={NewsScreen} options={{ title: 'News' }} />
+                <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+                <Stack.Screen name="AIChatbot" component={AIChatbotScreen} options={{ title: 'AI Assistant' }} />
+                <Stack.Screen name="AIAssistant" component={AIChatbotScreen} options={{ title: 'AI Assistant' }} />
+                <Stack.Screen name="TokenDetail" component={TokenDetailScreen} options={{ title: 'Token' }} />
+                <Stack.Screen name="ChainDetail" component={ChainDetailScreen} options={{ title: 'Chain' }} />
+                <Stack.Screen name="CustomToken" component={CustomTokenScreen} options={{ title: 'Import Token' }} />
+                <Stack.Screen name="ConnectedApps" component={ConnectedAppsScreen} options={{ title: 'Connected Apps' }} />
+                <Stack.Screen name="Wallets" component={WalletsScreen} options={{ title: 'Wallets' }} />
+                <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} options={{ title: 'Privacy' }} />
+                <Stack.Screen name="NetworkSettings" component={NetworkSettingsScreen} options={{ title: 'Networks' }} />
+                <Stack.Screen name="DefaultNetwork" component={NetworkSettingsScreen} options={{ title: 'Default Network' }} />
+                <Stack.Screen name="Help" component={HelpScreen} options={{ title: 'Help' }} />
+                <Stack.Screen name="Feedback" component={FeedbackScreen} options={{ title: 'Feedback' }} />
+                <Stack.Screen name="About" component={AboutScreen} options={{ title: 'About' }} />
+                <Stack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    </View>
   );
 }
 
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#05070B' }}>
       <ThemeProvider>
         <AppContent />
       </ThemeProvider>

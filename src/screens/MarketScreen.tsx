@@ -25,6 +25,13 @@ const StarIcon = ({ filled = false, color = '#FFFFFF', size = 18 }: { filled?: b
   </Svg>
 );
 
+const GlobeIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="12" cy="12" r="10" />
+    <Path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </Svg>
+);
+
 export type MarketCategory =
   | 'Trending'
   | 'bStocks'
@@ -800,6 +807,14 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
         <View style={styles.headerTitleRow}>
           <Text style={[styles.headerTitleText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Markets</Text>
+
+          <TouchableOpacity
+            onPress={() => navigation?.navigate?.('DAppBrowser')}
+            style={[styles.web3BrowserBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+            activeOpacity={0.75}
+          >
+            <GlobeIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
+          </TouchableOpacity>
         </View>
 
         {/* Big Search Input */}
@@ -1056,6 +1071,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.6,
+  },
+  web3BrowserBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   liveIndicatorPill: {
     flexDirection: 'row',

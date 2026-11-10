@@ -407,6 +407,48 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
           </SpringButton>
         </View>
 
+        {/* Section: Web3 Ecosystem */}
+        <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>WEB3 ECOSYSTEM</Text>
+        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+          <SpringButton
+            onPress={() => navigation.navigate('DAppBrowser')}
+            style={styles.settingsRow}
+          >
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <GlobeIcon color={colors.text.primary} size={17} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                Web3 dApp Browser
+              </Text>
+              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                DEXs, Staking, Liquid Yield & NFT protocols
+              </Text>
+            </View>
+            <ChevronRightIcon color={colors.text.muted} size={15} />
+          </SpringButton>
+
+          <View style={[styles.rowDivider, { backgroundColor: hairline }]} />
+
+          <SpringButton
+            onPress={() => navigation.navigate('ConnectedApps')}
+            style={styles.settingsRow}
+          >
+            <View style={[styles.iconCapsule, { backgroundColor: monoMuted }]}>
+              <ShieldIcon color={colors.text.primary} size={17} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.settingsLabel, { color: colors.text.primary, marginLeft: 0 }]}>
+                Connected Sessions
+              </Text>
+              <Text style={[styles.settingsSubtext, { color: colors.text.muted }]}>
+                Manage active WalletConnect sessions
+              </Text>
+            </View>
+            <ChevronRightIcon color={colors.text.muted} size={15} />
+          </SpringButton>
+        </View>
+
         {/* Section: General */}
         <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>GENERAL</Text>
         <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>

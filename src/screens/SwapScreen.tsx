@@ -246,6 +246,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
   };
 
   // ── CONTINUOUS GESTURE AMOUNT SLIDER (Smooth hand flow) ────────
+  const startPercentRef = useRef<number>(0);
   const [percentTrackWidth, setPercentTrackWidth] = useState<number>(SCREEN_WIDTH - 52);
 
   const applyPercentValue = (pct: number) => {
@@ -264,14 +265,16 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderGrant: (evt) => {
         setScrollEnabled(false);
+        const w = percentTrackWidth || (SCREEN_WIDTH - 52);
         const touchX = evt.nativeEvent.locationX;
-        const width = percentTrackWidth || (SCREEN_WIDTH - 52);
-        applyPercentValue((touchX / width) * 100);
+        const initialPct = Math.max(0, Math.min(100, (touchX / w) * 100));
+        startPercentRef.current = initialPct;
+        applyPercentValue(initialPct);
       },
-      onPanResponderMove: (evt) => {
-        const touchX = evt.nativeEvent.locationX;
-        const width = percentTrackWidth || (SCREEN_WIDTH - 52);
-        applyPercentValue((touchX / width) * 100);
+      onPanResponderMove: (evt, gestureState) => {
+        const w = percentTrackWidth || (SCREEN_WIDTH - 52);
+        const newPct = Math.max(0, Math.min(100, startPercentRef.current + (gestureState.dx / w) * 100));
+        applyPercentValue(newPct);
       },
       onPanResponderRelease: () => {
         setScrollEnabled(true);
@@ -390,15 +393,13 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
           <ArrowLeftIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
         </TouchableOpacity>
 
-        {/* Center Market / Perp Switcher Pill */}
-        <TouchableOpacity
-          onPress={() => navigation?.navigate?.('Perpetuals')}
+        {/* Center Market Pill (Image 2) */}
+        <View
           style={[styles.marketPill, { backgroundColor: monoMutedSurface }]}
-          activeOpacity={0.75}
         >
-          <Text style={[styles.marketPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Spot • Perps ↗</Text>
+          <Text style={[styles.marketPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Market</Text>
           <ChevronDownIcon color={isDark ? '#AAAAAA' : colors.text.muted} size={12} />
-        </TouchableOpacity>
+        </View>
 
         {/* Slippage Settings Button */}
         <TouchableOpacity
@@ -516,7 +517,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
           </View>
         </View>
 
-        {/* ── SMOOTH CONTINUOUS GESTURE PERCENTAGE SLIDER ─────── */}
+        {/* ── SMOOTH CONTINUOUS GESTURE PERCENTAGE SLIDER (No Dots) ─── */}
         <View
           {...percentSliderPanResponder.panHandlers}
           onLayout={(e) => {
@@ -531,29 +532,13 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
             <View style={[styles.sliderActiveLine, { width: `${selectedPercent}%`, backgroundColor: '#5865F2' }]} />
           </View>
 
-          {/* Graduation indicator dots (0, 25, 50, 75, 100) */}
-          <View style={styles.dotsRow} pointerEvents="none">
-            {PERCENT_STOPS.map((pct) => (
-              <View key={pct} style={styles.dotTouchItem}>
-                <View
-                  style={[
-                    styles.sliderDotCircle,
-                    {
-                      backgroundColor: pct <= selectedPercent ? '#FFFFFF' : '#4E576B',
-                    },
-                  ]}
-                />
-              </View>
-            ))}
-          </View>
-
-          {/* Smooth Grabbable White Thumb Handle positioned continuously */}
+          {/* Smooth Grabbable White Thumb Handle positioned continuously without dots */}
           <View
             pointerEvents="none"
             style={[
               styles.sliderThumbCircle,
               {
-                left: `${Math.min(96, Math.max(0, selectedPercent))}%`,
+                left: `${Math.min(100, Math.max(0, selectedPercent))}%`,
               },
             ]}
           />
@@ -958,6 +943,7 @@ const styles = StyleSheet.create({
   },
   sliderThumbCircle: {
     position: 'absolute',
+    top: 6,
     width: 20,
     height: 20,
     borderRadius: 10,

@@ -657,7 +657,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Send */}
           <SpringButton onPress={() => navigation.navigate('Send')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <SendActionIcon color={monoPrimary} size={24} />
+              <SendActionIcon color={monoPrimary} size={22} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Send</Text>
           </SpringButton>
@@ -665,7 +665,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Receive */}
           <SpringButton onPress={() => navigation.navigate('Receive')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <ReceiveActionIcon color={monoPrimary} size={24} />
+              <ReceiveActionIcon color={monoPrimary} size={22} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Receive</Text>
           </SpringButton>
@@ -673,7 +673,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Swap (White highlight background) */}
           <SpringButton onPress={() => navigation.navigate('Swap')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoPrimary }]}>
-              <SwapActionIcon color={isDark ? '#000000' : '#FFFFFF'} size={24} />
+              <SwapActionIcon color={isDark ? '#000000' : '#FFFFFF'} size={22} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Swap</Text>
           </SpringButton>
@@ -681,31 +681,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           {/* Buy */}
           <SpringButton onPress={() => navigation.navigate('Buy')} style={styles.actionBtnItem}>
             <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <BuyActionIcon color={monoPrimary} size={24} />
+              <BuyActionIcon color={monoPrimary} size={22} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Buy</Text>
           </SpringButton>
-        </View>
-
-        {/* Web3 Ecosystem Quick Triggers (dApp Browser & Perpetuals) */}
-        <View style={styles.web3QuickRow}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('DAppBrowser')}
-            style={[styles.web3QuickPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
-            activeOpacity={0.8}
-          >
-            <Text style={{ fontSize: 16 }}>🌐</Text>
-            <Text style={[styles.web3QuickText, { color: colors.text.primary }]}>Web3 Browser</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Perpetuals')}
-            style={[styles.web3QuickPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
-            activeOpacity={0.8}
-          >
-            <Text style={{ fontSize: 16 }}>📈</Text>
-            <Text style={[styles.web3QuickText, { color: colors.text.primary }]}>Perpetuals 50x</Text>
-          </TouchableOpacity>
         </View>
 
         {/* ======================================================== */}
@@ -1232,24 +1211,24 @@ const styles = StyleSheet.create({
   walletSelectorPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 22,
+    gap: 7,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderRadius: 20,
     borderWidth: 1,
     flexShrink: 0,
     maxWidth: 240,
   },
   walletSelectorName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     letterSpacing: -0.2,
     flexShrink: 0,
   },
   headerIconBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1257,11 +1236,11 @@ const styles = StyleSheet.create({
   aiButtonPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 42,
-    paddingHorizontal: 13,
-    borderRadius: 21,
+    height: 38,
+    paddingHorizontal: 11,
+    borderRadius: 19,
     borderWidth: 1,
-    gap: 6,
+    gap: 5,
   },
   aiButtonText: {
     fontSize: 13,
@@ -1468,9 +1447,9 @@ const styles = StyleSheet.create({
     minWidth: 62,
   },
   actionIconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -1484,31 +1463,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   actionBtnLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    lineHeight: 17,
+    lineHeight: 16,
     includeFontPadding: false,
-    marginTop: 6,
+    marginTop: 5,
     textAlign: 'center',
-  },
-  web3QuickRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 16,
-  },
-  web3QuickPill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  web3QuickText: {
-    fontSize: 13,
-    fontWeight: '800',
   },
   // MARKET MOVERS (GAINERS & LOSERS)
   moversSegmentPill: {
@@ -1562,7 +1522,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   sectionHeading: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
