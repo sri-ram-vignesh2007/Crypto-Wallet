@@ -348,11 +348,20 @@ function AppContent() {
   );
 }
 
+function RootThemeWrapper() {
+  const { theme } = useTheme();
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.bg.canvas }}>
+      <AppContent />
+    </View>
+  );
+}
+
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ backgroundColor: '#000000' }}>
       <ThemeProvider>
-        <AppContent />
+        <RootThemeWrapper />
       </ThemeProvider>
     </SafeAreaProvider>
   );

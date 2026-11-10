@@ -536,7 +536,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       <Animated.ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
-        style={{ opacity: screenFadeAnim }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -699,7 +698,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             style={[styles.viewAllBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.viewAllBoxText, { color: colors.text.primary }]}>View All</Text>
+            <Text style={[styles.viewAllBoxText, { color: isDark ? '#FFFFFF' : '#111111' }]}>View All</Text>
           </TouchableOpacity>
         </View>
 
@@ -812,45 +811,20 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* ======================================================== */}
-        {/* CURA COMMUNITY: OFFICIAL BROADCASTS & NEWS             */}
+        {/* RECENT ACTIVITY SECTION (MOVED ABOVE COMMUNITY & NEWS)   */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>COMMUNITY & NEWS</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Community')}>
-            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>Community →</Text>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>RECENT ACTIVITY</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('History')}
+            style={[styles.viewAllBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.viewAllBoxText, { color: isDark ? '#FFFFFF' : '#111111' }]}>View All</Text>
           </TouchableOpacity>
         </View>
 
-        <SpringButton
-          onPress={() => navigation.navigate('Community')}
-          style={[styles.pulseNewsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-        >
-          <View style={styles.pulseCardTop}>
-            <View style={[styles.sourceBadge, { backgroundColor: monoMutedSurface }]}>
-              <Text style={[styles.sourceBadgeText, { color: colors.text.primary }]}>Bloomberg Crypto</Text>
-            </View>
-            <Text style={styles.pulseTimeText}>8m ago</Text>
-          </View>
-          <Text style={[styles.pulseTitleText, { color: colors.text.primary }]}>
-            Bitcoin ETF Net Inflows Cross $1.2B As Global Asset Allocators Rotate Into Digital Assets
-          </Text>
-          <View style={styles.pulseCardFooter}>
-            <Text style={styles.pulseMetaText}>Institutional Market Flow • 48 comments</Text>
-            <Text style={[styles.pulseReadMore, { color: colors.text.primary }]}>Join Discussion</Text>
-          </View>
-        </SpringButton>
-
-        {/* ======================================================== */}
-        {/* RECENT ACTIVITY SECTION                                  */}
-        {/* ======================================================== */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>RECENT ACTIVITY</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Portfolio', { initialTab: 'transactions' })}>
-            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>View All</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+        <View style={[styles.assetListCard, { backgroundColor: cardBg, borderColor: cardBorder, marginBottom: 18 }]}>
           {(transactions && transactions.length > 0 ? transactions.slice(0, 3) : [
             {
               id: 'tx-fallback-1',
@@ -899,7 +873,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   )}
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={[styles.activityTitle, { color: colors.text.primary }]}>
+                  <Text style={[styles.activityTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                     {isSwap ? 'Smart Aggregator Swap' : isSent ? 'Transfer Sent' : 'Transfer Received'}
                   </Text>
                   <Text style={styles.activitySub}>
@@ -907,7 +881,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={[styles.activityAmount, { color: colors.text.primary }]}>
+                  <Text style={[styles.activityAmount, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                     {isSent ? `-${txItem.amount}` : isSwap ? `+${txItem.receivedAmount || txItem.amount}` : `+${txItem.amount}`} {txItem.asset.includes('→') ? 'USDC' : txItem.asset}
                   </Text>
                   <Text style={styles.activityTime}>{txItem.time}</Text>
@@ -916,6 +890,75 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             );
           })}
         </View>
+
+        {/* ======================================================== */}
+        {/* CURA COMMUNITY: 4 NEWS & DISCUSSIONS                     */}
+        {/* ======================================================== */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>COMMUNITY & NEWS</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Community')}
+            style={[styles.viewAllBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.viewAllBoxText, { color: isDark ? '#FFFFFF' : '#111111' }]}>View All</Text>
+          </TouchableOpacity>
+        </View>
+
+        {[
+          {
+            id: 'pulse-news-1',
+            source: 'Bloomberg Crypto',
+            time: '8m ago',
+            title: 'Bitcoin ETF Net Inflows Cross $1.2B As Global Asset Allocators Rotate Into Digital Assets',
+            meta: 'Institutional Flow • 48 comments',
+          },
+          {
+            id: 'pulse-news-2',
+            source: 'CoinDesk Wire',
+            time: '24m ago',
+            title: 'Ethereum Pectra Devnet Finalized: Validator Staking Maximums Increase to 2,048 ETH',
+            meta: 'Core Protocol • 36 comments',
+          },
+          {
+            id: 'pulse-news-3',
+            source: 'Solana Telemetry',
+            time: '1h ago',
+            title: 'DEX Aggregate Volume Sets All-Time Record of $4.8B With Sub-Second Finality',
+            meta: 'DeFi Ecosystem • 29 comments',
+          },
+          {
+            id: 'pulse-news-4',
+            source: 'DefiLlama Research',
+            time: '3h ago',
+            title: 'Total Value Locked in Cross-Chain Liquidity Protocols Surpasses $92 Billion',
+            meta: 'Cross-Chain Bridges • 41 comments',
+          },
+        ].map((newsItem) => (
+          <SpringButton
+            key={newsItem.id}
+            onPress={() => navigation.navigate('Community')}
+            style={[styles.pulseNewsCard, { backgroundColor: cardBg, borderColor: cardBorder, marginBottom: 10 }]}
+          >
+            <View style={styles.pulseCardTop}>
+              <View style={[styles.sourceBadge, { backgroundColor: monoMutedSurface }]}>
+                <Text style={[styles.sourceBadgeText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
+                  {newsItem.source}
+                </Text>
+              </View>
+              <Text style={styles.pulseTimeText}>{newsItem.time}</Text>
+            </View>
+            <Text style={[styles.pulseTitleText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
+              {newsItem.title}
+            </Text>
+            <View style={styles.pulseCardFooter}>
+              <Text style={styles.pulseMetaText}>{newsItem.meta}</Text>
+              <Text style={[styles.pulseReadMore, { color: isDark ? '#FFFFFF' : '#111111' }]}>
+                Join Discussion →
+              </Text>
+            </View>
+          </SpringButton>
+        ))}
       </Animated.ScrollView>
 
       {/* ======================================================== */}

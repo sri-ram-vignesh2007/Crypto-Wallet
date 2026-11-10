@@ -245,6 +245,43 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
     setFromAmount(val <= 0 ? '0' : val.toFixed(val < 1 ? 8 : 4));
   };
 
+  // ── CONTINUOUS GESTURE AMOUNT SLIDER (Smooth hand flow) ────────
+  const [percentTrackWidth, setPercentTrackWidth] = useState<number>(SCREEN_WIDTH - 52);
+
+  const applyPercentValue = (pct: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+    setSelectedPercent(clamped);
+    const balance = fromLiveBalance > 0 ? fromLiveBalance : 0.00042273;
+    const val = balance * (clamped / 100);
+    setFromAmount(val <= 0 ? '0' : val.toFixed(val < 1 ? 8 : 4));
+  };
+
+  const percentSliderPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (evt) => {
+        setScrollEnabled(false);
+        const touchX = evt.nativeEvent.locationX;
+        const width = percentTrackWidth || (SCREEN_WIDTH - 52);
+        applyPercentValue((touchX / width) * 100);
+      },
+      onPanResponderMove: (evt) => {
+        const touchX = evt.nativeEvent.locationX;
+        const width = percentTrackWidth || (SCREEN_WIDTH - 52);
+        applyPercentValue((touchX / width) * 100);
+      },
+      onPanResponderRelease: () => {
+        setScrollEnabled(true);
+      },
+      onPanResponderTerminate: () => {
+        setScrollEnabled(true);
+      },
+    })
+  ).current;
+
   const handleFlipAssets = () => {
     const temp = fromAsset;
     setFromAsset(toAsset);
@@ -475,23 +512,25 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
           </View>
         </View>
 
-        {/* ── 5-DOT PERCENTAGE SLIDER (Image 2) ─────────────────── */}
-        <View style={styles.fiveDotSliderContainer}>
+        {/* ── SMOOTH CONTINUOUS GESTURE PERCENTAGE SLIDER ─────── */}
+        <View
+          {...percentSliderPanResponder.panHandlers}
+          onLayout={(e) => {
+            const w = e.nativeEvent.layout.width;
+            if (w > 0) setPercentTrackWidth(w);
+          }}
+          style={styles.fiveDotSliderContainer}
+        >
           {/* Base background bar */}
           <View style={[styles.sliderTrackLine, { backgroundColor: isDark ? '#262626' : '#E5E5E5' }]}>
-            {/* Active purple filled bar */}
+            {/* Active purple filled bar with smooth continuous width */}
             <View style={[styles.sliderActiveLine, { width: `${selectedPercent}%`, backgroundColor: '#5865F2' }]} />
           </View>
 
-          {/* 5 Dots Row */}
-          <View style={styles.dotsRow}>
+          {/* Graduation indicator dots (0, 25, 50, 75, 100) */}
+          <View style={styles.dotsRow} pointerEvents="none">
             {PERCENT_STOPS.map((pct) => (
-              <TouchableOpacity
-                key={pct}
-                onPress={() => handlePercentPress(pct)}
-                style={styles.dotTouchItem}
-                hitSlop={{ top: 12, bottom: 12, left: 10, right: 10 }}
-              >
+              <View key={pct} style={styles.dotTouchItem}>
                 <View
                   style={[
                     styles.sliderDotCircle,
@@ -500,12 +539,13 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
                     },
                   ]}
                 />
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
 
-          {/* White Round Thumb Circle positioned at selectedPercent */}
+          {/* Smooth Grabbable White Thumb Handle positioned continuously */}
           <View
+            pointerEvents="none"
             style={[
               styles.sliderThumbCircle,
               {

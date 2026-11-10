@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
   SafeAreaView, StatusBar, RefreshControl, Modal, Animated, Pressable,
-  Share, KeyboardAvoidingView, Platform, Dimensions,
+  Share, KeyboardAvoidingView, Platform, Dimensions, NativeSyntheticEvent, NativeScrollEvent,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -330,6 +330,46 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
+  // Collapsible Search & Categories Bar on scroll
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const headerCollapseAnim = useRef(new Animated.Value(1)).current;
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    const diff = currentY - lastScrollY.current;
+
+    if (currentY <= 15) {
+      if (!headerVisible) {
+        setHeaderVisible(true);
+        Animated.timing(headerCollapseAnim, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: false,
+        }).start();
+      }
+    } else if (diff > 10 && currentY > 40) {
+      if (headerVisible) {
+        setHeaderVisible(false);
+        Animated.timing(headerCollapseAnim, {
+          toValue: 0,
+          duration: 180,
+          useNativeDriver: false,
+        }).start();
+      }
+    } else if (diff < -5) {
+      if (!headerVisible) {
+        setHeaderVisible(true);
+        Animated.timing(headerCollapseAnim, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: false,
+        }).start();
+      }
+    }
+    lastScrollY.current = currentY;
+  };
+
   // Colors
   const cardBg = isDark ? '#171717' : '#FFFFFF';
   const cardBorder = isDark ? '#303030' : '#E5E5E5';
@@ -617,131 +657,144 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       )}
 
-      {/* Top Header Bar (Clean: "Community" title + Write News Button) */}
+      {/* Top Header Bar (Clean: "Community" title) */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
         <Text style={[styles.screenTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Community</Text>
+      </View>
+
+      {/* 3 Main Things: Dispatches | News Wires | My Questions */}
+      <View style={styles.threeTabsRow}>
         <TouchableOpacity
-          onPress={handleOpenPostDispatch}
-          style={[styles.writeNewsHeaderBtn, { backgroundColor: monoPrimary }]}
-          activeOpacity={0.8}
+          onPress={() => setActiveTab('dispatches')}
+          style={[
+            styles.threeTabPill,
+            { backgroundColor: activeTab === 'dispatches' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+          ]}
+          activeOpacity={0.75}
         >
-          <Text style={[styles.writeNewsHeaderBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-            + Write News
+          <Text
+            style={[
+              styles.threeTabText,
+              activeTab === 'dispatches'
+                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                : { color: isDark ? '#CCCCCC' : colors.text.muted, fontWeight: '600' },
+            ]}
+          >
+            Dispatches
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setActiveTab('news')}
+          style={[
+            styles.threeTabPill,
+            { backgroundColor: activeTab === 'news' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+          ]}
+          activeOpacity={0.75}
+        >
+          <Text
+            style={[
+              styles.threeTabText,
+              activeTab === 'news'
+                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                : { color: isDark ? '#CCCCCC' : colors.text.muted, fontWeight: '600' },
+            ]}
+          >
+            News Wires
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setActiveTab('myInquiries')}
+          style={[
+            styles.threeTabPill,
+            { backgroundColor: activeTab === 'myInquiries' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+          ]}
+          activeOpacity={0.75}
+        >
+          <Text
+            style={[
+              styles.threeTabText,
+              activeTab === 'myInquiries'
+                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                : { color: isDark ? '#CCCCCC' : colors.text.muted, fontWeight: '600' },
+            ]}
+          >
+            My Questions ({userInquiriesList.length})
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchRow}>
-        <View style={[styles.searchBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
-          <SearchIcon color={colors.text.muted} size={15} />
-          <TextInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Search dispatches, cashtags ($BTC, $SOL)..."
-            placeholderTextColor={colors.text.muted}
-            style={[styles.searchInput, { color: colors.text.primary }]}
-            autoCapitalize="none"
-            clearButtonMode="while-editing"
-          />
+      {/* Collapsible Section: Search Bar & Dispatches Categories (Smoothly hide on scroll up, show on slight scroll down) */}
+      <Animated.View
+        style={{
+          maxHeight: headerCollapseAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, activeTab === 'dispatches' ? 116 : 60],
+          }),
+          opacity: headerCollapseAnim,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Search Bar */}
+        <View style={styles.searchRow}>
+          <View style={[styles.searchBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+            <SearchIcon color={colors.text.muted} size={15} />
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder={
+                activeTab === 'news'
+                  ? 'Search news wires...'
+                  : activeTab === 'myInquiries'
+                  ? 'Search my questions...'
+                  : 'Search dispatches, cashtags ($BTC, $SOL)...'
+              }
+              placeholderTextColor={colors.text.muted}
+              style={[styles.searchInput, { color: isDark ? '#FFFFFF' : colors.text.primary }]}
+              autoCapitalize="none"
+              clearButtonMode="while-editing"
+            />
+          </View>
         </View>
-      </View>
 
-      {/* Unified Single-Line Filter Row: Dispatches and All Box on the Same Line */}
-      <View style={styles.sameLineFilterBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sameLineFilterScroll}>
-          {/* Main Dispatches Button */}
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab('dispatches');
-            }}
-            style={[
-              styles.filterPillSameLine,
-              { backgroundColor: activeTab === 'dispatches' && selectedCategory !== 'All' ? monoMutedSurface : (activeTab === 'dispatches' ? monoPrimary : monoMutedSurface), borderColor: cardBorder },
-            ]}
-            activeOpacity={0.75}
-          >
-            <Text style={[
-              styles.filterPillTextSameLine,
-              activeTab === 'dispatches'
-                ? { color: isDark ? (selectedCategory === 'All' ? '#000000' : '#FFFFFF') : (selectedCategory === 'All' ? '#FFFFFF' : '#111111'), fontWeight: '800' }
-                : { color: colors.text.muted },
-            ]}>
-              Dispatches
-            </Text>
-          </TouchableOpacity>
-
-          {/* AI Category Chips (Starting with "All") on the SAME LINE */}
-          {AI_CATEGORIES.map(cat => {
-            const active = activeTab === 'dispatches' && selectedCategory === cat;
-            return (
-              <TouchableOpacity
-                key={cat}
-                onPress={() => {
-                  setActiveTab('dispatches');
-                  setSelectedCategory(cat);
-                }}
-                style={[
-                  styles.filterPillSameLine,
-                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
-                ]}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.filterPillTextSameLine,
-                  active
-                    ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                    : { color: isDark ? '#CCCCCC' : colors.text.muted },
-                ]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-
-          <View style={styles.filterDividerSameLine} />
-
-          {/* News Wire Tab */}
-          <TouchableOpacity
-            onPress={() => setActiveTab('news')}
-            style={[
-              styles.filterPillSameLine,
-              { backgroundColor: activeTab === 'news' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
-            ]}
-            activeOpacity={0.75}
-          >
-            <Text style={[
-              styles.filterPillTextSameLine,
-              activeTab === 'news'
-                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                : { color: isDark ? '#CCCCCC' : colors.text.muted },
-            ]}>
-              News Wire
-            </Text>
-          </TouchableOpacity>
-
-          {/* My Questions Tab */}
-          <TouchableOpacity
-            onPress={() => setActiveTab('myInquiries')}
-            style={[
-              styles.filterPillSameLine,
-              { backgroundColor: activeTab === 'myInquiries' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
-            ]}
-            activeOpacity={0.75}
-          >
-            <Text style={[
-              styles.filterPillTextSameLine,
-              activeTab === 'myInquiries'
-                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                : { color: isDark ? '#CCCCCC' : colors.text.muted },
-            ]}>
-              My Questions ({userInquiriesList.length})
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+        {/* Categories Under Dispatches */}
+        {activeTab === 'dispatches' && (
+          <View style={styles.dispatchesCategoriesBar}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dispatchesCategoriesScroll}>
+              {AI_CATEGORIES.map(cat => {
+                const active = selectedCategory === cat;
+                return (
+                  <TouchableOpacity
+                    key={cat}
+                    onPress={() => setSelectedCategory(cat)}
+                    style={[
+                      styles.categoryChip,
+                      { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+                    ]}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryChipText,
+                        active
+                          ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                          : { color: isDark ? '#CCCCCC' : colors.text.muted, fontWeight: '600' },
+                      ]}
+                    >
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+      </Animated.View>
 
       <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -765,7 +818,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   key={broadcast.id}
                   style={[styles.broadcastCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
                 >
-                  {/* Header: Org Avatar, Name, Handle, Time (No category badge) */}
+                  {/* Header: Org Avatar, Name, and ONLY Posted Time Underneath */}
                   <View style={styles.broadcastHeader}>
                     <View style={styles.orgInfoRow}>
                       <View style={[styles.orgAvatarCircle, { backgroundColor: monoPrimary }]}>
@@ -775,7 +828,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                       </View>
                       <View style={{ marginLeft: 10 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                          <Text style={[styles.orgNameText, { color: colors.text.primary }]}>
+                          <Text style={[styles.orgNameText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                             {broadcast.orgName}
                           </Text>
                           {broadcast.isVerified && (
@@ -784,15 +837,10 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                             </View>
                           )}
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                          <Text style={styles.timeAgoText}>{broadcast.timeAgo}</Text>
-                          {broadcast.orgCategory && (
-                            <>
-                              <Text style={styles.dotDivider}>•</Text>
-                              <Text style={styles.timeAgoText}>{broadcast.orgCategory}</Text>
-                            </>
-                          )}
-                        </View>
+                        {/* ONLY posted time is shown under the name */}
+                        <Text style={[styles.timeAgoText, { marginTop: 2, color: colors.text.muted }]}>
+                          {broadcast.timeAgo}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -1381,6 +1429,40 @@ const styles = StyleSheet.create({
   searchRow: {
     paddingHorizontal: 16,
     paddingVertical: 6,
+  },
+  threeTabsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    gap: 8,
+    marginBottom: 6,
+  },
+  threeTabPill: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 0.5,
+  },
+  threeTabText: {
+    fontSize: 12.5,
+  },
+  dispatchesCategoriesBar: {
+    paddingVertical: 4,
+    marginBottom: 6,
+  },
+  dispatchesCategoriesScroll: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  categoryChip: {
+    paddingHorizontal: 13,
+    paddingVertical: 6,
+    borderRadius: 13,
+    borderWidth: 0.5,
+  },
+  categoryChipText: {
+    fontSize: 12,
   },
   searchBox: {
     flexDirection: 'row',
