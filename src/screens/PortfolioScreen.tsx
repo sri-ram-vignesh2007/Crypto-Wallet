@@ -57,7 +57,8 @@ const ALL_PORTFOLIO_ASSETS = [
   { symbol: 'POL', name: 'Polygon', balance: '1,250.00', price: '$0.38', change: '+3.5%', positive: true, network: 'Polygon' },
   { symbol: 'OP', name: 'Optimism', balance: '320.00', price: '$1.65', change: '+6.2%', positive: true, network: 'Optimism' },
   { symbol: 'LINK', name: 'Chainlink', balance: '65.00', price: '$11.80', change: '+1.9%', positive: true, network: 'Ethereum' },
-  { symbol: 'BNB', name: 'BNB Chain', balance: '1.20', price: '$592.40', change: '+2.1%', positive: true, network: 'BNB Chain' },
+  { symbol: 'BNB', name: 'BNB Chain', balance: '0.00042273', price: '$592.40', change: '+2.1%', positive: true, network: 'BNB Chain' },
+  { symbol: 'LIBRA', name: 'Libra', balance: '0', price: '$0.006222', change: '-2.0%', positive: false, network: 'BNB Chain' },
 ];
 
 export default function PortfolioScreen({ navigation, route }: { navigation: any; route?: any }) {
@@ -88,13 +89,17 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
   const monoPrimary = isDark ? '#FFFFFF' : '#111111';
   const monoMutedSurface = isDark ? '#202020' : '#F2F2F2';
 
-  // Calculate dynamic balances for top 4 assets if present in dynamic store
+  // Calculate dynamic balances for assets if present in dynamic store
   const mergedAssets = ALL_PORTFOLIO_ASSETS.map(asset => {
-    const symKey = asset.symbol as keyof typeof dynamicBalances;
+    const symKey = asset.symbol.toUpperCase();
     if (dynamicBalances && dynamicBalances[symKey] !== undefined) {
+      const liveBal = dynamicBalances[symKey];
       return {
         ...asset,
-        balance: dynamicBalances[symKey].toFixed(dynamicBalances[symKey] < 1 ? 4 : 2),
+        balance: liveBal.toLocaleString(undefined, {
+          minimumFractionDigits: liveBal < 1 ? 4 : 2,
+          maximumFractionDigits: liveBal < 1 ? 8 : 4,
+        }),
       };
     }
     return asset;
@@ -141,7 +146,7 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
             <Path d="M15 18l-6-6 6-6" />
           </Svg>
         </TouchableOpacity>
-        <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Portfolio</Text>
+        <Text style={[styles.screenTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Portfolio</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -154,7 +159,7 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
             onChangeText={setSearchQuery}
             placeholder="Search tokens by name or symbol..."
             placeholderTextColor={colors.text.muted}
-            style={[styles.searchInput, { color: colors.text.primary }]}
+            style={[styles.searchInput, { color: isDark ? '#FFFFFF' : colors.text.primary }]}
             autoCapitalize="none"
             clearButtonMode="while-editing"
           />
@@ -163,7 +168,7 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
 
       {/* ASSETS Header in CAPS */}
       <View style={styles.assetsHeaderRow}>
-        <Text style={[styles.assetsCapsHeading, { color: isDark ? '#FFFFFF' : colors.text.primary }]}>
+        <Text style={[styles.assetsCapsHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>
           ASSETS ({filteredAssets.length})
         </Text>
       </View>

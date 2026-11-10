@@ -323,9 +323,9 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
     : null;
 
   const cardBg = isDark ? '#171717' : '#FFFFFF';
-  const cardBorder = isDark ? '#262A36' : '#E5E5E5';
-  const monoSurfaceElevated = isDark ? '#1F2430' : '#F4F4F4';
-  const monoMutedSurface = isDark ? '#262C3A' : '#ECECEC';
+  const cardBorder = isDark ? '#282828' : '#E5E5E5';
+  const monoSurfaceElevated = isDark ? '#181818' : '#F4F4F4';
+  const monoMutedSurface = isDark ? '#222222' : '#ECECEC';
 
   const chartInfo = TIMEFRAME_PATHS[selectedTimeRange] || TIMEFRAME_PATHS['1D'];
 
@@ -623,11 +623,11 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
       <View style={[styles.stickyBottomBar, { paddingBottom: Math.max(16, insets.bottom + 8), backgroundColor: colors.bg.canvas }]}>
         <TouchableOpacity
           onPress={() => navigation?.navigate?.('Swap', { tokenSymbol: symbol })}
-          style={styles.floatingTradeBtn}
+          style={[styles.floatingTradeBtn, { backgroundColor: isDark ? '#FFFFFF' : '#111111' }]}
           activeOpacity={0.85}
         >
-          <TradeIcon color="#FFFFFF" size={20} />
-          <Text style={styles.floatingTradeText}>Trade</Text>
+          <TradeIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
+          <Text style={[styles.floatingTradeText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Trade</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -906,21 +906,19 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   floatingTradeBtn: {
-    backgroundColor: '#4F46E5',
     height: 52,
     borderRadius: 26,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
     elevation: 4,
   },
   floatingTradeText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '800',
   },

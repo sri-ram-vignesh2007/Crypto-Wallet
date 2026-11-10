@@ -75,7 +75,7 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
 
       {/* Top Header Bar (Matching Community, Swap, and Settings) */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Activity</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Activity</Text>
       </View>
 
       <ScrollView
@@ -161,7 +161,7 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
                   </View>
                   <View style={styles.txInfo}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Text style={[styles.txType, { color: colors.text.primary }]}>
+                      <Text style={[styles.txType, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                         {txTypeLabels[item.type] || 'Transaction'}
                       </Text>
                       <Text style={{ fontSize: 11.5, color: colors.text.muted, fontWeight: '500' }}>
@@ -176,7 +176,7 @@ export default function ActivityScreen({ navigation }: { navigation: any }) {
 
                 {/* Right Side: Amount on top, Value + Status Pill + Chevron on bottom */}
                 <View style={styles.txRight}>
-                  <Text style={[styles.txValue, { color: colors.text.primary }]}>
+                  <Text style={[styles.txValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                     {item.type === 'received' ? '+' : item.type === 'swap' ? '' : '-'}{item.amount} {item.asset.includes('→') ? '' : item.asset}
                   </Text>
                   <View style={styles.txMetaRow}>

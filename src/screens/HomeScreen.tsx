@@ -321,7 +321,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const btcTotal = balances.BTC * 67540.00;
   const solTotal = balances.SOL * 168.20;
   const usdcTotal = balances.USDC;
-  const dynamicTotalPortfolio = ethTotal + btcTotal + solTotal + usdcTotal;
+  const bnbBal = balances.BNB ?? 0.00042273;
+  const bnbTotal = bnbBal * 592.40;
+  const libraBal = balances.LIBRA ?? 0;
+  const libraTotal = libraBal * 0.006222;
+  const dynamicTotalPortfolio = ethTotal + btcTotal + solTotal + usdcTotal + bnbTotal + libraTotal;
 
   const displayTotalUsd = dynamicTotalPortfolio.toLocaleString(undefined, {
     minimumFractionDigits: 2,
@@ -363,6 +367,17 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       networkColor: '#14F195',
     },
     {
+      symbol: 'BNB',
+      name: 'BNB',
+      balance: bnbBal.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 8 }),
+      price: '$592.40',
+      change: '+2.1%',
+      positive: true,
+      usd: `$${bnbTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      network: 'BNB Chain',
+      networkColor: '#F3BA2F',
+    },
+    {
       symbol: 'USDC',
       name: 'USD Coin',
       balance: balances.USDC.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
@@ -373,6 +388,17 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       network: 'ERC-20',
       networkColor: '#2775CA',
     },
+    ...(libraBal > 0 ? [{
+      symbol: 'LIBRA',
+      name: 'Libra',
+      balance: libraBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }),
+      price: '$0.006222',
+      change: '-2.0%',
+      positive: false,
+      usd: `$${libraTotal.toFixed(2)}`,
+      network: 'BNB Chain',
+      networkColor: '#10B981',
+    }] : []),
   ];
 
   const activeChart = TIMEFRAME_CHART_DATA[selectedTimeRange] || TIMEFRAME_CHART_DATA['1D'];
@@ -666,7 +692,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* ASSET OVERVIEW SECTION (ASSETS UP)                       */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>Assets</Text>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>ASSETS</Text>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Portfolio', { initialTab: 'assets' })}

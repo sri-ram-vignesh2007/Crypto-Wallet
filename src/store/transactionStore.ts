@@ -23,18 +23,20 @@ export interface WalletTransaction {
   timestamp: number;
 }
 
-export interface UserBalances {
-  ETH: number;
-  BTC: number;
-  SOL: number;
-  USDC: number;
-}
+export type UserBalances = Record<string, number>;
 
 const DEFAULT_BALANCES: UserBalances = {
   ETH: 306.45,
   BTC: 7.70,
   SOL: 1095.00,
   USDC: 89790.00,
+  BNB: 0.00042273,
+  LIBRA: 0,
+  USDT: 3450.00,
+  ARB: 850.00,
+  POL: 1250.00,
+  OP: 320.00,
+  LINK: 65.00,
 };
 
 const INITIAL_TRANSACTIONS: WalletTransaction[] = [
@@ -135,7 +137,7 @@ export const useTransactionStore = create<TransactionStoreState>((set, get) => (
         set({ transactions: JSON.parse(rawTxs) });
       }
       if (rawBalances) {
-        set({ balances: JSON.parse(rawBalances) });
+        set({ balances: { ...DEFAULT_BALANCES, ...JSON.parse(rawBalances) } });
       }
     } catch {}
   },
@@ -155,17 +157,16 @@ export const useTransactionStore = create<TransactionStoreState>((set, get) => (
   ) => {
     const currentBalances = { ...get().balances };
 
-    // Deduct from fromSymbol if recognized
-    const fromKey = fromSymbol.toUpperCase() as keyof UserBalances;
-    if (currentBalances[fromKey] !== undefined) {
-      currentBalances[fromKey] = Math.max(0, currentBalances[fromKey] - fromAmount);
-    }
+    const fromKey = fromSymbol.toUpperCase();
+    const toKey = toSymbol.toUpperCase();
 
-    // Add to toSymbol if recognized
-    const toKey = toSymbol.toUpperCase() as keyof UserBalances;
-    if (currentBalances[toKey] !== undefined) {
-      currentBalances[toKey] = currentBalances[toKey] + toAmount;
-    }
+    // Deduct from fromSymbol
+    const currentFrom = currentBalances[fromKey] !== undefined ? currentBalances[fromKey] : fromAmount;
+    currentBalances[fromKey] = Math.max(0, currentFrom - fromAmount);
+
+    // Add to toSymbol
+    const currentTo = currentBalances[toKey] !== undefined ? currentBalances[toKey] : 0;
+    currentBalances[toKey] = currentTo + toAmount;
 
     // Create realistic transaction hash
     const randomHex = Math.random().toString(16).substring(2, 10);

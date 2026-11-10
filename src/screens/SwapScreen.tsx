@@ -152,6 +152,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
   const [tokenSearchQuery, setTokenSearchQuery] = useState<string>('');
   const [swapping, setSwapping] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [scrollEnabled, setScrollEnabled] = useState<boolean>(true);
 
   useEffect(() => {
     loadTransactions();
@@ -170,18 +171,18 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
     }
   }, [routeSymbol]);
 
-  const cardBg = isDark ? '#161922' : '#FFFFFF';
-  const cardBorder = isDark ? '#232938' : '#E8E8E8';
+  const cardBg = isDark ? '#171717' : '#FFFFFF';
+  const cardBorder = isDark ? '#2B2B2B' : '#E8E8E8';
   const monoPrimary = isDark ? '#FFFFFF' : '#111111';
-  const monoMutedSurface = isDark ? '#1C212E' : '#F2F2F2';
+  const monoMutedSurface = isDark ? '#222222' : '#F2F2F2';
 
   // Live balance from transaction store
   const getLiveBalance = (symbol: string): number => {
-    const symKey = symbol as keyof typeof liveBalances;
-    if (liveBalances && liveBalances[symKey] !== undefined) {
-      return liveBalances[symKey];
+    const symUpper = symbol.toUpperCase();
+    if (liveBalances && liveBalances[symUpper] !== undefined) {
+      return liveBalances[symUpper];
     }
-    const found = BASE_SWAP_ASSETS.find(a => a.symbol === symbol);
+    const found = BASE_SWAP_ASSETS.find(a => a.symbol.toUpperCase() === symUpper);
     return found ? parseFloat(found.balance.replace(/,/g, '')) : 0;
   };
 
@@ -263,13 +264,15 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
 
       setSwapping(false);
       setShowSuccessModal(true);
-    }, 750);
+      setFromAmount('0');
+      setSelectedPercent(0);
+    }, 600);
   };
 
   // ── SLIDE TO SWAP PAN RESPONDER ────────────────────────────────
-  const sliderTrackWidth = SCREEN_WIDTH - 40;
-  const thumbWidth = 56;
-  const maxSlideDistance = sliderTrackWidth - thumbWidth - 10;
+  const sliderTrackWidth = SCREEN_WIDTH - 36;
+  const thumbWidth = 50;
+  const maxSlideDistance = sliderTrackWidth - thumbWidth - 8;
 
   const slideX = useRef(new Animated.Value(0)).current;
 
@@ -277,18 +280,22 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
     PanResponder.create({
       onStartShouldSetPanResponder: () => !isInputEmpty && !swapping,
       onStartShouldSetPanResponderCapture: () => !isInputEmpty && !swapping,
-      onMoveShouldSetPanResponder: (_, gesture) => !isInputEmpty && !swapping && Math.abs(gesture.dx) > 3,
-      onMoveShouldSetPanResponderCapture: (_, gesture) => !isInputEmpty && !swapping && Math.abs(gesture.dx) > 3,
+      onMoveShouldSetPanResponder: (_, gesture) => !isInputEmpty && !swapping && Math.abs(gesture.dx) > 2,
+      onMoveShouldSetPanResponderCapture: (_, gesture) => !isInputEmpty && !swapping && Math.abs(gesture.dx) > 2,
+      onPanResponderGrant: () => {
+        setScrollEnabled(false);
+      },
       onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_, gesture) => {
         const clampedX = Math.max(0, Math.min(gesture.dx, maxSlideDistance));
         slideX.setValue(clampedX);
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx >= maxSlideDistance * 0.40) {
+        setScrollEnabled(true);
+        if (gesture.dx >= maxSlideDistance * 0.65) {
           Animated.timing(slideX, {
             toValue: maxSlideDistance,
-            duration: 120,
+            duration: 100,
             useNativeDriver: true,
           }).start(() => {
             handleExecuteSwap();
@@ -296,19 +303,28 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
               Animated.spring(slideX, {
                 toValue: 0,
                 useNativeDriver: true,
-                damping: 18,
-                stiffness: 240,
+                bounciness: 4,
+                speed: 18,
               }).start();
-            }, 800);
+            }, 600);
           });
         } else {
           Animated.spring(slideX, {
             toValue: 0,
             useNativeDriver: true,
-            damping: 18,
-            stiffness: 240,
+            bounciness: 4,
+            speed: 18,
           }).start();
         }
+      },
+      onPanResponderTerminate: () => {
+        setScrollEnabled(true);
+        Animated.spring(slideX, {
+          toValue: 0,
+          useNativeDriver: true,
+          bounciness: 4,
+          speed: 18,
+        }).start();
       },
     })
   ).current;
@@ -324,7 +340,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
   const usdToEquivalent = (parseFloat(toAmount) * toAsset.priceUsd).toFixed(2);
 
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#0D0F17' : colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
       {/* ── TOP HEADER (Image 2: ←, Market ˅, 🎛) ─────────────── */}
@@ -354,7 +370,8 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]}
+        scrollEnabled={scrollEnabled}
+        contentContainerStyle={[styles.scrollContent, { flexGrow: 1, paddingBottom: Math.max(16, insets.bottom + 8) }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ======================================================== */}
@@ -408,7 +425,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
               onPress={handleFlipAssets}
               style={[
                 styles.flipCircleBtn,
-                { backgroundColor: '#1C212E', borderColor: '#2E384D' },
+                { backgroundColor: isDark ? '#1F1F1F' : '#FFFFFF', borderColor: isDark ? '#333333' : '#E0E0E0' },
               ]}
               activeOpacity={0.8}
             >
@@ -461,7 +478,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
         {/* ── 5-DOT PERCENTAGE SLIDER (Image 2) ─────────────────── */}
         <View style={styles.fiveDotSliderContainer}>
           {/* Base background bar */}
-          <View style={[styles.sliderTrackLine, { backgroundColor: '#202636' }]}>
+          <View style={[styles.sliderTrackLine, { backgroundColor: isDark ? '#262626' : '#E5E5E5' }]}>
             {/* Active purple filled bar */}
             <View style={[styles.sliderActiveLine, { width: `${selectedPercent}%`, backgroundColor: '#5865F2' }]} />
           </View>
@@ -576,13 +593,13 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
             style={[
               styles.slideTrack,
               {
-                backgroundColor: isDark ? '#161924' : '#E8E8E8',
+                backgroundColor: isDark ? '#1C1C1C' : '#E8E8E8',
                 borderColor: cardBorder,
               },
             ]}
           >
             {/* Center Slide to Swap Label */}
-            <Text style={[styles.slideTrackLabel, { color: isDark ? '#7E8B9B' : '#666666' }]}>
+            <Text style={[styles.slideTrackLabel, { color: isDark ? '#888888' : '#666666' }]}>
               {swapping ? 'Executing Swap…' : 'Slide to Swap'}
             </Text>
 
@@ -592,11 +609,12 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
               style={[
                 styles.slideThumb,
                 {
+                  backgroundColor: isDark ? '#2C2C2C' : '#D0D0D0',
                   transform: [{ translateX: slideX }],
                 },
               ]}
             >
-              <SliderChevronIcon color={isDark ? '#7E8B9B' : '#444444'} size={22} />
+              <SliderChevronIcon color={isDark ? '#AAAAAA' : '#333333'} size={22} />
             </Animated.View>
           </View>
         </View>
@@ -728,13 +746,13 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
       {/* ======================================================== */}
       <Modal visible={showSuccessModal} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
-          <View style={[styles.successModalCard, { backgroundColor: isDark ? '#161922' : '#FFFFFF', borderColor: cardBorder }]}>
+          <View style={[styles.successModalCard, { backgroundColor: isDark ? '#171717' : '#FFFFFF', borderColor: cardBorder }]}>
             <View style={[styles.successIconCircle, { backgroundColor: '#FFFFFF' }]}>
               <CheckIcon color="#000000" size={28} />
             </View>
 
             <Text style={[styles.successTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Swap Executed</Text>
-            <Text style={styles.successSub}>
+            <Text style={[styles.successSub, { color: isDark ? '#AAAAAA' : '#666666' }]}>
               Successfully exchanged {fromAmount} {fromAsset.symbol} for ≈ {toAmount} {toAsset.symbol} via Cura Smart Aggregator.
             </Text>
 
@@ -927,8 +945,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   slideContainer: {
-    marginTop: 14,
-    marginBottom: 8,
+    marginTop: 'auto',
+    marginBottom: 6,
+    paddingTop: 10,
   },
   slideTrack: {
     height: 58,
@@ -950,7 +969,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#1E2433',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -1071,9 +1089,8 @@ const styles = StyleSheet.create({
   },
   successDonePill: {
     backgroundColor: '#FFFFFF',
-    minWidth: 120,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+    width: '100%',
+    height: 48,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',

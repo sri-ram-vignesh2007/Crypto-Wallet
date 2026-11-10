@@ -59,3 +59,4 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     return get().watchlist.includes(symbol.toUpperCase());
   },
 }));
+

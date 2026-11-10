@@ -63,13 +63,13 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
       <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => navigation?.goBack()} style={[styles.backButton, { backgroundColor: monoMutedSurface }]}>
-            <ArrowLeftIcon color={colors.text.primary} size={20} />
+            <ArrowLeftIcon color={isDark ? '#FFFFFF' : '#111111'} size={20} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Transaction</Text>
+          <Text style={[styles.headerTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Transaction</Text>
           <View style={{ width: 36 }} />
         </View>
         <View style={styles.emptyState}>
-          <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No Transaction Selected</Text>
+          <Text style={[styles.emptyTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>No Transaction Selected</Text>
           <Text style={[styles.emptySubtitle, { color: colors.text.muted }]}>Select a transaction to inspect on-chain details.</Text>
         </View>
       </SafeAreaView>
@@ -112,9 +112,9 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
           style={[styles.backButton, { backgroundColor: monoMutedSurface }]}
           activeOpacity={0.7}
         >
-          <ArrowLeftIcon color={colors.text.primary} size={20} />
+          <ArrowLeftIcon color={isDark ? '#FFFFFF' : '#111111'} size={20} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Transaction Detail</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Transaction Detail</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -127,7 +127,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
           <View style={styles.heroLogoRow}>
             <TokenLogo symbol={assetSymbol} size={50} />
           </View>
-          <Text style={[styles.heroAmount, { color: colors.text.primary }]}>
+          <Text style={[styles.heroAmount, { color: isDark ? '#FFFFFF' : '#111111' }]}>
             {tx.type === 'received' ? '+' : tx.type === 'swap' ? '' : '-'}{tx.amount} {tx.asset}
           </Text>
           <Text style={[styles.heroUsd, { color: colors.text.muted }]}>
@@ -161,7 +161,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
         <View style={[styles.detailsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
           <View style={styles.row}>
             <Text style={[styles.label, { color: colors.text.muted }]}>Transaction Type</Text>
-            <Text style={[styles.value, { color: colors.text.primary, textTransform: 'capitalize' }]}>
+            <Text style={[styles.value, { color: monoPrimary, textTransform: 'capitalize' }]}>
               {tx.type || 'Transfer'}
             </Text>
           </View>
@@ -170,7 +170,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
 
           <View style={styles.row}>
             <Text style={[styles.label, { color: colors.text.muted }]}>Timestamp</Text>
-            <Text style={[styles.value, { color: colors.text.primary }]}>
+            <Text style={[styles.value, { color: monoPrimary }]}>
               {tx.time || 'Just now'}
             </Text>
           </View>
@@ -179,7 +179,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
 
           <View style={styles.row}>
             <Text style={[styles.label, { color: colors.text.muted }]}>Network</Text>
-            <Text style={[styles.value, { color: colors.text.primary }]}>
+            <Text style={[styles.value, { color: monoPrimary }]}>
               {tx.network || 'Ethereum Mainnet'}
             </Text>
           </View>
@@ -195,7 +195,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
               style={styles.copyRow}
               activeOpacity={0.7}
             >
-              <Text style={[styles.valueMono, { color: colors.text.primary }]}>
+              <Text style={[styles.valueMono, { color: monoPrimary }]}>
                 {targetAddress.slice(0, 8)}...{targetAddress.slice(-6)}
               </Text>
               <CopyIcon color={colors.text.muted} size={14} />
@@ -207,7 +207,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
 
           <View style={styles.row}>
             <Text style={[styles.label, { color: colors.text.muted }]}>Network Gas Fee</Text>
-            <Text style={[styles.value, { color: colors.text.primary }]}>
+            <Text style={[styles.value, { color: monoPrimary }]}>
               {tx.fee || '~0.0004 ETH ($1.38)'}
             </Text>
           </View>
@@ -221,7 +221,7 @@ export default function TransactionDetailScreen({ navigation, route }: Props) {
               style={styles.copyRow}
               activeOpacity={0.7}
             >
-              <Text style={[styles.valueMono, { color: colors.text.primary }]}>
+              <Text style={[styles.valueMono, { color: monoPrimary }]}>
                 {txHash.slice(0, 10)}...{txHash.slice(-8)}
               </Text>
               <CopyIcon color={colors.text.muted} size={14} />

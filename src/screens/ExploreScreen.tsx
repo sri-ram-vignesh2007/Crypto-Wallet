@@ -798,12 +798,12 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   </View>
 
                   {/* Broadcast Title */}
-                  <Text style={[styles.broadcastTitle, { color: colors.text.primary }]}>
+                  <Text style={[styles.broadcastTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                     {broadcast.title}
                   </Text>
 
                   {/* Broadcast Content Body */}
-                  <Text style={[styles.broadcastBody, { color: colors.text.primary }]}>
+                  <Text style={[styles.broadcastBody, { color: isDark ? '#E0E0E0' : '#222222' }]}>
                     {broadcast.content}
                   </Text>
 
@@ -886,7 +886,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                   <Text style={styles.newsTimeText}>{item.timeAgo}</Text>
                 </View>
 
-                <Text style={[styles.newsTitle, { color: colors.text.primary }]}>
+                <Text style={[styles.newsTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                   {item.title}
                 </Text>
 
