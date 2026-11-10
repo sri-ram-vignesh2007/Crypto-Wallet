@@ -47,7 +47,7 @@ class RPCManager {
         const provider = createStaticProvider(rpcUrl, chain);
         const balance = await Promise.race([
           provider.getBalance(address),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('RPC Timeout')), 3500)),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('RPC Timeout')), 1800)),
         ]);
         return ethers.formatUnits(balance, decimals);
       } catch (e) {
@@ -69,7 +69,7 @@ class RPCManager {
         const contract = new ethers.Contract(token.address, ERC20_ABI, provider);
         const balance = await Promise.race([
           contract.balanceOf(address),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('RPC Timeout')), 3500)),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('RPC Timeout')), 1800)),
         ]);
         return ethers.formatUnits(balance, token.decimals);
       } catch (e) {
@@ -81,18 +81,16 @@ class RPCManager {
 
   async getAllBalances(address: string, chainKey: string): Promise<{ token: Token; balance: string }[]> {
     const tokens = getTokensForChain(chainKey);
-    const results: { token: Token; balance: string }[] = [];
-    
-    for (const token of tokens) {
+    const balancePromises = tokens.map(async (token) => {
       try {
         const balance = await this.getTokenBalance(address, token, chainKey);
-        results.push({ token, balance });
+        return { token, balance };
       } catch (e) {
-        results.push({ token, balance: '0.00' });
+        return { token, balance: '0.00' };
       }
-    }
+    });
     
-    return results;
+    return await Promise.all(balancePromises);
   }
 
   async getTransactionCount(address: string, chainKey: string): Promise<number> {

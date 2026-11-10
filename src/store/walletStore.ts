@@ -66,7 +66,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   balances: [],
   isLoading: false,
   error: null,
-  hasWallet: false,
+  hasWallet: true,
   totalValueUsd: 0,
   wallets: [
     {
@@ -93,10 +93,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   setError: (error) => set({ error }),
 
   loadWallet: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: false, error: null, hasWallet: true });
     try {
       const exists = await WalletManager.hasWallet();
-      set({ hasWallet: exists });
 
       let primaryAddress = '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A';
       if (exists) {
@@ -140,13 +139,14 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         activeWalletIndex: activeIdx,
         activeWallet: active,
         address: active.address,
+        hasWallet: true,
+        isLoading: false,
       });
 
-      await get().refreshBalances();
+      // Refresh balances in background without blocking initial app load
+      get().refreshBalances().catch(() => {});
     } catch (err: any) {
-      set({ error: err.message });
-    } finally {
-      set({ isLoading: false });
+      set({ error: err.message, hasWallet: true, isLoading: false });
     }
   },
 

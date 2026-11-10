@@ -154,14 +154,8 @@ const TabIcon = ({ name, focused, color, size = 22 }: { name: string; focused: b
 // Main Tab Navigator
 function MainTabs() {
   const insets = useSafeAreaInsets();
-  const { hasWallet } = useWalletStore();
-  const { isUnlocked } = useAppLock();
   const { theme } = useTheme();
   const colors = theme.colors;
-
-  if (!hasWallet || !isUnlocked) {
-    return null;
-  }
 
   // Adaptive safe area bottom padding across all iPhone & Android models
   const isAndroid = Platform.OS === 'android';
@@ -348,20 +342,11 @@ function AppContent() {
   );
 }
 
-function RootThemeWrapper() {
-  const { theme } = useTheme();
-  return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.bg.canvas }}>
-      <AppContent />
-    </View>
-  );
-}
-
 export default function App() {
   return (
-    <SafeAreaProvider style={{ backgroundColor: '#000000' }}>
+    <SafeAreaProvider>
       <ThemeProvider>
-        <RootThemeWrapper />
+        <AppContent />
       </ThemeProvider>
     </SafeAreaProvider>
   );
