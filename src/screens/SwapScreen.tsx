@@ -245,16 +245,19 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
   const slidePanResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => !isInputEmpty && !isInsufficientFunds && !swapping,
-      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 5,
+      onStartShouldSetPanResponderCapture: () => !isInputEmpty && !isInsufficientFunds && !swapping,
+      onMoveShouldSetPanResponder: (_, gesture) => !isInputEmpty && !isInsufficientFunds && !swapping && Math.abs(gesture.dx) > 3,
+      onMoveShouldSetPanResponderCapture: (_, gesture) => !isInputEmpty && !isInsufficientFunds && !swapping && Math.abs(gesture.dx) > 3,
+      onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_, gesture) => {
         const clampedX = Math.max(0, Math.min(gesture.dx, maxSlideDistance));
         slideX.setValue(clampedX);
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx >= maxSlideDistance * 0.65) {
+        if (gesture.dx >= maxSlideDistance * 0.45) {
           Animated.timing(slideX, {
             toValue: maxSlideDistance,
-            duration: 140,
+            duration: 120,
             useNativeDriver: true,
           }).start(() => {
             handleExecuteSwap();
@@ -265,7 +268,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
                 damping: 18,
                 stiffness: 240,
               }).start();
-            }, 1000);
+            }, 800);
           });
         } else {
           Animated.spring(slideX, {
@@ -305,7 +308,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 110 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ======================================================== */}
@@ -504,7 +507,27 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
         {/* SLIDE TO SWAP INTERACTIVE SLIDER                         */}
         {/* ======================================================== */}
         <View style={styles.slideContainer}>
-          <View
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => {
+              if (!isInputEmpty && !isInsufficientFunds && !swapping) {
+                Animated.timing(slideX, {
+                  toValue: maxSlideDistance,
+                  duration: 160,
+                  useNativeDriver: true,
+                }).start(() => {
+                  handleExecuteSwap();
+                  setTimeout(() => {
+                    Animated.spring(slideX, {
+                      toValue: 0,
+                      useNativeDriver: true,
+                      damping: 18,
+                      stiffness: 240,
+                    }).start();
+                  }, 800);
+                });
+              }
+            }}
             style={[
               styles.slideTrack,
               {
@@ -552,7 +575,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
             >
               <SliderArrowIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
             </Animated.View>
-          </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 

@@ -638,71 +638,99 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      {/* Main Tabs (Dispatches, News Wire, My Inquiries) */}
-      <View style={styles.segmentContainer}>
-        <View style={[styles.segmentTrack, { backgroundColor: monoMutedSurface }]}>
-          {(['dispatches', 'news', 'myInquiries'] as const).map(tab => {
-            const active = activeTab === tab;
-            const label = tab === 'dispatches'
-              ? 'Dispatches'
-              : tab === 'news'
-              ? 'News Wire'
-              : `My Questions (${userInquiriesList.length})`;
+      {/* Unified Single-Line Filter Row: Dispatches and All Box on the Same Line */}
+      <View style={styles.sameLineFilterBar}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sameLineFilterScroll}>
+          {/* Main Dispatches Button */}
+          <TouchableOpacity
+            onPress={() => {
+              setActiveTab('dispatches');
+            }}
+            style={[
+              styles.filterPillSameLine,
+              { backgroundColor: activeTab === 'dispatches' && selectedCategory !== 'All' ? monoMutedSurface : (activeTab === 'dispatches' ? monoPrimary : monoMutedSurface), borderColor: cardBorder },
+            ]}
+            activeOpacity={0.75}
+          >
+            <Text style={[
+              styles.filterPillTextSameLine,
+              activeTab === 'dispatches'
+                ? { color: isDark ? (selectedCategory === 'All' ? '#000000' : '#FFFFFF') : (selectedCategory === 'All' ? '#FFFFFF' : '#111111'), fontWeight: '800' }
+                : { color: colors.text.muted },
+            ]}>
+              Dispatches
+            </Text>
+          </TouchableOpacity>
 
+          {/* AI Category Chips (Starting with "All") on the SAME LINE */}
+          {AI_CATEGORIES.map(cat => {
+            const active = activeTab === 'dispatches' && selectedCategory === cat;
             return (
               <TouchableOpacity
-                key={tab}
-                onPress={() => setActiveTab(tab)}
+                key={cat}
+                onPress={() => {
+                  setActiveTab('dispatches');
+                  setSelectedCategory(cat);
+                }}
                 style={[
-                  styles.segmentButton,
-                  active && { backgroundColor: monoPrimary },
+                  styles.filterPillSameLine,
+                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
                 ]}
-                activeOpacity={0.75}
+                activeOpacity={0.7}
               >
                 <Text style={[
-                  styles.segmentButtonText,
+                  styles.filterPillTextSameLine,
                   active
-                    ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '700' }
-                    : { color: colors.text.muted },
+                    ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                    : { color: isDark ? '#CCCCCC' : colors.text.muted },
                 ]}>
-                  {label}
+                  {cat}
                 </Text>
               </TouchableOpacity>
             );
           })}
-        </View>
-      </View>
 
-      {/* 10 AI Category Filters (When Dispatches tab is active) */}
-      {activeTab === 'dispatches' && (
-        <View style={styles.categoryFiltersContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryFiltersScroll}>
-            {AI_CATEGORIES.map(cat => {
-              const active = selectedCategory === cat;
-              return (
-                <TouchableOpacity
-                  key={cat}
-                  onPress={() => setSelectedCategory(cat)}
-                  style={[
-                    styles.categoryFilterChip,
-                    { backgroundColor: active ? monoPrimary : monoMutedSurface },
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[
-                    styles.categoryFilterChipText,
-                    active
-                      ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                      : { color: colors.text.primary },
-                  ]}>
-                    {cat}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
+          <View style={styles.filterDividerSameLine} />
+
+          {/* News Wire Tab */}
+          <TouchableOpacity
+            onPress={() => setActiveTab('news')}
+            style={[
+              styles.filterPillSameLine,
+              { backgroundColor: activeTab === 'news' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+            ]}
+            activeOpacity={0.75}
+          >
+            <Text style={[
+              styles.filterPillTextSameLine,
+              activeTab === 'news'
+                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                : { color: isDark ? '#CCCCCC' : colors.text.muted },
+            ]}>
+              News Wire
+            </Text>
+          </TouchableOpacity>
+
+          {/* My Questions Tab */}
+          <TouchableOpacity
+            onPress={() => setActiveTab('myInquiries')}
+            style={[
+              styles.filterPillSameLine,
+              { backgroundColor: activeTab === 'myInquiries' ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+            ]}
+            activeOpacity={0.75}
+          >
+            <Text style={[
+              styles.filterPillTextSameLine,
+              activeTab === 'myInquiries'
+                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
+                : { color: isDark ? '#CCCCCC' : colors.text.muted },
+            ]}>
+              My Questions ({userInquiriesList.length})
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
 
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
@@ -1346,6 +1374,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     paddingVertical: 0,
+  },
+  sameLineFilterBar: {
+    paddingVertical: 6,
+    marginBottom: 4,
+  },
+  sameLineFilterScroll: {
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  filterPillSameLine: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 14,
+    borderWidth: 0.5,
+  },
+  filterPillTextSameLine: {
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  filterDividerSameLine: {
+    width: 1,
+    height: 18,
+    backgroundColor: '#383838',
+    marginHorizontal: 2,
   },
   segmentContainer: {
     paddingHorizontal: 16,

@@ -130,50 +130,19 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* Screen Header */}
+      {/* Screen Header: Centered Portfolio with Left Arrow Back Button */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={[styles.backButton, { backgroundColor: monoMutedSurface }]}
+          activeOpacity={0.7}
+        >
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M15 18l-6-6 6-6" />
+          </Svg>
+        </TouchableOpacity>
         <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Portfolio</Text>
-      </View>
-
-      {/* Segmented Switcher: [ Assets | Transactions ] */}
-      <View style={styles.segmentContainer}>
-        <View style={[styles.segmentTrack, { backgroundColor: monoMutedSurface }]}>
-          <TouchableOpacity
-            onPress={() => setActiveTab('assets')}
-            style={[
-              styles.segmentBtn,
-              activeTab === 'assets' && { backgroundColor: monoPrimary },
-            ]}
-            activeOpacity={0.75}
-          >
-            <Text style={[
-              styles.segmentBtnText,
-              activeTab === 'assets'
-                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                : { color: colors.text.muted },
-            ]}>
-              Assets ({mergedAssets.length})
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => setActiveTab('transactions')}
-            style={[
-              styles.segmentBtn,
-              activeTab === 'transactions' && { backgroundColor: monoPrimary },
-            ]}
-            activeOpacity={0.75}
-          >
-            <Text style={[
-              styles.segmentBtnText,
-              activeTab === 'transactions'
-                ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                : { color: colors.text.muted },
-            ]}>
-              Transactions ({transactions.length})
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <View style={{ width: 36 }} />
       </View>
 
       {/* Search Input */}
@@ -183,7 +152,7 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder={activeTab === 'assets' ? 'Search token by name or symbol...' : 'Search transactions by coin, hash...'}
+            placeholder="Search tokens by name or symbol..."
             placeholderTextColor={colors.text.muted}
             style={[styles.searchInput, { color: colors.text.primary }]}
             autoCapitalize="none"
@@ -192,35 +161,12 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
         </View>
       </View>
 
-      {/* Transaction Filter Chips */}
-      {activeTab === 'transactions' && (
-        <View style={styles.filtersRow}>
-          {FILTERS.map(filter => {
-            const active = activeFilter === filter;
-            return (
-              <TouchableOpacity
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: active ? monoPrimary : cardBg,
-                    borderColor: active ? monoPrimary : cardBorder,
-                  },
-                ]}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.filterChipText,
-                  { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.secondary },
-                ]}>
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      )}
+      {/* ASSETS Header in CAPS */}
+      <View style={styles.assetsHeaderRow}>
+        <Text style={[styles.assetsCapsHeading, { color: isDark ? '#FFFFFF' : colors.text.primary }]}>
+          ASSETS ({filteredAssets.length})
+        </Text>
+      </View>
 
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 48 }]}
@@ -234,116 +180,51 @@ export default function PortfolioScreen({ navigation, route }: { navigation: any
         }
       >
         {/* ======================================================== */}
-        {/* OPTION 1: ALL ASSETS LIST                                */}
+        {/* ALL ASSETS LIST (ONLY ASSETS - NO TRANSACTIONS)          */}
         {/* ======================================================== */}
-        {activeTab === 'assets' && (
-          <View style={[styles.listCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-            {filteredAssets.map((asset, index) => {
-              const isLast = index === filteredAssets.length - 1;
-              return (
-                <TouchableOpacity
-                  key={asset.symbol}
-                  onPress={() => navigation.navigate('TokenDetail', {
-                    symbol: asset.symbol,
-                    name: asset.name,
-                    price: asset.price,
-                    change: asset.change,
-                    positive: asset.positive,
-                    network: asset.network,
-                  })}
-                  style={[
-                    styles.assetRow,
-                    !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder },
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  <TokenLogo symbol={asset.symbol} size={38} />
-                  <View style={styles.assetColLeft}>
-                    <Text style={[styles.assetName, { color: colors.text.primary }]}>{asset.name}</Text>
-                    <Text style={[styles.assetSymbol, { color: colors.text.muted }]}>
-                      {asset.symbol} • {asset.network}
+        <View style={[styles.listCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+          {filteredAssets.map((asset, index) => {
+            const isLast = index === filteredAssets.length - 1;
+            return (
+              <TouchableOpacity
+                key={asset.symbol}
+                onPress={() => navigation.navigate('TokenDetail', {
+                  symbol: asset.symbol,
+                  name: asset.name,
+                  price: asset.price,
+                  change: asset.change,
+                  positive: asset.positive,
+                  network: asset.network,
+                })}
+                style={[
+                  styles.assetRow,
+                  !isLast && { borderBottomWidth: 0.5, borderBottomColor: cardBorder },
+                ]}
+                activeOpacity={0.7}
+              >
+                <TokenLogo symbol={asset.symbol} size={38} />
+                <View style={styles.assetColLeft}>
+                  <Text style={[styles.assetName, { color: colors.text.primary }]}>{asset.name}</Text>
+                  <Text style={[styles.assetSymbol, { color: isDark ? '#CCCCCC' : colors.text.muted }]}>
+                    {asset.symbol} • {asset.network}
+                  </Text>
+                </View>
+
+                <View style={styles.assetColRight}>
+                  <Text style={[styles.assetBalance, { color: colors.text.primary }]}>
+                    {asset.balance} {asset.symbol}
+                  </Text>
+                  <View style={styles.priceRow}>
+                    <Text style={[styles.assetPrice, { color: isDark ? '#CCCCCC' : colors.text.muted }]}>{asset.price}</Text>
+                    <Text style={[styles.assetDelta, { color: asset.positive ? '#22C55E' : '#EF4444' }]}>
+                      {asset.change}
                     </Text>
                   </View>
-
-                  <View style={styles.assetColRight}>
-                    <Text style={[styles.assetBalance, { color: colors.text.primary }]}>
-                      {asset.balance} {asset.symbol}
-                    </Text>
-                    <View style={styles.priceRow}>
-                      <Text style={[styles.assetPrice, { color: colors.text.muted }]}>{asset.price}</Text>
-                      <Text style={[styles.assetDelta, { color: asset.positive ? '#22C55E' : '#EF4444' }]}>
-                        {asset.change}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-
-        {/* ======================================================== */}
-        {/* OPTION 2: TRANSACTIONS LIST                              */}
-        {/* ======================================================== */}
-        {activeTab === 'transactions' && (
-          <View>
-            {filteredTxs.length === 0 ? (
-              <View style={[styles.emptyCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-                <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>No Transactions Found</Text>
-                <Text style={[styles.emptySub, { color: colors.text.muted }]}>
-                  Your on-chain transfers, swaps, and received assets will appear here.
-                </Text>
-              </View>
-            ) : (
-              filteredTxs.map(tx => {
-                const IconComponent = TX_ICONS[tx.type] || TX_ICONS.sent;
-
-                return (
-                  <TouchableOpacity
-                    key={tx.id}
-                    onPress={() => navigation.navigate('TransactionDetail', { tx })}
-                    style={[styles.txCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-                    activeOpacity={0.75}
-                  >
-                    <View style={styles.txLeft}>
-                      <View style={[styles.txIconCircle, { backgroundColor: monoMutedSurface }]}>
-                        <IconComponent color={colors.text.primary} size={16} />
-                      </View>
-                      <View style={styles.txInfo}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                          <Text style={[styles.txType, { color: colors.text.primary }]}>
-                            {tx.type === 'sent' ? 'Sent' : tx.type === 'received' ? 'Received' : 'Swap'}
-                          </Text>
-                          <Text style={[styles.txTime, { color: colors.text.muted }]}>
-                            {tx.time || 'Just now'}
-                          </Text>
-                        </View>
-                        <Text style={[styles.txAssetSub, { color: colors.text.muted }]} numberOfLines={1}>
-                          {tx.asset}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.txRight}>
-                      <Text style={[styles.txAmount, { color: colors.text.primary }]}>
-                        {tx.type === 'received' ? '+' : tx.type === 'swap' ? '' : '-'}{tx.amount} {tx.asset.includes('→') ? '' : tx.asset}
-                      </Text>
-                      <View style={styles.txStatusRow}>
-                        <Text style={[styles.txValue, { color: colors.text.muted }]}>{tx.value}</Text>
-                        <View style={[styles.statusBadge, { backgroundColor: monoMutedSurface }]}>
-                          <Text style={[styles.statusText, { color: colors.text.secondary }]}>
-                            {tx.status}
-                          </Text>
-                        </View>
-                        <ChevronRightIcon color={colors.text.muted} size={12} />
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })
-            )}
-          </View>
-        )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -354,13 +235,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   screenTitle: {
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: '800',
-    letterSpacing: -0.6,
+    textAlign: 'center',
+    letterSpacing: -0.3,
+  },
+  assetsHeaderRow: {
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 6,
+  },
+  assetsCapsHeading: {
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   segmentContainer: {
     paddingHorizontal: 16,

@@ -486,27 +486,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           <ChevronDownIcon color={colors.text.muted} size={12} />
         </SpringButton>
 
-        {/* Right Action Block: Network Selector, Scan Reticle, AI */}
+        {/* Right Action Block: Scan Reticle, AI */}
         <View style={styles.navRightRow}>
-          {/* Chain Selector Trigger */}
+          {/* Camera Scan Reticle (Opens QR Code Camera Scanner Directly) */}
           <SpringButton
-            onPress={() => setShowNetworkModal(true)}
-            style={[styles.chainSelectorPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
-          >
-            <View style={[styles.chainStatusDot, { backgroundColor: monoPrimary }]} />
-            <Text
-              style={[styles.chainSelectorText, { color: colors.text.primary }]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {currentChainObj.name}
-            </Text>
-            <ChevronDownIcon color={colors.text.muted} size={11} />
-          </SpringButton>
-
-          {/* Camera Scan Reticle (Opens QR Code Camera Scanner) */}
-          <SpringButton
-            onPress={() => navigation.navigate('Send')}
+            onPress={() => navigation.navigate('Send', { openScanner: true })}
             style={[styles.headerIconBtn, { backgroundColor: cardBg, borderColor: cardBorder }]}
           >
             <ScanReticleIcon color={monoPrimary} size={20} />
@@ -682,23 +666,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* ASSET OVERVIEW SECTION (ASSETS UP)                       */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={styles.sectionHeading}>Assets</Text>
-            <TouchableOpacity
-              onPress={() => setShowAssetsDrawer(true)}
-              style={[styles.headingArrowBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-              activeOpacity={0.7}
-            >
-              <ChevronRightIcon color={monoPrimary} size={15} />
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.sectionHeading}>Assets</Text>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Portfolio', { initialTab: 'assets' })}
             style={[styles.viewAllBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.viewAllBoxText, { color: colors.text.primary }]}>View All →</Text>
+            <Text style={[styles.viewAllBoxText, { color: colors.text.primary }]}>View All</Text>
           </TouchableOpacity>
         </View>
 

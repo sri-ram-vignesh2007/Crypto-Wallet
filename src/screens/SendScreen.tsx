@@ -15,6 +15,7 @@ import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
 import { rpcManager } from '../core/RPCManager';
+import { TokenLogo } from '../components/TokenLogo';
 
 // Smooth iOS Spring Button Component
 function SpringButton({
@@ -90,7 +91,7 @@ const ScanQrIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: n
   </Svg>
 );
 
-export default function SendScreen({ navigation }: { navigation: any }) {
+export default function SendScreen({ navigation, route }: { navigation: any; route?: any }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
@@ -111,6 +112,22 @@ export default function SendScreen({ navigation }: { navigation: any }) {
   const [gasSpeed, setGasSpeed] = useState<'economy' | 'standard' | 'instant'>('standard');
   const [gasFeeEstimate, setGasFeeEstimate] = useState<string>('~0.0004 ' + currentChainObj.symbol);
   const [txSuccessHash, setTxSuccessHash] = useState<string | null>(null);
+
+  // Directly launch QR camera if openScanner param passed
+  useEffect(() => {
+    if (route?.params?.openScanner) {
+      (async () => {
+        if (!cameraPermission?.granted) {
+          const res = await requestCameraPermission();
+          if (res.granted) {
+            setShowScannerModal(true);
+          }
+        } else {
+          setShowScannerModal(true);
+        }
+      })();
+    }
+  }, [route?.params?.openScanner, cameraPermission?.granted]);
 
   // PanResponder to slide down / dismiss token selector sheet
   const tokenSelectorPan = useRef(
@@ -266,7 +283,20 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           </Svg>
         </TouchableOpacity>
         <Text style={[styles.navTitle, { color: colors.text.primary }]}>Send</Text>
-        <View style={{ width: 36 }} />
+        <TouchableOpacity
+          onPress={async () => {
+            if (!cameraPermission?.granted) {
+              const res = await requestCameraPermission();
+              if (res.granted) setShowScannerModal(true);
+            } else {
+              setShowScannerModal(true);
+            }
+          }}
+          style={[styles.backButton, { backgroundColor: monoMuted }]}
+          activeOpacity={0.7}
+        >
+          <ScanQrIcon color={colors.text.primary} size={18} />
+        </TouchableOpacity>
       </View>
 
       <KeyboardAvoidingView
@@ -278,29 +308,27 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           showsVerticalScrollIndicator={false}
         >
           {/* Section: Asset Picker (Apple Inset Grouped Row) */}
-          <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>ASSET</Text>
+          <Text style={[styles.sectionHeader, { color: isDark ? '#FFFFFF' : colors.text.secondary }]}>ASSET</Text>
           <SpringButton onPress={() => setShowTokenSelector(true)} style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
             <View style={styles.assetRow}>
-              <View style={[styles.assetIconCircle, { backgroundColor: monoMuted }]}>
-                <Text style={styles.assetIconEmoji}>{currentSelectedBalance.token.logo || '🪙'}</Text>
-              </View>
+              <TokenLogo symbol={currentSelectedBalance.token.symbol} size={36} />
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={[styles.assetSymbol, { color: colors.text.primary }]}>
                   {currentSelectedBalance.token.symbol}
                 </Text>
-                <Text style={[styles.assetSub, { color: colors.text.muted }]}>
+                <Text style={[styles.assetSub, { color: isDark ? '#CCCCCC' : colors.text.muted }]}>
                   {currentChainObj.name} • Available: {parseFloat(currentSelectedBalance.balance).toFixed(4)}
                 </Text>
               </View>
               <View style={styles.assetSelectorTag}>
-                <Text style={[styles.assetSelectorTagText, { color: colors.text.secondary }]}>Change</Text>
-                <ChevronDownIcon color={colors.text.muted} size={14} />
+                <Text style={[styles.assetSelectorTagText, { color: isDark ? '#FFFFFF' : colors.text.secondary }]}>Change</Text>
+                <ChevronDownIcon color={isDark ? '#FFFFFF' : colors.text.muted} size={14} />
               </View>
             </View>
           </SpringButton>
 
           {/* Section: Recipient Address */}
-          <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>RECIPIENT</Text>
+          <Text style={[styles.sectionHeader, { color: isDark ? '#FFFFFF' : colors.text.secondary }]}>RECIPIENT</Text>
           <View style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
             <View style={styles.inputInnerRow}>
               <TextInput
@@ -324,7 +352,7 @@ export default function SendScreen({ navigation }: { navigation: any }) {
           </View>
 
           {/* Section: Amount */}
-          <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>AMOUNT</Text>
+          <Text style={[styles.sectionHeader, { color: isDark ? '#FFFFFF' : colors.text.secondary }]}>AMOUNT</Text>
           <View style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
             <View style={styles.amountInputRow}>
               <TextInput

@@ -166,7 +166,7 @@ function MainTabs() {
   // Adaptive safe area bottom padding across all iPhone & Android models
   const isAndroid = Platform.OS === 'android';
   const bottomPadding = insets.bottom > 0 ? insets.bottom : (isAndroid ? 10 : 8);
-  const tabHeight = 58 + bottomPadding;
+  const tabHeight = 66 + bottomPadding;
 
   return (
     <Tab.Navigator
@@ -184,7 +184,7 @@ function MainTabs() {
           overflow: 'hidden',
           height: tabHeight,
           paddingBottom: bottomPadding,
-          paddingTop: 6,
+          paddingTop: 8,
           elevation: 10,
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: -3 },
@@ -194,7 +194,7 @@ function MainTabs() {
         tabBarItemStyle: {
           justifyContent: 'center',
           alignItems: 'center',
-          height: 48,
+          height: 52,
         },
         tabBarIconStyle: {
           justifyContent: 'center',
@@ -223,35 +223,35 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={26} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Home" focused={focused} color={color} size={29} />,
         }}
       />
       <Tab.Screen
         name="Market"
         component={MarketScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={26} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Market" focused={focused} color={color} size={29} />,
         }}
       />
       <Tab.Screen
         name="Swap"
         component={SwapScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={26} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={29} />,
         }}
       />
       <Tab.Screen
         name="Community"
         component={ExploreScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={26} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Community" focused={focused} color={color} size={29} />,
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={26} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="Settings" focused={focused} color={color} size={29} />,
         }}
       />
     </Tab.Navigator>

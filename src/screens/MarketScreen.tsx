@@ -1,41 +1,20 @@
-// src/screens/MarketScreen.tsx - Institutional-Grade Multi-Chain Crypto Markets Hub (Trust Wallet & Coinbase Scale)
+// src/screens/MarketScreen.tsx - Institutional Multi-Chain Crypto Markets Hub with CoinGecko Top Assets
 
 import React, { useState, useMemo } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
-  SafeAreaView, StatusBar, RefreshControl, Dimensions,
+  SafeAreaView, StatusBar, RefreshControl,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Polyline } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { TokenLogo } from '../components/TokenLogo';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Vector Glyphs
+// Vector Search Glyph
 const SearchIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="11" cy="11" r="8" />
     <Path d="M21 21l-4.35-4.35" />
-  </Svg>
-);
-
-const SwapIcon = ({ color = '#FFFFFF', size = 14 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M16 3l4 4-4 4M8 21l-4-4 4-4M4 17h16M20 7H4" />
-  </Svg>
-);
-
-const MiniSparkline = ({ points, positive }: { points: string; positive: boolean }) => (
-  <Svg width={64} height={28} viewBox="0 0 64 28" fill="none">
-    <Polyline
-      fill="none"
-      stroke={positive ? '#22C55E' : '#EF4444'}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      points={points}
-    />
   </Svg>
 );
 
@@ -54,15 +33,18 @@ export interface MarketToken {
   name: string;
   price: string;
   numericPrice: number;
+  change1h: string;
+  positive1h: boolean;
+  change7h: string;
+  positive7h: boolean;
   change24h: string;
+  positive24h: boolean;
   numericChange: number;
-  positive: boolean;
   volume24h: string;
   marketCap: string;
   numericMarketCap: number;
   chain: string;
   category: MarketCategory[];
-  sparkline: string;
 }
 
 const ALL_MARKET_TOKENS: MarketToken[] = [
@@ -71,301 +53,576 @@ const ALL_MARKET_TOKENS: MarketToken[] = [
     name: 'Bitcoin',
     price: '$67,540.00',
     numericPrice: 67540,
+    change1h: '+0.25%',
+    positive1h: true,
+    change7h: '+1.45%',
+    positive7h: true,
     change24h: '+3.42%',
+    positive24h: true,
     numericChange: 3.42,
-    positive: true,
     volume24h: '$34.2B',
     marketCap: '$1.33T',
     numericMarketCap: 1330000000000,
     chain: 'Bitcoin',
     category: ['Majors', 'Trending'],
-    sparkline: '0,20 12,18 24,14 36,16 48,8 64,4',
   },
   {
     symbol: 'ETH',
     name: 'Ethereum',
     price: '$2,700.00',
     numericPrice: 2700,
+    change1h: '+0.38%',
+    positive1h: true,
+    change7h: '+2.10%',
+    positive7h: true,
     change24h: '+5.40%',
+    positive24h: true,
     numericChange: 5.40,
-    positive: true,
     volume24h: '$18.6B',
     marketCap: '$324.8B',
     numericMarketCap: 324800000000,
     chain: 'Ethereum',
     category: ['Majors', 'Trending', 'DeFi'],
-    sparkline: '0,22 14,19 26,16 38,12 50,7 64,3',
   },
   {
     symbol: 'SOL',
     name: 'Solana',
     price: '$168.20',
     numericPrice: 168.2,
+    change1h: '+1.15%',
+    positive1h: true,
+    change7h: '+4.80%',
+    positive7h: true,
     change24h: '+12.40%',
+    positive24h: true,
     numericChange: 12.40,
-    positive: true,
     volume24h: '$6.8B',
     marketCap: '$78.4B',
     numericMarketCap: 78400000000,
     chain: 'Solana',
     category: ['Majors', 'Trending', 'Top Gainers'],
-    sparkline: '0,26 12,22 24,15 36,11 48,5 64,2',
   },
   {
     symbol: 'BNB',
     name: 'BNB Chain',
     price: '$592.40',
     numericPrice: 592.4,
+    change1h: '+0.12%',
+    positive1h: true,
+    change7h: '+0.85%',
+    positive7h: true,
     change24h: '+2.15%',
+    positive24h: true,
     numericChange: 2.15,
-    positive: true,
     volume24h: '$1.4B',
     marketCap: '$89.2B',
     numericMarketCap: 89200000000,
     chain: 'BNB Chain',
     category: ['Majors'],
-    sparkline: '0,18 14,16 28,15 42,12 56,10 64,8',
   },
   {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    price: '$1.00',
-    numericPrice: 1.0,
-    change24h: '+0.01%',
-    numericChange: 0.01,
-    positive: true,
-    volume24h: '$7.8B',
-    marketCap: '$35.2B',
-    numericMarketCap: 35200000000,
-    chain: 'Ethereum',
-    category: ['Majors', 'RWA & Stocks'],
-    sparkline: '0,14 16,14 32,14 48,14 64,14',
-  },
-  {
-    symbol: 'USDT',
-    name: 'Tether USD',
-    price: '$1.00',
-    numericPrice: 1.0,
-    change24h: '+0.02%',
-    numericChange: 0.02,
-    positive: true,
-    volume24h: '$48.1B',
-    marketCap: '$118.0B',
-    numericMarketCap: 118000000000,
+    symbol: 'XRP',
+    name: 'XRP',
+    price: '$0.542',
+    numericPrice: 0.542,
+    change1h: '-0.10%',
+    positive1h: false,
+    change7h: '+0.40%',
+    positive7h: true,
+    change24h: '+1.80%',
+    positive24h: true,
+    numericChange: 1.80,
+    volume24h: '$1.1B',
+    marketCap: '$30.6B',
+    numericMarketCap: 30600000000,
     chain: 'Ethereum',
     category: ['Majors'],
-    sparkline: '0,14 16,14 32,14 48,14 64,14',
   },
   {
     symbol: 'DOGE',
     name: 'Dogecoin',
     price: '$0.158',
     numericPrice: 0.158,
+    change1h: '+0.60%',
+    positive1h: true,
+    change7h: '+3.10%',
+    positive7h: true,
     change24h: '+8.90%',
+    positive24h: true,
     numericChange: 8.90,
-    positive: true,
     volume24h: '$2.1B',
     marketCap: '$23.1B',
     numericMarketCap: 23100000000,
     chain: 'Bitcoin',
     category: ['Trending', 'Top Gainers'],
-    sparkline: '0,24 14,20 28,14 42,8 56,5 64,3',
   },
   {
     symbol: 'ADA',
     name: 'Cardano',
     price: '$0.428',
     numericPrice: 0.428,
+    change1h: '-0.20%',
+    positive1h: false,
+    change7h: '-0.85%',
+    positive7h: false,
     change24h: '-1.85%',
+    positive24h: false,
     numericChange: -1.85,
-    positive: false,
-    volume24h: '$450M',
-    marketCap: '$15.4B',
-    numericMarketCap: 15400000000,
+    volume24h: '$410M',
+    marketCap: '$15.2B',
+    numericMarketCap: 15200000000,
     chain: 'Ethereum',
     category: ['Majors', 'Top Losers'],
-    sparkline: '0,6 14,10 28,15 42,19 56,22 64,24',
   },
   {
-    symbol: 'XRP',
-    name: 'XRP Ledger',
-    price: '$0.584',
-    numericPrice: 0.584,
-    change24h: '+4.12%',
-    numericChange: 4.12,
-    positive: true,
-    volume24h: '$1.8B',
-    marketCap: '$32.8B',
-    numericMarketCap: 32800000000,
+    symbol: 'AVAX',
+    name: 'Avalanche',
+    price: '$27.80',
+    numericPrice: 27.8,
+    change1h: '+0.30%',
+    positive1h: true,
+    change7h: '+1.10%',
+    positive7h: true,
+    change24h: '+4.20%',
+    positive24h: true,
+    numericChange: 4.20,
+    volume24h: '$420M',
+    marketCap: '$11.2B',
+    numericMarketCap: 11200000000,
+    chain: 'Avalanche',
+    category: ['Majors', 'DeFi'],
+  },
+  {
+    symbol: 'SUI',
+    name: 'Sui Network',
+    price: '$2.15',
+    numericPrice: 2.15,
+    change1h: '+1.40%',
+    positive1h: true,
+    change7h: '+6.20%',
+    positive7h: true,
+    change24h: '+15.80%',
+    positive24h: true,
+    numericChange: 15.80,
+    volume24h: '$950M',
+    marketCap: '$5.9B',
+    numericMarketCap: 5900000000,
+    chain: 'Sui',
+    category: ['Trending', 'Top Gainers', 'New'],
+  },
+  {
+    symbol: 'LINK',
+    name: 'Chainlink',
+    price: '$11.80',
+    numericPrice: 11.8,
+    change1h: '+0.15%',
+    positive1h: true,
+    change7h: '+0.95%',
+    positive7h: true,
+    change24h: '+1.90%',
+    positive24h: true,
+    numericChange: 1.90,
+    volume24h: '$260M',
+    marketCap: '$7.1B',
+    numericMarketCap: 7100000000,
     chain: 'Ethereum',
-    category: ['Majors', 'Trending'],
-    sparkline: '0,20 16,18 32,14 48,10 64,6',
+    category: ['DeFi', 'Majors'],
+  },
+  {
+    symbol: 'SHIB',
+    name: 'Shiba Inu',
+    price: '$0.0000185',
+    numericPrice: 0.0000185,
+    change1h: '+0.45%',
+    positive1h: true,
+    change7h: '+2.10%',
+    positive7h: true,
+    change24h: '+6.15%',
+    positive24h: true,
+    numericChange: 6.15,
+    volume24h: '$520M',
+    marketCap: '$10.9B',
+    numericMarketCap: 10900000000,
+    chain: 'Ethereum',
+    category: ['Trending'],
+  },
+  {
+    symbol: 'PEPE',
+    name: 'Pepe',
+    price: '$0.0000098',
+    numericPrice: 0.0000098,
+    change1h: '+1.20%',
+    positive1h: true,
+    change7h: '+5.40%',
+    positive7h: true,
+    change24h: '+14.20%',
+    positive24h: true,
+    numericChange: 14.20,
+    volume24h: '$840M',
+    marketCap: '$4.1B',
+    numericMarketCap: 4100000000,
+    chain: 'Ethereum',
+    category: ['Trending', 'Top Gainers', 'New'],
   },
   {
     symbol: 'NEAR',
     name: 'NEAR Protocol',
     price: '$5.15',
     numericPrice: 5.15,
+    change1h: '+0.80%',
+    positive1h: true,
+    change7h: '+3.20%',
+    positive7h: true,
     change24h: '+8.20%',
+    positive24h: true,
     numericChange: 8.20,
-    positive: true,
-    volume24h: '$610M',
-    marketCap: '$6.1B',
-    numericMarketCap: 6100000000,
+    volume24h: '$480M',
+    marketCap: '$6.3B',
+    numericMarketCap: 6300000000,
     chain: 'NEAR',
+    category: ['Trending', 'Top Gainers', 'Layer 2'],
+  },
+  {
+    symbol: 'DOT',
+    name: 'Polkadot',
+    price: '$4.45',
+    numericPrice: 4.45,
+    change1h: '-0.15%',
+    positive1h: false,
+    change7h: '-0.40%',
+    positive7h: false,
+    change24h: '-1.10%',
+    positive24h: false,
+    numericChange: -1.10,
+    volume24h: '$160M',
+    marketCap: '$6.4B',
+    numericMarketCap: 6400000000,
+    chain: 'Ethereum',
+    category: ['Majors', 'Top Losers'],
+  },
+  {
+    symbol: 'UNI',
+    name: 'Uniswap',
+    price: '$7.85',
+    numericPrice: 7.85,
+    change1h: '+0.50%',
+    positive1h: true,
+    change7h: '+1.80%',
+    positive7h: true,
+    change24h: '+4.90%',
+    positive24h: true,
+    numericChange: 4.90,
+    volume24h: '$320M',
+    marketCap: '$4.7B',
+    numericMarketCap: 4700000000,
+    chain: 'Ethereum',
+    category: ['DeFi', 'Majors'],
+  },
+  {
+    symbol: 'APT',
+    name: 'Aptos',
+    price: '$9.20',
+    numericPrice: 9.20,
+    change1h: '+0.90%',
+    positive1h: true,
+    change7h: '+4.10%',
+    positive7h: true,
+    change24h: '+11.30%',
+    positive24h: true,
+    numericChange: 11.30,
+    volume24h: '$390M',
+    marketCap: '$4.5B',
+    numericMarketCap: 4500000000,
+    chain: 'Ethereum',
     category: ['Trending', 'Top Gainers'],
-    sparkline: '0,22 14,18 28,12 42,8 56,5 64,3',
+  },
+  {
+    symbol: 'FET',
+    name: 'Artificial Superintelligence Alliance',
+    price: '$1.42',
+    numericPrice: 1.42,
+    change1h: '+1.10%',
+    positive1h: true,
+    change7h: '+4.90%',
+    positive7h: true,
+    change24h: '+13.60%',
+    positive24h: true,
+    numericChange: 13.60,
+    volume24h: '$290M',
+    marketCap: '$3.6B',
+    numericMarketCap: 3600000000,
+    chain: 'Ethereum',
+    category: ['Trending', 'Top Gainers', 'New'],
+  },
+  {
+    symbol: 'TIA',
+    name: 'Celestia',
+    price: '$5.80',
+    numericPrice: 5.80,
+    change1h: '-0.50%',
+    positive1h: false,
+    change7h: '-2.10%',
+    positive7h: false,
+    change24h: '-4.60%',
+    positive24h: false,
+    numericChange: -4.60,
+    volume24h: '$180M',
+    marketCap: '$1.3B',
+    numericMarketCap: 1300000000,
+    chain: 'Ethereum',
+    category: ['Top Losers'],
   },
   {
     symbol: 'RENDER',
     name: 'Render Network',
     price: '$6.20',
-    numericPrice: 6.20,
+    numericPrice: 6.2,
+    change1h: '+0.40%',
+    positive1h: true,
+    change7h: '+1.60%',
+    positive7h: true,
     change24h: '+4.10%',
+    positive24h: true,
     numericChange: 4.10,
-    positive: true,
-    volume24h: '$340M',
-    marketCap: '$3.9B',
-    numericMarketCap: 3900000000,
+    volume24h: '$195M',
+    marketCap: '$3.2B',
+    numericMarketCap: 3200000000,
     chain: 'Solana',
-    category: ['Trending', 'Top Gainers'],
-    sparkline: '0,21 15,17 30,12 45,9 64,5',
+    category: ['Trending'],
+  },
+  {
+    symbol: 'INJ',
+    name: 'Injective',
+    price: '$21.40',
+    numericPrice: 21.4,
+    change1h: '+0.70%',
+    positive1h: true,
+    change7h: '+3.10%',
+    positive7h: true,
+    change24h: '+7.80%',
+    positive24h: true,
+    numericChange: 7.80,
+    volume24h: '$140M',
+    marketCap: '$2.1B',
+    numericMarketCap: 2100000000,
+    chain: 'Ethereum',
+    category: ['DeFi', 'Trending'],
   },
   {
     symbol: 'ARB',
-    name: 'Arbitrum One',
+    name: 'Arbitrum',
     price: '$0.58',
     numericPrice: 0.58,
+    change1h: '-0.30%',
+    positive1h: false,
+    change7h: '-1.10%',
+    positive7h: false,
     change24h: '-2.10%',
+    positive24h: false,
     numericChange: -2.10,
-    positive: false,
-    volume24h: '$380M',
-    marketCap: '$2.8B',
-    numericMarketCap: 2800000000,
+    volume24h: '$185M',
+    marketCap: '$2.05B',
+    numericMarketCap: 2050000000,
     chain: 'Arbitrum',
     category: ['Layer 2', 'Top Losers'],
-    sparkline: '0,5 14,9 28,14 42,18 56,21 64,23',
-  },
-  {
-    symbol: 'POL',
-    name: 'Polygon PoS',
-    price: '$0.38',
-    numericPrice: 0.38,
-    change24h: '+3.50%',
-    numericChange: 3.50,
-    positive: true,
-    volume24h: '$290M',
-    marketCap: '$4.2B',
-    numericMarketCap: 4200000000,
-    chain: 'Polygon',
-    category: ['Layer 2', 'Top Gainers'],
-    sparkline: '0,20 14,16 28,13 42,10 56,8 64,5',
   },
   {
     symbol: 'OP',
-    name: 'Optimism Mainnet',
+    name: 'Optimism',
     price: '$1.65',
     numericPrice: 1.65,
+    change1h: '+0.55%',
+    positive1h: true,
+    change7h: '+2.40%',
+    positive7h: true,
     change24h: '+6.20%',
+    positive24h: true,
     numericChange: 6.20,
-    positive: true,
     volume24h: '$210M',
     marketCap: '$2.1B',
     numericMarketCap: 2100000000,
     chain: 'Optimism',
-    category: ['Layer 2', 'Top Gainers'],
-    sparkline: '0,22 14,18 28,13 42,9 56,6 64,4',
+    category: ['Layer 2', 'Trending'],
   },
   {
-    symbol: 'LINK',
-    name: 'Chainlink Oracle',
-    price: '$11.80',
-    numericPrice: 11.80,
-    change24h: '+1.90%',
-    numericChange: 1.90,
-    positive: true,
-    volume24h: '$260M',
-    marketCap: '$7.2B',
-    numericMarketCap: 7200000000,
+    symbol: 'POL',
+    name: 'Polygon Ecosystem Token',
+    price: '$0.38',
+    numericPrice: 0.38,
+    change1h: '+0.20%',
+    positive1h: true,
+    change7h: '+1.30%',
+    positive7h: true,
+    change24h: '+3.50%',
+    positive24h: true,
+    numericChange: 3.50,
+    volume24h: '$130M',
+    marketCap: '$3.1B',
+    numericMarketCap: 3100000000,
+    chain: 'Polygon',
+    category: ['Layer 2'],
+  },
+  {
+    symbol: 'TON',
+    name: 'Toncoin',
+    price: '$5.20',
+    numericPrice: 5.20,
+    change1h: '+0.40%',
+    positive1h: true,
+    change7h: '+1.75%',
+    positive7h: true,
+    change24h: '+3.90%',
+    positive24h: true,
+    numericChange: 3.90,
+    volume24h: '$280M',
+    marketCap: '$13.2B',
+    numericMarketCap: 13200000000,
     chain: 'Ethereum',
-    category: ['DeFi'],
-    sparkline: '0,18 14,16 28,14 42,11 56,9 64,7',
+    category: ['Majors'],
   },
   {
-    symbol: 'AVAX',
-    name: 'Avalanche C-Chain',
-    price: '$27.80',
-    numericPrice: 27.80,
-    change24h: '-1.40%',
-    numericChange: -1.40,
-    positive: false,
-    volume24h: '$310M',
-    marketCap: '$11.2B',
-    numericMarketCap: 11200000000,
-    chain: 'Avalanche',
-    category: ['Majors', 'Top Losers'],
-    sparkline: '0,6 14,10 28,14 42,18 56,21 64,23',
+    symbol: 'LTC',
+    name: 'Litecoin',
+    price: '$72.40',
+    numericPrice: 72.40,
+    change1h: '+0.10%',
+    positive1h: true,
+    change7h: '+0.60%',
+    positive7h: true,
+    change24h: '+1.50%',
+    positive24h: true,
+    numericChange: 1.50,
+    volume24h: '$340M',
+    marketCap: '$5.4B',
+    numericMarketCap: 5400000000,
+    chain: 'Bitcoin',
+    category: ['Majors'],
   },
-  // RWA & STOCKS CATEGORY
+  {
+    symbol: 'ICP',
+    name: 'Internet Computer',
+    price: '$8.45',
+    numericPrice: 8.45,
+    change1h: '-0.40%',
+    positive1h: false,
+    change7h: '-1.80%',
+    positive7h: false,
+    change24h: '-3.20%',
+    positive24h: false,
+    numericChange: -3.20,
+    volume24h: '$95M',
+    marketCap: '$3.9B',
+    numericMarketCap: 3900000000,
+    chain: 'Ethereum',
+    category: ['Top Losers'],
+  },
   {
     symbol: 'USDC',
+    name: 'USD Coin',
+    price: '$1.00',
+    numericPrice: 1.0,
+    change1h: '0.00%',
+    positive1h: true,
+    change7h: '+0.01%',
+    positive7h: true,
+    change24h: '+0.01%',
+    positive24h: true,
+    numericChange: 0.01,
+    volume24h: '$7.8B',
+    marketCap: '$35.2B',
+    numericMarketCap: 35200000000,
+    chain: 'Ethereum',
+    category: ['Majors', 'RWA & Stocks'],
+  },
+  {
+    symbol: 'USDT',
+    name: 'Tether USD',
+    price: '$1.00',
+    numericPrice: 1.0,
+    change1h: '0.00%',
+    positive1h: true,
+    change7h: '+0.01%',
+    positive7h: true,
+    change24h: '+0.02%',
+    positive24h: true,
+    numericChange: 0.02,
+    volume24h: '$48.1B',
+    marketCap: '$118.0B',
+    numericMarketCap: 118000000000,
+    chain: 'Ethereum',
+    category: ['Majors'],
+  },
+  {
+    symbol: 'BUIDL',
     name: 'BlackRock BUIDL Fund',
     price: '$1.00',
     numericPrice: 1.0,
+    change1h: '0.00%',
+    positive1h: true,
+    change7h: '+0.01%',
+    positive7h: true,
     change24h: '+0.01%',
+    positive24h: true,
     numericChange: 0.01,
-    positive: true,
     volume24h: '$42M',
     marketCap: '$520M',
     numericMarketCap: 520000000,
     chain: 'Ethereum',
     category: ['RWA & Stocks', 'New'],
-    sparkline: '0,14 16,14 32,14 48,14 64,14',
   },
   {
-    symbol: 'USDC',
-    name: 'Ondo US Short-Term Govt (OUSG)',
+    symbol: 'OUSG',
+    name: 'Ondo US Short-Term Govt',
     price: '$105.40',
     numericPrice: 105.4,
+    change1h: '0.00%',
+    positive1h: true,
+    change7h: '+0.01%',
+    positive7h: true,
     change24h: '+0.03%',
+    positive24h: true,
     numericChange: 0.03,
-    positive: true,
     volume24h: '$15M',
     marketCap: '$240M',
     numericMarketCap: 240000000,
     chain: 'Ethereum',
     category: ['RWA & Stocks'],
-    sparkline: '0,18 16,16 32,14 48,12 64,10',
   },
   {
-    symbol: 'SOL',
-    name: 'Tokenized Apple Inc. (AAPLx)',
+    symbol: 'AAPLx',
+    name: 'Tokenized Apple Inc.',
     price: '$224.20',
     numericPrice: 224.2,
+    change1h: '+0.30%',
+    positive1h: true,
+    change7h: '+0.95%',
+    positive7h: true,
     change24h: '+1.85%',
+    positive24h: true,
     numericChange: 1.85,
-    positive: true,
     volume24h: '$65M',
     marketCap: '$3.4T Eq.',
     numericMarketCap: 3400000000000,
     chain: 'Solana',
     category: ['RWA & Stocks'],
-    sparkline: '0,19 14,16 28,13 42,10 56,7 64,4',
   },
   {
-    symbol: 'SOL',
-    name: 'Tokenized Tesla Inc. (TSLAx)',
+    symbol: 'TSLAx',
+    name: 'Tokenized Tesla Inc.',
     price: '$218.40',
     numericPrice: 218.4,
+    change1h: '+0.80%',
+    positive1h: true,
+    change7h: '+2.10%',
+    positive7h: true,
     change24h: '+4.20%',
+    positive24h: true,
     numericChange: 4.20,
-    positive: true,
     volume24h: '$84M',
     marketCap: '$690B Eq.',
     numericMarketCap: 690000000000,
     chain: 'Solana',
     category: ['RWA & Stocks', 'Trending'],
-    sparkline: '0,22 14,18 28,13 42,8 56,5 64,3',
   },
 ];
 
@@ -380,9 +637,12 @@ const CATEGORIES: MarketCategory[] = [
   'Layer 2',
 ];
 
-const NETWORKS = ['All Chains', 'Ethereum', 'Solana', 'BNB Chain', 'Bitcoin', 'Polygon', 'Arbitrum', 'Avalanche'];
-const TIMEFRAMES = ['1H', '24H', '7D', '1M', '1Y'];
-const SORT_OPTIONS = ['Market Cap', '24h Volume', 'Price: High-Low', 'Top Gainers'];
+const NETWORKS = [
+  'All Chains', 'Ethereum', 'Solana', 'Bitcoin', 'BNB Chain', 'Arbitrum',
+  'Polygon', 'Avalanche', 'Optimism', 'NEAR', 'Sui'
+];
+
+const TIMEFRAMES = ['1h', '7h', '24h'] as const;
 
 export default function MarketScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
@@ -391,8 +651,7 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
 
   const [selectedCategory, setSelectedCategory] = useState<MarketCategory>('Trending');
   const [selectedNetwork, setSelectedNetwork] = useState('All Chains');
-  const [selectedTimeframe, setSelectedTimeframe] = useState('24H');
-  const [selectedSort, setSelectedSort] = useState('Market Cap');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'1h' | '7h' | '24h'>('24h');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -405,9 +664,15 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
     let list = ALL_MARKET_TOKENS.filter((t) => {
       // Category filter
       if (selectedCategory === 'Top Gainers') {
-        if (!t.positive || t.numericChange <= 2) return false;
+        const changeNum = selectedTimeframe === '1h'
+          ? (t.positive1h ? 1 : -1)
+          : selectedTimeframe === '7h'
+          ? (t.positive7h ? 1 : -1)
+          : (t.positive24h ? t.numericChange : -1);
+        if (changeNum <= 0) return false;
       } else if (selectedCategory === 'Top Losers') {
-        if (t.positive) return false;
+        const isPos = selectedTimeframe === '1h' ? t.positive1h : selectedTimeframe === '7h' ? t.positive7h : t.positive24h;
+        if (isPos) return false;
       } else {
         if (!t.category.includes(selectedCategory)) return false;
       }
@@ -430,22 +695,8 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
       return true;
     });
 
-    // Sorting
-    list = [...list].sort((a, b) => {
-      if (selectedSort === 'Market Cap') {
-        return b.numericMarketCap - a.numericMarketCap;
-      }
-      if (selectedSort === 'Price: High-Low') {
-        return b.numericPrice - a.numericPrice;
-      }
-      if (selectedSort === 'Top Gainers') {
-        return b.numericChange - a.numericChange;
-      }
-      return 0;
-    });
-
     return list;
-  }, [selectedCategory, selectedNetwork, selectedSort, searchQuery]);
+  }, [selectedCategory, selectedNetwork, selectedTimeframe, searchQuery]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -472,7 +723,7 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search 500+ cryptos, stocks, contracts..."
+            placeholder="Search 500+ cryptos, tokens, contracts..."
             placeholderTextColor={colors.text.muted}
             style={[styles.searchInput, { color: colors.text.primary }]}
             autoCapitalize="none"
@@ -510,11 +761,14 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
         </ScrollView>
       </View>
 
-      {/* ── SECONDARY CONTROLS (Chains, Timeframes, Sort) ──── */}
+      {/* ── CHOOSE CHAINS FILTER BAR ─────────────────────────── */}
       <View style={styles.filterBarRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterBarContent}>
-          {/* Network chips */}
-          {NETWORKS.slice(0, 5).map((net) => {
+          <View style={[styles.chainLabelBadge, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
+            <Text style={[styles.chainLabelBadgeText, { color: colors.text.primary }]}>Chains:</Text>
+          </View>
+
+          {NETWORKS.map((net) => {
             const active = selectedNetwork === net;
             return (
               <TouchableOpacity
@@ -522,32 +776,17 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
                 onPress={() => setSelectedNetwork(net)}
                 style={[
                   styles.filterSmallChip,
-                  { backgroundColor: active ? (isDark ? '#2F2F2F' : '#E8E8E8') : 'transparent', borderColor: cardBorder },
+                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
                 ]}
+                activeOpacity={0.75}
               >
-                <Text style={[styles.filterChipText, { color: active ? colors.text.primary : colors.text.muted }]}>
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted, fontWeight: active ? '800' : '600' },
+                  ]}
+                >
                   {net}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-
-          <View style={styles.filterDivider} />
-
-          {/* Timeframes */}
-          {TIMEFRAMES.slice(0, 3).map((tf) => {
-            const active = selectedTimeframe === tf;
-            return (
-              <TouchableOpacity
-                key={tf}
-                onPress={() => setSelectedTimeframe(tf)}
-                style={[
-                  styles.filterSmallChip,
-                  { backgroundColor: active ? (isDark ? '#2F2F2F' : '#E8E8E8') : 'transparent', borderColor: cardBorder },
-                ]}
-              >
-                <Text style={[styles.filterChipText, { color: active ? colors.text.primary : colors.text.muted }]}>
-                  {tf}
                 </Text>
               </TouchableOpacity>
             );
@@ -555,7 +794,37 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
         </ScrollView>
       </View>
 
-      {/* ── TOKEN LIST (Large Trust Wallet Scale) ──────────── */}
+      {/* ── TIMEFRAME SELECTOR: 1h, 7h, 24h ──────────────────── */}
+      <View style={styles.timeframeBarRow}>
+        <View style={styles.timeframeContainer}>
+          <Text style={[styles.timeframeLabel, { color: colors.text.muted }]}>Period:</Text>
+          {TIMEFRAMES.map((tf) => {
+            const active = selectedTimeframe === tf;
+            return (
+              <TouchableOpacity
+                key={tf}
+                onPress={() => setSelectedTimeframe(tf)}
+                style={[
+                  styles.timeframeChip,
+                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
+                ]}
+                activeOpacity={0.75}
+              >
+                <Text
+                  style={[
+                    styles.timeframeChipText,
+                    { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted, fontWeight: active ? '800' : '600' },
+                  ]}
+                >
+                  {tf}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* ── TOKEN LIST (No mini graphs, delta directly under price, high visibility) ── */}
       <ScrollView
         contentContainerStyle={[styles.tokenListContent, { paddingBottom: insets.bottom + 28 }]}
         showsVerticalScrollIndicator={false}
@@ -572,6 +841,20 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
           ) : (
             filteredTokens.map((token, index) => {
               const isLast = index === filteredTokens.length - 1;
+              const displayedChange =
+                selectedTimeframe === '1h'
+                  ? token.change1h
+                  : selectedTimeframe === '7h'
+                  ? token.change7h
+                  : token.change24h;
+
+              const isPositive =
+                selectedTimeframe === '1h'
+                  ? token.positive1h
+                  : selectedTimeframe === '7h'
+                  ? token.positive7h
+                  : token.positive24h;
+
               return (
                 <TouchableOpacity
                   key={`${token.symbol}-${token.name}-${index}`}
@@ -580,8 +863,8 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
                       symbol: token.symbol,
                       name: token.name,
                       price: token.price,
-                      change: token.change24h,
-                      positive: token.positive,
+                      change: displayedChange,
+                      positive: isPositive,
                       network: token.chain,
                     })
                   }
@@ -598,53 +881,32 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                         <Text style={[styles.tokenSymbolMain, { color: colors.text.primary }]}>{token.symbol}</Text>
                         <View style={[styles.chainTagPill, { backgroundColor: monoMutedSurface }]}>
-                          <Text style={[styles.chainTagText, { color: colors.text.muted }]}>{token.chain}</Text>
+                          <Text style={[styles.chainTagText, { color: isDark ? '#CCCCCC' : colors.text.muted }]}>{token.chain}</Text>
                         </View>
                       </View>
-                      <Text style={[styles.tokenFullName, { color: colors.text.muted }]} numberOfLines={1}>
+                      <Text style={[styles.tokenFullName, { color: isDark ? '#CCCCCC' : colors.text.muted }]} numberOfLines={1}>
                         {token.name}
                       </Text>
                     </View>
                   </View>
 
-                  {/* Center: Sparkline */}
-                  <View style={styles.tokenSparkWrap}>
-                    <MiniSparkline points={token.sparkline} positive={token.positive} />
-                  </View>
-
-                  {/* Right: Price & Quick Swap Action */}
+                  {/* Right: Price & Change Directly Under Price (No mini graph, No swap box) */}
                   <View style={styles.tokenRightGroup}>
                     <Text style={[styles.tokenPriceText, { color: colors.text.primary }]}>{token.price}</Text>
 
-                    <View style={styles.tokenActionRow}>
-                      <View
-                        style={[
-                          styles.deltaPill,
-                          {
-                            backgroundColor: token.positive
-                              ? isDark
-                                ? 'rgba(34, 197, 94, 0.16)'
-                                : '#DCFCE7'
-                              : isDark
-                              ? 'rgba(239, 68, 68, 0.16)'
-                              : '#FEE2E2',
-                          },
-                        ]}
-                      >
-                        <Text style={[styles.deltaText, { color: token.positive ? '#22C55E' : '#EF4444' }]}>
-                          {token.change24h}
-                        </Text>
-                      </View>
-
-                      {/* 1-Tap Quick Swap */}
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate('Swap')}
-                        style={[styles.quickSwapBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-                        activeOpacity={0.7}
-                      >
-                        <SwapIcon color={monoPrimary} size={12} />
-                        <Text style={[styles.quickSwapText, { color: colors.text.primary }]}>Swap</Text>
-                      </TouchableOpacity>
+                    <View
+                      style={[
+                        styles.deltaPill,
+                        {
+                          backgroundColor: isPositive
+                            ? 'rgba(34, 197, 94, 0.16)'
+                            : 'rgba(239, 68, 68, 0.16)',
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.deltaText, { color: isPositive ? '#22C55E' : '#EF4444' }]}>
+                        {displayedChange}
+                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -663,13 +925,13 @@ const styles = StyleSheet.create({
   },
   headerBar: {
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 10,
   },
   headerTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   headerTitleText: {
     fontSize: 28,
@@ -709,7 +971,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   categoriesWrap: {
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   categoriesContent: {
     paddingHorizontal: 20,
@@ -722,17 +984,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   categoryText: {
-    fontSize: 14.5,
-    fontWeight: '700',
+    fontSize: 14,
   },
   filterBarRow: {
     paddingVertical: 4,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   filterBarContent: {
     paddingHorizontal: 20,
     alignItems: 'center',
     gap: 8,
+  },
+  chainLabelBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 0.5,
+  },
+  chainLabelBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
   },
   filterSmallChip: {
     paddingHorizontal: 12,
@@ -741,14 +1012,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   filterChipText: {
-    fontSize: 13,
+    fontSize: 12.5,
+  },
+  timeframeBarRow: {
+    paddingHorizontal: 20,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  timeframeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeframeLabel: {
+    fontSize: 12,
     fontWeight: '700',
   },
-  filterDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: '#383838',
-    marginHorizontal: 4,
+  timeframeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  timeframeChipText: {
+    fontSize: 12,
   },
   tokenListContent: {
     paddingHorizontal: 18,
@@ -762,13 +1049,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: 15,
     paddingHorizontal: 16,
   },
   tokenLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1.2,
+    flex: 1.4,
   },
   tokenTitleColumn: {
     marginLeft: 14,
@@ -785,55 +1072,34 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   chainTagText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   tokenFullName: {
-    fontSize: 13.5,
+    fontSize: 13,
     marginTop: 2,
     fontWeight: '500',
   },
-  tokenSparkWrap: {
-    paddingHorizontal: 4,
-  },
   tokenRightGroup: {
     alignItems: 'flex-end',
-    flex: 1,
+    justifyContent: 'center',
   },
   tokenPriceText: {
     fontSize: 17,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
   },
-  tokenActionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 5,
-  },
   deltaPill: {
-    paddingHorizontal: 7,
+    paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 7,
+    marginTop: 4,
   },
   deltaText: {
     fontSize: 12,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
-  },
-  quickSwapBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 8,
-    borderWidth: 0.8,
-  },
-  quickSwapText: {
-    fontSize: 12,
-    fontWeight: '700',
   },
   emptyWrap: {
     padding: 36,
@@ -849,4 +1115,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

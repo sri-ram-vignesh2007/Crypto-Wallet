@@ -11,6 +11,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useWalletStore } from '../store/walletStore';
 import { CHAINS } from '../core/ChainConfig';
+import { TokenLogo } from '../components/TokenLogo';
 import QRCodeView from '../components/QRCodeView';
 
 const SpringButton: React.FC<{
@@ -59,7 +60,7 @@ const ShareIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: nu
     <Circle cx="18" cy="5" r="3" />
     <Circle cx="6" cy="12" r="3" />
     <Circle cx="18" cy="19" r="3" />
-    <Path d="M8.59 13.51l4.9-4.9M15.49 13.51l4.9 4.9M15.49 10.49l-4.9 4.9M8.59 10.49l-4.9-4.9" />
+    <Path d="M8.59 13.51l6.83 3.98m-.01-10.98l-6.82 3.98" />
   </Svg>
 );
 
@@ -136,7 +137,16 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
           </Svg>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Receive {activeChain.name}</Text>
-        <View style={{ width: 36 }} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Send', { openScanner: true })}
+          style={[styles.backButton, { backgroundColor: monoMutedSurface }]}
+          activeOpacity={0.7}
+        >
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+            <Rect x="7" y="7" width="10" height="10" rx="1.5" />
+          </Svg>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -154,15 +164,21 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
                   onPress={() => setActiveChainId(chain.id)}
                   style={[
                     styles.chainChip,
-                    { backgroundColor: selected ? monoPrimary : monoMutedSurface },
+                    {
+                      backgroundColor: selected ? monoPrimary : monoMutedSurface,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 6,
+                    },
                   ]}
                   activeOpacity={0.7}
                 >
+                  <TokenLogo symbol={chain.symbol} size={18} />
                   <Text style={[
                     styles.chainChipText,
                     selected
                       ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                      : { color: colors.text.primary },
+                      : { color: isDark ? '#FFFFFF' : colors.text.primary },
                   ]}>
                     {chain.name}
                   </Text>
@@ -191,7 +207,7 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
           activeOpacity={0.75}
         >
           <View style={styles.addressCardHeader}>
-            <Text style={styles.chainBadgeText}>
+            <Text style={[styles.chainBadgeText, { color: isDark ? '#FFFFFF' : '#475569' }]}>
               {activeChain.name} Deposit Address
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -221,11 +237,11 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
 
         {/* Institutional Safeguard Warning Card */}
         <View style={[styles.safeguardCard, { backgroundColor: monoMutedSurface, borderColor: cardBorder, marginTop: 16 }]}>
-          <Text style={[styles.safeguardTitle, { color: colors.text.primary }]}>
+          <Text style={[styles.safeguardTitle, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
             Enclave Verified Address
           </Text>
-          <Text style={styles.safeguardText}>
-            Deposit only <Text style={{ fontWeight: '700', color: colors.text.primary }}>{activeChain.name} ({activeChain.symbol})</Text> and compatible network assets to this vault address. Assets deposited across incompatible networks cannot be recovered.
+          <Text style={[styles.safeguardText, { color: isDark ? '#F1F5F9' : '#475569' }]}>
+            Deposit only <Text style={{ fontWeight: '700', color: isDark ? '#FFFFFF' : colors.text.primary }}>{activeChain.name} ({activeChain.symbol})</Text> and compatible network assets to this vault address. Assets deposited across incompatible networks cannot be recovered.
           </Text>
         </View>
       </ScrollView>
