@@ -154,18 +154,28 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
           <View style={styles.highlightRow}>
             <Text style={styles.highlightBullet}>🔐</Text>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>Hardware Security Enclave</Text>
-              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>Protected by biometric authentication on your device.</Text>
+              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>True Self-Custody</Text>
+              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>You hold full ownership of your private keys and 12-word recovery phrase.</Text>
             </View>
           </View>
 
           <View style={[styles.divider, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]} />
 
           <View style={styles.highlightRow}>
-            <Text style={styles.highlightBullet}>⚡</Text>
+            <Text style={styles.highlightBullet}>🌐</Text>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>Free Multi-Chain RPC</Text>
-              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>Direct failover on Ethereum, Polygon, BSC, Base, and Arbitrum.</Text>
+              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>Multi-Chain & DeFi Hub</Text>
+              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>100+ blockchains, Web3 DApp browser, and decentralized perpetuals.</Text>
+            </View>
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' }]} />
+
+          <View style={styles.highlightRow}>
+            <Text style={styles.highlightBullet}>🔄</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.highlightTitle, { color: colors.text.primary }]}>Cross-Compatibility</Text>
+              <Text style={[styles.highlightSub, { color: colors.text.muted }]}>Easily import recovery phrases from Trust Wallet, Coinbase Wallet, or MetaMask.</Text>
             </View>
           </View>
         </View>

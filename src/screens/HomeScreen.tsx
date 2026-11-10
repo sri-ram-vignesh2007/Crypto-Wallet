@@ -687,6 +687,27 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </SpringButton>
         </View>
 
+        {/* Web3 Ecosystem Quick Triggers (dApp Browser & Perpetuals) */}
+        <View style={styles.web3QuickRow}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('DAppBrowser')}
+            style={[styles.web3QuickPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
+            activeOpacity={0.8}
+          >
+            <Text style={{ fontSize: 16 }}>🌐</Text>
+            <Text style={[styles.web3QuickText, { color: colors.text.primary }]}>Web3 Browser</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Perpetuals')}
+            style={[styles.web3QuickPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
+            activeOpacity={0.8}
+          >
+            <Text style={{ fontSize: 16 }}>📈</Text>
+            <Text style={[styles.web3QuickText, { color: colors.text.primary }]}>Perpetuals 50x</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* ======================================================== */}
         {/* ASSET OVERVIEW SECTION (ASSETS UP)                       */}
         {/* ======================================================== */}
@@ -1469,6 +1490,25 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
     marginTop: 6,
     textAlign: 'center',
+  },
+  web3QuickRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  web3QuickPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  web3QuickText: {
+    fontSize: 13,
+    fontWeight: '800',
   },
   // MARKET MOVERS (GAINERS & LOSERS)
   moversSegmentPill: {

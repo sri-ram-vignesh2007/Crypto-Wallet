@@ -11,6 +11,7 @@ import {
   Dimensions,
   Share,
   Animated,
+  Modal,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -279,6 +280,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
   const [perfTab, setPerfTab] = useState<'5m' | '1h' | '4h' | '24h'>('1h');
   const [copiedContract, setCopiedContract] = useState(false);
+  const [showTradeModal, setShowTradeModal] = useState(false);
 
   const { balances } = useTransactionStore();
   const { watchlist, toggleWatchlist, loadWatchlist } = useWatchlistStore();
@@ -622,7 +624,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
       {/* ── STICKY FLOATING TRADE BUTTON (Images 3 & 4) ──────── */}
       <View style={[styles.stickyBottomBar, { paddingBottom: Math.max(16, insets.bottom + 8), backgroundColor: colors.bg.canvas }]}>
         <TouchableOpacity
-          onPress={() => navigation?.navigate?.('Swap', { tokenSymbol: symbol })}
+          onPress={() => setShowTradeModal(true)}
           style={[styles.floatingTradeBtn, { backgroundColor: isDark ? '#FFFFFF' : '#111111' }]}
           activeOpacity={0.85}
         >
@@ -630,6 +632,52 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
           <Text style={[styles.floatingTradeText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Trade</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ── TRADE OPTIONS MODAL ────────────────────────────── */}
+      <Modal visible={showTradeModal} transparent animationType="slide" onRequestClose={() => setShowTradeModal(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTradeModal(false)}>
+          <View style={[styles.tradeSheet, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+            <View style={styles.tradeSheetHeader}>
+              <Text style={[styles.tradeSheetTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Trade {symbol}</Text>
+              <TouchableOpacity onPress={() => setShowTradeModal(false)}>
+                <Text style={{ color: '#858585', fontSize: 16 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => {
+                setShowTradeModal(false);
+                navigation?.navigate?.('Swap', { tokenSymbol: symbol });
+              }}
+              style={[styles.tradeOptionItem, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+              activeOpacity={0.8}
+            >
+              <Text style={{ fontSize: 24 }}>🔄</Text>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.tradeOptionTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Instant Spot Swap</Text>
+                <Text style={styles.tradeOptionSub}>Swap {symbol} at best DEX aggregator rates with 0% slippage MEV protection</Text>
+              </View>
+              <Text style={{ color: isDark ? '#FFFFFF' : '#111111', fontWeight: '800' }}>→</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setShowTradeModal(false);
+                navigation?.navigate?.('Perpetuals');
+              }}
+              style={[styles.tradeOptionItem, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+              activeOpacity={0.8}
+            >
+              <Text style={{ fontSize: 24 }}>📈</Text>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.tradeOptionTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Perpetual Futures (Up to 50x)</Text>
+                <Text style={styles.tradeOptionSub}>Trade decentralized perps with ApolloX / GMX, Long or Short with leverage</Text>
+              </View>
+              <Text style={{ color: isDark ? '#FFFFFF' : '#111111', fontWeight: '800' }}>→</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -921,5 +969,45 @@ const styles = StyleSheet.create({
   floatingTradeText: {
     fontSize: 16,
     fontWeight: '800',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  tradeSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: 1,
+    padding: 20,
+    paddingBottom: 36,
+  },
+  tradeSheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  tradeSheetTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  tradeOptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  tradeOptionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  tradeOptionSub: {
+    color: '#858585',
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 2,
   },
 });

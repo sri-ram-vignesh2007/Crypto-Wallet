@@ -390,11 +390,15 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
           <ArrowLeftIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
         </TouchableOpacity>
 
-        {/* Center Market Dropdown Pill */}
-        <View style={[styles.marketPill, { backgroundColor: monoMutedSurface }]}>
-          <Text style={[styles.marketPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Market</Text>
+        {/* Center Market / Perp Switcher Pill */}
+        <TouchableOpacity
+          onPress={() => navigation?.navigate?.('Perpetuals')}
+          style={[styles.marketPill, { backgroundColor: monoMutedSurface }]}
+          activeOpacity={0.75}
+        >
+          <Text style={[styles.marketPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Spot • Perps ↗</Text>
           <ChevronDownIcon color={isDark ? '#AAAAAA' : colors.text.muted} size={12} />
-        </View>
+        </TouchableOpacity>
 
         {/* Slippage Settings Button */}
         <TouchableOpacity

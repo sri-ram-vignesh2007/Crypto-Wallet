@@ -38,6 +38,8 @@ import TokenDetailScreen from './src/screens/TokenDetailScreen';
 import ChainDetailScreen from './src/screens/ChainDetailScreen';
 import BuyScreen from './src/screens/BuyScreen';
 import CustomTokenScreen from './src/screens/CustomTokenScreen';
+import PerpetualsScreen from './src/screens/PerpetualsScreen';
+import DAppBrowserScreen from './src/screens/DAppBrowserScreen';
 import {
   ConnectedAppsScreen,
   WalletsScreen,
@@ -66,6 +68,8 @@ type RootStackParamList = {
   Receive: { tokenSymbol?: string } | undefined;
   Swap: { tokenSymbol?: string } | undefined;
   Buy: undefined;
+  Perpetuals: undefined;
+  DAppBrowser: undefined;
   History: undefined;
   Activity: undefined;
   AssetDetail: { asset: any };
@@ -314,6 +318,8 @@ function AppContent() {
               <Stack.Screen name="Receive" component={ReceiveScreen} options={{ title: 'Receive' }} />
               <Stack.Screen name="Swap" component={SwapScreen} options={{ title: 'Swap' }} />
               <Stack.Screen name="Buy" component={BuyScreen} options={{ title: 'Buy Crypto' }} />
+              <Stack.Screen name="Perpetuals" component={PerpetualsScreen} options={{ title: 'Perpetual Futures' }} />
+              <Stack.Screen name="DAppBrowser" component={DAppBrowserScreen} options={{ title: 'Web3 Browser' }} />
               <Stack.Screen name="History" component={ActivityScreen} options={{ title: 'History' }} />
               <Stack.Screen name="AssetDetail" component={AssetDetailScreen} options={{ title: 'Asset' }} />
               <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ title: 'Transaction' }} />
