@@ -1,6 +1,6 @@
 // src/screens/TokenDetailScreen.tsx - Institutional-Grade Crypto Detail & Analytics (Trust Wallet / Phantom Style)
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,12 +10,15 @@ import {
   StatusBar,
   Dimensions,
   Share,
+  Animated,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Circle, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { TokenLogo } from '../components/TokenLogo';
 import { useTransactionStore } from '../store/transactionStore';
+import { useWatchlistStore } from '../store/watchlistStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -35,49 +38,60 @@ interface Props {
   };
 }
 
-// Vector Navigation & Action Icons
+// Vector Glyphs
 const ArrowLeftIcon = ({ color, size = 22 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M19 12H5M12 19l-7-7 7-7" />
   </Svg>
 );
 
-const ShareIcon = ({ color, size = 18 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <Circle cx="18" cy="5" r="3" />
-    <Circle cx="6" cy="12" r="3" />
-    <Circle cx="18" cy="19" r="3" />
-    <Path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
+const StarIcon = ({ filled = false, color = '#FFFFFF', size = 20 }: { filled?: boolean; color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </Svg>
 );
 
-const ArrowUpRightIcon = ({ color, size = 19 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+const ArrowUpRightIcon = ({ color, size = 18 }: { color: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M7 17L17 7M17 7H7M17 7v10" />
   </Svg>
 );
 
-const ArrowDownLeftIcon = ({ color, size = 19 }: { color: string; size?: number }) => (
+const ScanQrIcon = ({ color, size = 18 }: { color: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M17 7L7 17M7 17h10M7 17V7" />
+    <Path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+    <Rect x="7" y="7" width="10" height="10" rx="1.5" />
   </Svg>
 );
 
-const SwapIcon = ({ color, size = 19 }: { color: string; size?: number }) => (
+const SparkIcon = ({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+  </Svg>
+);
+
+const CandleIcon = ({ color = '#858585', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 3v3M9 18v3M6 6h6v12H6zM17 8v2M17 14v2M15 10h4v4h-4z" />
+  </Svg>
+);
+
+const CopyIcon = ({ color = '#858585', size = 14 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="9" y="9" width="13" height="13" rx="2.5" />
+    <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </Svg>
+);
+
+const ChevronRightIcon = ({ color = '#858585', size = 12 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 18l6-6-6-6" />
+  </Svg>
+);
+
+const TradeIcon = ({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M16 3l4 4-4 4M8 21l-4-4 4-4M4 17h16M20 7H4" />
-  </Svg>
-);
-
-const PlusIcon = ({ color, size = 20 }: { color: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M12 5v14M5 12h14" />
-  </Svg>
-);
-
-const ChevronRightIcon = ({ color = '#858585', size = 14 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
@@ -88,17 +102,37 @@ interface TokenMetaData {
   circulatingSupply: string;
   allTimeHigh: string;
   rank: string;
+  holders?: string;
+  created?: string;
+  circulatingSupplyPct?: string;
+  liquidity?: string;
+  top10HoldersPct?: string;
+  top10AvgBuy?: string;
+  top10AvgSell?: string;
+  contractAddress?: string;
   about: string;
-  news: {
-    id: string;
-    source: string;
-    title: string;
-    timeAgo: string;
-    snippet: string;
-  }[];
+  summary?: string;
 }
 
 const TOKEN_METADATA_REGISTRY: Record<string, TokenMetaData> = {
+  LIBRA: {
+    network: 'BNB Smart Chain',
+    marketCap: '$6.22M',
+    volume24h: '$283.13M',
+    circulatingSupply: '1.0B LIBRA',
+    allTimeHigh: '$0.024',
+    rank: '#340',
+    holders: '-',
+    created: '23 Oct 2025',
+    circulatingSupplyPct: '-',
+    liquidity: '$1.13M',
+    top10HoldersPct: '62.2537%',
+    top10AvgBuy: '$0.01',
+    top10AvgSell: '$0.00',
+    contractAddress: '0x1e36c5793bf819dfb48e3e4a9e9a4f227b9c8f9c',
+    about: 'Libra (LIBRA) is a decentralized cryptocurrency and automated utility liquidity protocol engineered for high-velocity decentralized swaps across BNB Chain. It leverages autonomous invariant curves to ensure deep pooled liquidity and verifiable transaction settlement.',
+    summary: 'Libra exhibits active on-chain liquidity velocity with $283M+ in 24h decentralized exchange volume. Contract safety analysis verified no malicious functions, honeypots, or proxy transfer vulnerabilities.',
+  },
   SOL: {
     network: 'Solana L1',
     marketCap: '$78.4B',
@@ -106,30 +140,16 @@ const TOKEN_METADATA_REGISTRY: Record<string, TokenMetaData> = {
     circulatingSupply: '467.2M SOL',
     allTimeHigh: '$259.96',
     rank: '#5',
+    holders: '2,840,190',
+    created: '16 Mar 2020',
+    circulatingSupplyPct: '89.4%',
+    liquidity: '$420.5M',
+    top10HoldersPct: '12.45%',
+    top10AvgBuy: '$24.50',
+    top10AvgSell: '$148.00',
+    contractAddress: 'So11111111111111111111111111111111111111112',
     about: 'Solana is a high-performance Layer-1 blockchain supporting fast, deterministic smart contract execution with sub-second finality. It leverages Proof-of-History (PoH) coupled with Tower BFT to process institutional transaction volumes with fractional cent fees.',
-    news: [
-      {
-        id: 'sol-news-1',
-        source: 'CoinDesk',
-        timeAgo: '18m ago',
-        title: 'Solana Firedancer Validator Testnet Reaches 1,000,000 TPS Benchmark',
-        snippet: 'Jump Crypto independent client architecture demonstrated flawless state synchronization under simulated global stress workloads.',
-      },
-      {
-        id: 'sol-news-2',
-        source: 'Bloomberg Crypto',
-        timeAgo: '1h ago',
-        title: 'Solana Daily Decentralized Exchange Volume Crosses $2.4B Milestone',
-        snippet: 'High-speed automated market makers captured 48% of cross-chain active retail and institutional swap volume over the past 24 hours.',
-      },
-      {
-        id: 'sol-news-3',
-        source: 'The Block',
-        timeAgo: '4h ago',
-        title: 'Solana Liquid Staking Protocol TVL Expands Amid Institutional Custody Inflows',
-        snippet: 'Jito and Marinade node participation increased 14% as enterprise treasuries allocate rewards directly into multi-sig vaults.',
-      },
-    ],
+    summary: 'High throughput telemetry indicates sustained institutional volume with 99.99% uptime. Low latency execution ensures reliable swap settlements across decentralized exchanges.',
   },
   BTC: {
     network: 'Bitcoin Core',
@@ -138,48 +158,52 @@ const TOKEN_METADATA_REGISTRY: Record<string, TokenMetaData> = {
     circulatingSupply: '19.78M BTC',
     allTimeHigh: '$73,750.07',
     rank: '#1',
+    holders: '54,200,000+',
+    created: '03 Jan 2009',
+    circulatingSupplyPct: '94.2%',
+    liquidity: '$2.8B',
+    top10HoldersPct: '5.8%',
+    top10AvgBuy: '$18,200',
+    top10AvgSell: '$64,500',
+    contractAddress: 'Native UTXO Bitcoin Core',
     about: 'Bitcoin is the foundational decentralized digital asset and global store of value. It operates via Proof-of-Work (PoW) consensus with a mathematically hard-capped supply of 21,000,000 coins, providing absolute monetary predictability.',
-    news: [
-      {
-        id: 'btc-news-1',
-        source: 'Bloomberg Crypto',
-        timeAgo: '12m ago',
-        title: 'Spot Bitcoin ETFs Record $1.8B Weekly Inflow Led by BlackRock IBIT',
-        snippet: 'Institutional wealth managers and family offices expanded exposure to multi-year reserve allocations.',
-      },
-      {
-        id: 'btc-news-2',
-        source: 'Reuters',
-        timeAgo: '2h ago',
-        title: 'Bitcoin Mining Difficulty Crosses 92T Record Ahead of Macro Easing Cycle',
-        snippet: 'Global hash rate metrics confirm unprecedented energy infrastructure resilience and ASIC hardware efficiency.',
-      },
-    ],
+    summary: 'Sovereign-grade cryptographic security and unmatched decentralization. Network difficulty and hash rate remain at historic peaks amid sustained ETF inflows.',
   },
   ETH: {
-    network: 'Ethereum',
+    network: 'Ethereum Mainnet',
     marketCap: '$410.8B',
     volume24h: '$18.6B',
     circulatingSupply: '120.4M ETH',
     allTimeHigh: '$4,891.70',
     rank: '#2',
+    holders: '24,100,000+',
+    created: '30 Jul 2015',
+    circulatingSupplyPct: '100%',
+    liquidity: '$1.9B',
+    top10HoldersPct: '14.2%',
+    top10AvgBuy: '$1,200',
+    top10AvgSell: '$3,150',
+    contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     about: 'Ethereum is the global settlement layer for decentralized finance and programmable smart contracts. With Proof-of-Stake consensus and Layer-2 rollups, Ethereum powers decentralized applications and asset tokenization worldwide.',
-    news: [
-      {
-        id: 'eth-news-1',
-        source: 'CoinDesk',
-        timeAgo: '25m ago',
-        title: 'Ethereum Pectra Devnet Finalized With EOF Prover Upgrades',
-        snippet: 'Core developers confirmed validator balance caps increasing up to 2,048 ETH, streamlining institutional node operation.',
-      },
-      {
-        id: 'eth-news-2',
-        source: 'The Block',
-        timeAgo: '3h ago',
-        title: 'Rollup Settlement Volume Reaches Record High Across Arbitrum and Base',
-        snippet: 'Blob transaction gas fees remained sub-cent, accelerating commercial micro-payment adoption.',
-      },
-    ],
+    summary: 'Core settlement layer for global DeFi, tokenized securities, and rollup scaling. Steady deflationary burning mechanism supports long-term structural supply dynamics.',
+  },
+  BNB: {
+    network: 'BNB Smart Chain',
+    marketCap: '$89.2B',
+    volume24h: '$1.4B',
+    circulatingSupply: '153.8M BNB',
+    allTimeHigh: '$720.67',
+    rank: '#4',
+    holders: '2,900,000+',
+    created: '08 Jul 2017',
+    circulatingSupplyPct: '100%',
+    liquidity: '$380M',
+    top10HoldersPct: '42.1%',
+    top10AvgBuy: '$120.00',
+    top10AvgSell: '$480.00',
+    contractAddress: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+    about: 'BNB powers the BNB Chain ecosystem, providing fast and low-cost transaction execution for millions of daily active on-chain users, decentralized finance protocols, and gaming networks.',
+    summary: 'Deep pooled liquidity and continuous auto-burn cycles. Gas fees remain predictable and microscopic for retail and institutional traders.',
   },
   USDC: {
     network: 'Multi-Chain Standard',
@@ -188,247 +212,128 @@ const TOKEN_METADATA_REGISTRY: Record<string, TokenMetaData> = {
     circulatingSupply: '35.4B USDC',
     allTimeHigh: '$1.00',
     rank: '#6',
+    holders: '4,500,000+',
+    created: '04 Sep 2018',
+    circulatingSupplyPct: '100%',
+    liquidity: '$1.2B',
+    top10HoldersPct: '18.9%',
+    top10AvgBuy: '$1.00',
+    top10AvgSell: '$1.00',
+    contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     about: 'USD Coin (USDC) is a fully collateralized US dollar stablecoin backed 100% by cash and short-duration US Treasuries. It provides atomic settlement and programmatic fiat parity across Ethereum, Solana, and major Layer-2 protocols.',
-    news: [
-      {
-        id: 'usdc-news-1',
-        source: 'Reuters Fintech',
-        timeAgo: '45m ago',
-        title: 'Cross-Chain Transfer Protocol (CCTP) Volume Surpasses $14B Benchmark',
-        snippet: 'Instant burn-and-mint settlement across rollups eliminates wrapped token bridge liquidity risk.',
-      },
-    ],
-  },
-  AVAX: {
-    network: 'Avalanche C-Chain',
-    marketCap: '$13.8B',
-    volume24h: '$720M',
-    circulatingSupply: '395M AVAX',
-    allTimeHigh: '$146.22',
-    rank: '#12',
-    about: 'Avalanche is an asynchronous, high-throughput smart contract platform featuring sub-second finality. It enables custom sovereign enterprise blockchains and subnets with tailored compliance and validator configurations.',
-    news: [
-      {
-        id: 'avax-news-1',
-        source: 'Bloomberg Crypto',
-        timeAgo: '1h ago',
-        title: 'Avalanche Institutional Subnets Power $400M Tokenized Fund Inflows',
-        snippet: 'Regulated custodians deployed compliant privacy subnets for high-frequency private equity settlements.',
-      },
-    ],
-  },
-  NEAR: {
-    network: 'NEAR Protocol',
-    marketCap: '$6.1B',
-    volume24h: '$480M',
-    circulatingSupply: '1.18B NEAR',
-    allTimeHigh: '$20.42',
-    rank: '#18',
-    about: 'NEAR is a sharded, Proof-of-Stake Layer-1 blockchain built with Nightshade dynamic sharding and Chain Abstraction to deliver sub-second multi-chain account execution and decentralized AI model inference.',
-    news: [
-      {
-        id: 'near-news-1',
-        source: 'CoinDesk',
-        timeAgo: '2h ago',
-        title: 'NEAR Chain Abstraction Architecture Connects Cross-Chain User Accounts',
-        snippet: 'Single-signature transaction routing enables instant liquidity transfer across EVM and Solana ecosystems.',
-      },
-    ],
-  },
-  RENDER: {
-    network: 'Render DePIN Network',
-    marketCap: '$3.9B',
-    volume24h: '$340M',
-    circulatingSupply: '518M RENDER',
-    allTimeHigh: '$13.60',
-    rank: '#24',
-    about: 'Render Network is the premier decentralized GPU computing infrastructure provider. It connects node operators with creators and AI research laboratories requiring scalable distributed graphics and AI model inference compute.',
-    news: [
-      {
-        id: 'render-news-1',
-        source: 'The Block',
-        timeAgo: '3h ago',
-        title: 'Render Network GPU Compute Fleet Expands 35% For Decentralized AI Workloads',
-        snippet: 'Commercial rendering nodes reported 99.98% uptime executing large-scale parameter model training.',
-      },
-    ],
-  },
-  ARB: {
-    network: 'Arbitrum One L2',
-    marketCap: '$2.8B',
-    volume24h: '$380M',
-    circulatingSupply: '3.4B ARB',
-    allTimeHigh: '$2.40',
-    rank: '#35',
-    about: 'Arbitrum One is the leading Ethereum Optimistic Rollup, offering EVM equivalence with ultra-low fees and high throughput while inheriting Ethereum mainnet cryptographic security.',
-    news: [
-      {
-        id: 'arb-news-1',
-        source: 'CoinDesk',
-        timeAgo: '2h ago',
-        title: 'Arbitrum Stylus Multi-Language WASM Provers Deploy on Mainnet',
-        snippet: 'Developers can now author high-frequency smart contracts in Rust and C++ with full EVM composability.',
-      },
-    ],
-  },
-  MATIC: {
-    network: 'Polygon PoS / AggLayer',
-    marketCap: '$4.2B',
-    volume24h: '$290M',
-    circulatingSupply: '8.0B MATIC',
-    allTimeHigh: '$2.92',
-    rank: '#28',
-    about: 'Polygon is a decentralized multi-chain ecosystem powered by AggLayer zero-knowledge technology. It unifies shared liquidity and cross-chain execution with near-zero gas costs.',
-    news: [
-      {
-        id: 'matic-news-1',
-        source: 'The Block',
-        timeAgo: '4h ago',
-        title: 'Polygon AggLayer Unifies Unified Cross-Rollup Liquidity Pools',
-        snippet: 'ZK-powered atomic transfers eliminate bridging slippage across connected gaming and payment chains.',
-      },
-    ],
-  },
-  OP: {
-    network: 'Optimism Superchain',
-    marketCap: '$2.3B',
-    volume24h: '$240M',
-    circulatingSupply: '1.2B OP',
-    allTimeHigh: '$4.85',
-    rank: '#38',
-    about: 'Optimism is an Ethereum Layer-2 rollup that powers the Superchain network, standardizing horizontal scaling and open-source infrastructure across leading rollups like Base and OP Mainnet.',
-    news: [
-      {
-        id: 'op-news-1',
-        source: 'Bloomberg Crypto',
-        timeAgo: '3h ago',
-        title: 'Optimism Superchain Ecosystem Captures 45% of Ethereum L2 User Base',
-        snippet: 'Standardized fault-proof architectures and interoperability protocols accelerate unified liquidity.',
-      },
-    ],
-  },
-  LINK: {
-    network: 'Chainlink Oracle Network',
-    marketCap: '$8.4B',
-    volume24h: '$560M',
-    circulatingSupply: '608M LINK',
-    allTimeHigh: '$52.88',
-    rank: '#14',
-    about: 'Chainlink is the industry-standard decentralized computing platform and oracle network. It provides verified real-world market price feeds, verifiable randomness, and cross-chain interoperability (CCIP) across all major blockchains.',
-    news: [
-      {
-        id: 'link-news-1',
-        source: 'Reuters Fintech',
-        timeAgo: '1h ago',
-        title: 'Chainlink CCIP Powers Global Interbank Settlement Pilots With SWIFT',
-        snippet: 'Tier-1 global financial institutions execute atomic cross-chain bond and CBDC transfers securely.',
-      },
-    ],
+    summary: 'Institutional-grade dollar liquidity instrument with verified daily attestations. CCTP integration guarantees instant zero-slippage cross-chain bridging.',
   },
 };
 
 const TIMEFRAME_PATHS: Record<string, { path: string; fill: string; change: string; positive: boolean }> = {
   '1H': {
-    path: 'M0 50 C 40 46, 80 54, 130 46 C 180 38, 240 42, 290 32 C 320 26, 340 24, 360 20',
-    fill: 'M0 50 C 40 46, 80 54, 130 46 C 180 38, 240 42, 290 32 C 320 26, 340 24, 360 20 L 360 85 L 0 85 Z',
-    change: '+0.42%',
-    positive: true,
+    path: 'M0 80 C 40 70, 80 85, 130 72 C 180 60, 240 68, 290 52 C 320 44, 340 40, 360 36',
+    fill: 'M0 80 C 40 70, 80 85, 130 72 C 180 60, 240 68, 290 52 C 320 44, 340 40, 360 36 L 360 180 L 0 180 Z',
+    change: '-0.39%',
+    positive: false,
   },
   '1D': {
-    path: 'M0 56 C 45 52, 90 62, 140 42 C 190 24, 230 36, 280 22 C 310 14, 335 18, 360 8',
-    fill: 'M0 56 C 45 52, 90 62, 140 42 C 190 24, 230 36, 280 22 C 310 14, 335 18, 360 8 L 360 85 L 0 85 Z',
-    change: '+12.4%',
-    positive: true,
+    path: 'M0 65 C 15 75, 25 95, 45 90 C 60 85, 70 125, 85 115 C 100 105, 110 140, 125 125 C 135 110, 140 40, 150 65 C 160 80, 170 40, 185 70 C 195 85, 205 60, 220 75 C 235 88, 250 70, 265 85 C 275 70, 285 82, 305 85 C 315 88, 325 75, 335 120 C 345 135, 355 130, 360 138',
+    fill: 'M0 65 C 15 75, 25 95, 45 90 C 60 85, 70 125, 85 115 C 100 105, 110 140, 125 125 C 135 110, 140 40, 150 65 C 160 80, 170 40, 185 70 C 195 85, 205 60, 220 75 C 235 88, 250 70, 265 85 C 275 70, 285 82, 305 85 C 315 88, 325 75, 335 120 C 345 135, 355 130, 360 138 L 360 180 L 0 180 Z',
+    change: '-2.0%',
+    positive: false,
   },
   '1W': {
-    path: 'M0 64 C 50 68, 100 56, 150 48 C 200 40, 250 28, 300 20 C 330 16, 345 12, 360 6',
-    fill: 'M0 64 C 50 68, 100 56, 150 48 C 200 40, 250 28, 300 20 C 330 16, 345 12, 360 6 L 360 85 L 0 85 Z',
-    change: '+18.6%',
+    path: 'M0 120 C 50 110, 100 90, 150 80 C 200 65, 250 50, 300 40 C 330 32, 345 28, 360 20',
+    fill: 'M0 120 C 50 110, 100 90, 150 80 C 200 65, 250 50, 300 40 C 330 32, 345 28, 360 20 L 360 180 L 0 180 Z',
+    change: '+14.6%',
     positive: true,
   },
   '1M': {
-    path: 'M0 48 C 45 56, 95 64, 145 52 C 195 40, 240 32, 290 22 C 320 16, 345 10, 360 4',
-    fill: 'M0 48 C 45 56, 95 64, 145 52 C 195 40, 240 32, 290 22 C 320 16, 345 10, 360 4 L 360 85 L 0 85 Z',
+    path: 'M0 130 C 45 120, 95 105, 145 90 C 195 75, 240 60, 290 45 C 320 35, 345 25, 360 18',
+    fill: 'M0 130 C 45 120, 95 105, 145 90 C 195 75, 240 60, 290 45 C 320 35, 345 25, 360 18 L 360 180 L 0 180 Z',
     change: '+29.4%',
     positive: true,
   },
   '1Y': {
-    path: 'M0 72 C 60 70, 120 54, 180 44 C 230 34, 280 22, 320 14 C 340 8, 350 6, 360 2',
-    fill: 'M0 72 C 60 70, 120 54, 180 44 C 230 34, 280 22, 320 14 C 340 8, 350 6, 360 2 L 360 85 L 0 85 Z',
+    path: 'M0 145 C 60 135, 120 115, 180 95 C 230 75, 280 55, 320 35 C 340 25, 350 20, 360 12',
+    fill: 'M0 145 C 60 135, 120 115, 180 95 C 230 75, 280 55, 320 35 C 340 25, 350 20, 360 12 L 360 180 L 0 180 Z',
     change: '+142.8%',
     positive: true,
   },
+  'YTD': {
+    path: 'M0 110 C 60 100, 120 85, 180 70 C 230 55, 280 40, 320 28 C 340 20, 350 16, 360 10',
+    fill: 'M0 110 C 60 100, 120 85, 180 70 C 230 55, 280 40, 320 28 C 340 20, 350 16, 360 10 L 360 180 L 0 180 Z',
+    change: '+68.2%',
+    positive: true,
+  },
   'ALL': {
-    path: 'M0 78 C 70 76, 130 60, 190 46 C 240 32, 290 18, 330 10 C 345 6, 355 4, 360 2',
-    fill: 'M0 78 C 70 76, 130 60, 190 46 C 240 32, 290 18, 330 10 C 345 6, 355 4, 360 2 L 360 85 L 0 85 Z',
+    path: 'M0 150 C 70 140, 130 115, 190 90 C 240 65, 290 45, 330 30 C 345 22, 355 18, 360 10',
+    fill: 'M0 150 C 70 140, 130 115, 190 90 C 240 65, 290 45, 330 30 C 345 22, 355 18, 360 10 L 360 180 L 0 180 Z',
     change: '+380.2%',
     positive: true,
   },
 };
 
-const TIME_RANGES = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
+const TIME_RANGES = ['1H', '1D', '1W', '1M', '1Y', 'YTD', 'ALL'];
 
 export default function TokenDetailScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
   const [selectedTimeRange, setSelectedTimeRange] = useState('1D');
+  const [perfTab, setPerfTab] = useState<'5m' | '1h' | '4h' | '24h'>('1h');
+  const [copiedContract, setCopiedContract] = useState(false);
 
-  const { transactions, balances } = useTransactionStore();
+  const { balances } = useTransactionStore();
+  const { watchlist, toggleWatchlist, loadWatchlist } = useWatchlistStore();
+
+  useEffect(() => {
+    loadWatchlist();
+  }, [loadWatchlist]);
 
   const params = route?.params || {};
-  const symbol = (params.symbol || 'SOL').toUpperCase();
-  const name = params.name || (symbol === 'SOL' ? 'Solana' : symbol === 'BTC' ? 'Bitcoin' : symbol === 'ETH' ? 'Ethereum' : symbol);
-  const rawPrice = params.price || '$168.20';
+  const symbol = (params.symbol || 'LIBRA').toUpperCase();
+  const name = params.name || (symbol === 'LIBRA' ? 'Libra' : symbol === 'SOL' ? 'Solana' : symbol === 'BTC' ? 'Bitcoin' : symbol === 'ETH' ? 'Ethereum' : symbol);
+  const rawPrice = params.price || (symbol === 'LIBRA' ? '$0.006222' : '$168.20');
   const price = rawPrice.startsWith('$') ? rawPrice : `$${rawPrice}`;
-  const change = params.change || '+12.4%';
-  const isPositive = params.positive !== undefined ? params.positive : !change.startsWith('-');
+  const change = params.change || (symbol === 'LIBRA' ? '-$0.0001273 (2.0%)' : '+12.4%');
+  const isPositive = params.positive !== undefined ? params.positive : !change.includes('-');
+
+  const isWatched = watchlist.includes(symbol);
 
   const meta: TokenMetaData = TOKEN_METADATA_REGISTRY[symbol] || {
     network: params.network || `${symbol} Network`,
-    marketCap: '$2.4B',
-    volume24h: '$180M',
+    marketCap: '$6.22M',
+    volume24h: '$283.13M',
     circulatingSupply: `100M ${symbol}`,
     allTimeHigh: price,
-    rank: '#20',
-    about: `${name} (${symbol}) is a decentralized cryptocurrency and blockchain protocol engineered for institutional-grade reliability, cryptographic security, and scalable liquidity settlement.`,
-    news: [
-      {
-        id: 'gen-news-1',
-        source: 'Bloomberg Crypto',
-        timeAgo: '42m ago',
-        title: `${name} Ecosystem Liquidity Accelerates Across Verified Institutional Vaults`,
-        snippet: `Protocol telemetry indicates sustained active address growth and low transaction settlement overhead.`,
-      },
-    ],
+    rank: '#100',
+    holders: '-',
+    created: '23 Oct 2025',
+    circulatingSupplyPct: '-',
+    liquidity: '$1.13M',
+    top10HoldersPct: '62.2537%',
+    top10AvgBuy: '$0.01',
+    top10AvgSell: '$0.00',
+    contractAddress: '0x1e36c5793bf819dfb48e3e4a9e9a4f227b9c8f9c',
+    about: `${name} (${symbol}) is a decentralized cryptocurrency token built on blockchain technology. It enables secure, fast, and low-cost transactions across the network.`,
+    summary: `${name} is an active decentralized liquidity protocol with continuous on-chain transactions and audited contract architectures.`,
   };
-
-  // Find relevant transactions for this symbol
-  const relevantTxs = transactions.filter(tx =>
-    tx.asset.toUpperCase().includes(symbol)
-  );
 
   // Dynamic user holding
   const userBalance = balances[symbol as keyof typeof balances];
-  const userHoldingFormatted = userBalance !== undefined ? userBalance.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: userBalance < 1 ? 4 : 2,
-  }) : null;
+  const userHoldingFormatted = userBalance !== undefined && userBalance > 0
+    ? userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: userBalance < 1 ? 4 : 2 })
+    : null;
 
-  // Monochrome Theme Tokens
   const cardBg = isDark ? '#171717' : '#FFFFFF';
-  const cardBorder = isDark ? '#2C2C2E' : '#E5E5E5';
-  const monoPrimary = isDark ? '#FFFFFF' : '#111111';
-  const monoSurfaceElevated = isDark ? '#202020' : '#F4F4F4';
-  const monoMutedSurface = isDark ? '#262626' : '#ECECEC';
+  const cardBorder = isDark ? '#262A36' : '#E5E5E5';
+  const monoSurfaceElevated = isDark ? '#1F2430' : '#F4F4F4';
+  const monoMutedSurface = isDark ? '#262C3A' : '#ECECEC';
 
   const chartInfo = TIMEFRAME_PATHS[selectedTimeRange] || TIMEFRAME_PATHS['1D'];
 
-  const handleShare = async () => {
+  const copyContractAddress = async () => {
     try {
-      await Share.share({
-        message: `${name} (${symbol}): ${price} (${change}) on Cura Wallet`,
-      });
+      await Clipboard.setStringAsync(meta.contractAddress || '0x1e36c5793bf819dfb48e3e4a9e9a4f227b9c8f9c');
+      setCopiedContract(true);
+      setTimeout(() => setCopiedContract(false), 2200);
     } catch {}
   };
 
@@ -436,7 +341,7 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]} edges={['top']}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* ── TOP NAV BAR ────────────────────────────────────────── */}
+      {/* ── TOP NAV BAR (Images 3 & 4: ← and ☆) ─────────────── */}
       <View style={[styles.topNavRow, { paddingTop: 6, paddingBottom: 10 }]}>
         <TouchableOpacity
           onPress={() => navigation?.goBack()}
@@ -444,297 +349,287 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ArrowLeftIcon color={colors.text.primary} size={20} />
+          <ArrowLeftIcon color={isDark ? '#FFFFFF' : '#111111'} size={20} />
         </TouchableOpacity>
 
-        <View style={styles.navTitleCenter}>
-          <Text style={[styles.navTitleText, { color: colors.text.primary }]}>{name}</Text>
-          <Text style={styles.navNetworkSub}>{meta.network}</Text>
-        </View>
+        <View style={{ flex: 1 }} />
 
+        {/* Watchlist Toggle Star Button */}
         <TouchableOpacity
-          onPress={handleShare}
+          onPress={() => toggleWatchlist(symbol)}
           style={[styles.navBtnCircle, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ShareIcon color={colors.text.primary} size={17} />
+          <StarIcon filled={isWatched} color={isWatched ? '#EAB308' : (isDark ? '#FFFFFF' : '#111111')} size={19} />
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── HERO TOKEN PRICE & HEADER CARD ─────────────────────── */}
-        <View style={[styles.heroCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          <View style={styles.heroTopRow}>
-            <View style={styles.tokenLogoWrap}>
-              <TokenLogo symbol={symbol} size={46} />
-            </View>
-            <View style={styles.heroTitleCol}>
-              <View style={styles.nameRankRow}>
-                <Text style={[styles.heroNameText, { color: colors.text.primary }]}>{name}</Text>
-                <View style={[styles.rankBadge, { backgroundColor: monoMutedSurface }]}>
-                  <Text style={[styles.rankBadgeText, { color: colors.text.secondary }]}>{meta.rank}</Text>
-                </View>
-              </View>
-              <Text style={styles.heroSymbolText}>{symbol} • {meta.network}</Text>
-            </View>
+        {/* ── HEADER TOKEN LOGO & PRICE (Image 3) ──────────────── */}
+        <View style={styles.headerInfoRow}>
+          <View style={styles.headerLeftGroup}>
+            <TokenLogo symbol={symbol} size={44} />
+            <Text style={[styles.headerTokenName, { color: isDark ? '#FFFFFF' : '#111111' }]}>{name}</Text>
           </View>
-
-          <View style={styles.priceRow}>
-            <Text style={[styles.priceNumber, { color: colors.text.primary }]}>{price}</Text>
-            <View style={[
-              styles.changeBadge,
-              { backgroundColor: isPositive ? 'rgba(34, 197, 94, 0.16)' : 'rgba(239, 68, 68, 0.16)' },
-            ]}>
-              <Text style={[
-                styles.changeBadgeText,
-                { color: isPositive ? '#22C55E' : '#EF4444' },
-              ]}>
-                {change} (24h)
-              </Text>
-            </View>
-          </View>
-
-          {/* User Holding Banner if wallet has funds */}
-          {userHoldingFormatted && (
-            <View style={[styles.holdingBanner, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}>
-              <Text style={styles.holdingBannerLabel}>Your Balance</Text>
-              <Text style={[styles.holdingBannerValue, { color: colors.text.primary }]}>
-                {userHoldingFormatted} {symbol}
-              </Text>
-            </View>
-          )}
-
-          {/* High-Res Vector Price Trend Chart */}
-          <View style={styles.chartWrapper}>
-            <Svg width={SCREEN_WIDTH - 64} height={85} viewBox="0 0 360 85">
-              <Defs>
-                <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor={isPositive ? '#22C55E' : '#EF4444'} stopOpacity="0.28" />
-                  <Stop offset="1" stopColor={isPositive ? '#22C55E' : '#EF4444'} stopOpacity="0.0" />
-                </LinearGradient>
-              </Defs>
-              <Path d={chartInfo.fill} fill="url(#chartGradient)" />
-              <Path
-                d={chartInfo.path}
-                fill="none"
-                stroke={isPositive ? '#22C55E' : '#EF4444'}
-                strokeWidth={2.4}
-                strokeLinecap="round"
-              />
-              <Circle cx="360" cy="8" r="3.5" fill={isPositive ? '#22C55E' : '#EF4444'} />
-            </Svg>
-          </View>
-
-          {/* Timeframe Selector Pill Bar */}
-          <View style={[styles.timeframeBar, { backgroundColor: monoSurfaceElevated }]}>
-            {TIME_RANGES.map(range => {
-              const active = selectedTimeRange === range;
-              return (
-                <TouchableOpacity
-                  key={range}
-                  onPress={() => setSelectedTimeRange(range)}
-                  style={[
-                    styles.timeframeBtn,
-                    active && { backgroundColor: monoPrimary },
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[
-                    styles.timeframeBtnText,
-                    active
-                      ? { color: isDark ? '#000000' : '#FFFFFF', fontWeight: '800' }
-                      : { color: colors.text.muted },
-                  ]}>
-                    {range}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View style={styles.headerRightGroup}>
+            <Text style={[styles.headerPriceText, { color: isDark ? '#FFFFFF' : '#111111' }]}>{price}</Text>
+            <Text style={[styles.headerDeltaText, { color: isPositive ? '#22C55E' : '#EF4444' }]}>
+              {change}
+            </Text>
           </View>
         </View>
 
-        {/* ── ACTION BUTTONS: BUY, SELL, SWAP, SEND, RECEIVE ────── */}
-        <View style={styles.actionButtonsRow}>
-          {/* Primary BUY Button (Always High-Contrast) */}
-          <TouchableOpacity
-            onPress={() => navigation?.navigate?.('Buy')}
-            style={[styles.primaryActionBtn, { backgroundColor: monoPrimary }]}
-            activeOpacity={0.8}
-          >
-            <PlusIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
-            <Text style={[styles.primaryActionText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-              Buy
-            </Text>
+        {/* ── PRICE TREND CHART WITH ENDPOINT DOT (Image 3) ─────── */}
+        <View style={styles.chartWrapper}>
+          <Svg width={SCREEN_WIDTH - 36} height={170} viewBox="0 0 360 180">
+            <Defs>
+              <LinearGradient id="tokenChartGrad" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor={isPositive ? '#22C55E' : '#22C55E'} stopOpacity="0.18" />
+                <Stop offset="1" stopColor={isPositive ? '#22C55E' : '#22C55E'} stopOpacity="0.0" />
+              </LinearGradient>
+            </Defs>
+            <Path d={chartInfo.fill} fill="url(#tokenChartGrad)" />
+            <Path
+              d={chartInfo.path}
+              fill="none"
+              stroke="#22C55E"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+            />
+            {/* Endpoint indicator dot matching Image 3 */}
+            <Circle cx="360" cy="138" r="4.5" fill="#6366F1" />
+          </Svg>
+        </View>
+
+        {/* ── TIMEFRAME SELECTOR BAR (Image 3) ─────────────────── */}
+        <View style={styles.timeframeRow}>
+          <TouchableOpacity style={[styles.candleBtn, { backgroundColor: monoSurfaceElevated }]}>
+            <CandleIcon color={isDark ? '#AAAAAA' : '#666666'} size={16} />
           </TouchableOpacity>
-
-          {/* SWAP Button */}
-          <TouchableOpacity
-            onPress={() => navigation?.navigate?.('Swap')}
-            style={[styles.secondaryActionBtn, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
-            activeOpacity={0.8}
-          >
-            <SwapIcon color={colors.text.primary} size={19} />
-            <Text style={[styles.secondaryActionText, { color: colors.text.primary }]}>
-              Swap
-            </Text>
-          </TouchableOpacity>
-
-          {/* SEND Button */}
-          <TouchableOpacity
-            onPress={() => navigation?.navigate?.('Send')}
-            style={[styles.secondaryActionBtn, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
-            activeOpacity={0.8}
-          >
-            <ArrowUpRightIcon color={colors.text.primary} size={19} />
-            <Text style={[styles.secondaryActionText, { color: colors.text.primary }]}>
-              Send
-            </Text>
-          </TouchableOpacity>
-
-          {/* RECEIVE Button */}
-          <TouchableOpacity
-            onPress={() => navigation?.navigate?.('Receive')}
-            style={[styles.secondaryActionBtn, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
-            activeOpacity={0.8}
-          >
-            <ArrowDownLeftIcon color={colors.text.primary} size={19} />
-            <Text style={[styles.secondaryActionText, { color: colors.text.primary }]}>
-              Receive
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ── KEY MARKET STATISTICS ─────────────────────────────── */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>MARKET STATISTICS</Text>
-        </View>
-
-        <View style={styles.statsGrid}>
-          {[
-            { label: 'Market Cap', value: meta.marketCap },
-            { label: '24h Volume', value: meta.volume24h },
-            { label: 'Circulating Supply', value: meta.circulatingSupply },
-            { label: 'All-Time High', value: meta.allTimeHigh },
-          ].map((stat, i) => (
-            <View
-              key={i}
-              style={[styles.statBoxCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-            >
-              <Text style={styles.statBoxLabel}>{stat.label}</Text>
-              <Text style={[styles.statBoxValue, { color: colors.text.primary }]}>{stat.value}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* ── LATEST COIN NEWS WIRE ─────────────────────────────── */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>{symbol} NEWS & UPDATES</Text>
-        </View>
-
-        <View style={styles.newsListWrap}>
-          {meta.news.map((item) => (
-            <View
-              key={item.id}
-              style={[styles.newsCard, { backgroundColor: cardBg, borderColor: cardBorder }]}
-            >
-              <View style={styles.newsMetaRow}>
-                <Text style={styles.newsSourceTag}>{item.source}</Text>
-                <Text style={styles.newsDotDivider}>•</Text>
-                <Text style={styles.newsTimeText}>{item.timeAgo}</Text>
-              </View>
-              <Text style={[styles.newsTitleText, { color: colors.text.primary }]}>
-                {item.title}
-              </Text>
-              <Text style={styles.newsSnippetText} numberOfLines={2}>
-                {item.snippet}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* ── RECENT TRANSACTIONS FOR THIS COIN ─────────────────── */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>TRANSACTION ACTIVITY</Text>
-          <TouchableOpacity onPress={() => navigation?.navigate?.('Activity')}>
-            <Text style={[styles.sectionActionText, { color: colors.text.primary }]}>View All</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={[styles.txListContainer, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          {relevantTxs.length > 0 ? (
-            relevantTxs.slice(0, 3).map((tx, idx, arr) => (
+          {TIME_RANGES.map((range) => {
+            const active = selectedTimeRange === range;
+            return (
               <TouchableOpacity
-                key={tx.id}
-                onPress={() => navigation?.navigate?.('TransactionDetail', { tx })}
+                key={range}
+                onPress={() => setSelectedTimeRange(range)}
                 style={[
-                  styles.txRowItem,
-                  idx < arr.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: cardBorder },
+                  styles.timeframePill,
+                  active && { backgroundColor: isDark ? '#262C3A' : '#E0E7FF' },
                 ]}
                 activeOpacity={0.7}
               >
-                <View style={styles.txLeftCol}>
-                  <View style={[styles.txIconCircle, { backgroundColor: monoSurfaceElevated }]}>
-                    <Text style={{ fontSize: 13, color: colors.text.primary }}>
-                      {tx.type === 'swap' ? '⇄' : tx.type === 'received' ? '↙' : '↗'}
-                    </Text>
-                  </View>
-                  <View style={{ marginLeft: 10 }}>
-                    <Text style={[styles.txTitleText, { color: colors.text.primary }]}>
-                      {tx.type === 'swap' ? 'Swap' : tx.type === 'received' ? 'Received' : 'Sent'}
-                    </Text>
-                    <Text style={styles.txSubText}>{tx.time}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.txRightCol}>
-                  <Text style={[styles.txAmountText, { color: colors.text.primary }]}>
-                    {tx.type === 'received' ? '+' : tx.type === 'swap' ? '' : '-'}{tx.amount} {symbol}
-                  </Text>
-                  <View style={styles.txMetaPillRow}>
-                    <Text style={styles.txValueText}>{tx.value}</Text>
-                    <View style={[styles.confirmedPill, { backgroundColor: monoSurfaceElevated }]}>
-                      <Text style={[styles.confirmedPillText, { color: colors.text.secondary }]}>
-                        {tx.status}
-                      </Text>
-                    </View>
-                    <ChevronRightIcon color="#858585" size={12} />
-                  </View>
-                </View>
+                <Text
+                  style={[
+                    styles.timeframeText,
+                    active
+                      ? { color: isDark ? '#FFFFFF' : '#2563EB', fontWeight: '800' }
+                      : { color: colors.text.muted, fontWeight: '600' },
+                  ]}
+                >
+                  {range}
+                </Text>
               </TouchableOpacity>
-            ))
-          ) : (
-            <View style={styles.emptyTxBox}>
-              <Text style={styles.emptyTxText}>No recent transactions for {symbol}</Text>
-            </View>
-          )}
+            );
+          })}
         </View>
 
-        {/* ── ABOUT & PROTOCOL DETAILS ─────────────────────────── */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>ABOUT {name.toUpperCase()}</Text>
+        {/* ── YOUR BALANCE ROW (Image 3) ───────────────────────── */}
+        <View style={styles.balanceRow}>
+          <Text style={[styles.balanceLabel, { color: isDark ? '#FFFFFF' : '#111111' }]}>Your balance</Text>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={[styles.balanceUsdText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
+              {userHoldingFormatted ? `$${(parseFloat(userHoldingFormatted.replace(/,/g, '')) * (parseFloat(price.replace(/[^0-9.]/g, '')) || 1)).toFixed(2)}` : '$0.00'}
+            </Text>
+            <Text style={styles.balanceTokenSub}>
+              {userHoldingFormatted ? `${userHoldingFormatted} ${symbol}` : `0.00 ${symbol}`}
+            </Text>
+          </View>
         </View>
 
-        <View style={[styles.aboutCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-          <Text style={[styles.aboutBodyText, { color: colors.text.secondary }]}>
-            {meta.about}
+        {/* ── ONLY 2 ACTION BUTTONS: SEND & RECEIVE (Image 3) ───── */}
+        <View style={styles.twoActionRow}>
+          {/* Send */}
+          <TouchableOpacity
+            onPress={() => navigation?.navigate?.('Send', { tokenSymbol: symbol })}
+            style={[styles.actionBtnPill, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
+            activeOpacity={0.75}
+          >
+            <ArrowUpRightIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
+            <Text style={[styles.actionBtnLabel, { color: isDark ? '#FFFFFF' : '#111111' }]}>Send</Text>
+          </TouchableOpacity>
+
+          {/* Receive */}
+          <TouchableOpacity
+            onPress={() => navigation?.navigate?.('Receive', { tokenSymbol: symbol })}
+            style={[styles.actionBtnPill, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
+            activeOpacity={0.75}
+          >
+            <ScanQrIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
+            <Text style={[styles.actionBtnLabel, { color: isDark ? '#FFFFFF' : '#111111' }]}>Receive</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── ✨ AI SUMMARY SECTION (Image 3) ──────────────────── */}
+        <View style={[styles.aiSummaryCard, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}>
+          <View style={styles.aiSummaryHeader}>
+            <SparkIcon color="#818CF8" size={16} />
+            <Text style={[styles.aiSummaryTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>AI Summary</Text>
+          </View>
+          <Text style={[styles.aiSummaryBody, { color: isDark ? '#CCCCCC' : '#444444' }]}>
+            {meta.summary}
           </Text>
-          <View style={styles.tagChipsRow}>
-            <View style={[styles.specTag, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}>
-              <Text style={[styles.specTagText, { color: colors.text.primary }]}>Consensus: PoS</Text>
+        </View>
+
+        {/* ── STATS SECTION (Image 4) ──────────────────────────── */}
+        <View style={styles.statsSection}>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>Stats</Text>
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Market Cap</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.marketCap}</Text>
             </View>
-            <View style={[styles.specTag, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}>
-              <Text style={[styles.specTagText, { color: colors.text.primary }]}>Token Standard: Native</Text>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>24h Volume</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.volume24h}</Text>
             </View>
-            <View style={[styles.specTag, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}>
-              <Text style={[styles.specTagText, { color: colors.text.primary }]}>Audit: Verified</Text>
+          </View>
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Holders</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.holders || '-'}</Text>
+            </View>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Created</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.created || '23 Oct 2025'}</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Circulating Supply %</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.circulatingSupplyPct || '-'}</Text>
+            </View>
+            <View style={styles.statCol}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={styles.statLabel}>Security Risk</Text>
+                <ChevronRightIcon color="#858585" size={12} />
+              </View>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111', fontWeight: '800' }]}>No risk found</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Liquidity (USD)</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.liquidity || '$1.13M'}</Text>
+            </View>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Top 10 holders %</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.top10HoldersPct || '62.2537%'}</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Top 10 holders avg buy</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.top10AvgBuy || '$0.01'}</Text>
+            </View>
+            <View style={styles.statCol}>
+              <Text style={styles.statLabel}>Top 10 holders avg sell</Text>
+              <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#111111' }]}>{meta.top10AvgSell || '$0.00'}</Text>
             </View>
           </View>
         </View>
+
+        {/* ── PERFORMANCE SECTION (Image 4) ────────────────────── */}
+        <View style={styles.performanceSection}>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>Performance</Text>
+
+          <View style={[styles.performanceCard, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}>
+            {/* 4 Timeframe Tabs */}
+            <View style={styles.perfTabsRow}>
+              {[
+                { key: '5m', change: '-0.39%' },
+                { key: '1h', change: '-1.01%' },
+                { key: '4h', change: '-2.32%' },
+                { key: '24h', change: '-1.98%' },
+              ].map(tab => {
+                const active = perfTab === tab.key;
+                return (
+                  <TouchableOpacity
+                    key={tab.key}
+                    onPress={() => setPerfTab(tab.key as any)}
+                    style={[
+                      styles.perfTabBtn,
+                      active && { backgroundColor: isDark ? '#2B3244' : '#E0E7FF' },
+                    ]}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.perfTabLabel, { color: isDark ? '#CCCCCC' : '#444444' }]}>{tab.key}</Text>
+                    <Text style={[styles.perfTabChange, { color: '#EF4444' }]}>{tab.change}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Total Vol & Transactions */}
+            <View style={styles.perfMetaRow}>
+              <Text style={styles.perfMetaText}>Total Vol $3,807</Text>
+              <Text style={styles.perfMetaText}>Transactions 63</Text>
+            </View>
+
+            {/* Buy / Sell Dual-Color Progress Bar */}
+            <View style={styles.buySellTrack}>
+              <View style={[styles.buyFill, { width: '13%' }]} />
+              <View style={[styles.sellFill, { width: '87%' }]} />
+            </View>
+
+            {/* Buy / Sell Labels */}
+            <View style={styles.buySellLabelRow}>
+              <Text style={styles.buyLabelText}>13% Buy</Text>
+              <Text style={styles.sellLabelText}>87% Sell</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ── ABOUT SECTION (Image 4) ──────────────────────────── */}
+        <View style={styles.aboutSection}>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>About</Text>
+
+          <TouchableOpacity
+            onPress={copyContractAddress}
+            style={[styles.contractPill, { backgroundColor: monoSurfaceElevated, borderColor: cardBorder }]}
+            activeOpacity={0.75}
+          >
+            <CopyIcon color={isDark ? '#FFFFFF' : '#111111'} size={14} />
+            <Text style={[styles.contractPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
+              {copiedContract ? '✓ Copied Contract' : 'Contract address'}
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.aboutText, { color: isDark ? '#BBBBBB' : '#555555' }]}>
+            {meta.about}
+          </Text>
+        </View>
       </ScrollView>
+
+      {/* ── STICKY FLOATING TRADE BUTTON (Images 3 & 4) ──────── */}
+      <View style={[styles.stickyBottomBar, { paddingBottom: Math.max(16, insets.bottom + 8), backgroundColor: colors.bg.canvas }]}>
+        <TouchableOpacity
+          onPress={() => navigation?.navigate?.('Swap', { tokenSymbol: symbol })}
+          style={styles.floatingTradeBtn}
+          activeOpacity={0.85}
+        >
+          <TradeIcon color="#FFFFFF" size={20} />
+          <Text style={styles.floatingTradeText}>Trade</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -747,342 +642,286 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   navBtnCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 0.5,
-  },
-  navTitleCenter: {
-    alignItems: 'center',
-  },
-  navTitleText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: -0.3,
-  },
-  navNetworkSub: {
-    fontSize: 11,
-    color: '#858585',
-    fontWeight: '600',
-    marginTop: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 18,
+    paddingTop: 10,
   },
-  heroCard: {
-    borderRadius: 20,
-    borderWidth: 0.5,
-    padding: 18,
-    marginBottom: 14,
-  },
-  heroTopRow: {
+  headerInfoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 14,
   },
-  tokenLogoWrap: {
-    marginRight: 12,
-  },
-  heroTitleCol: {
-    flex: 1,
-  },
-  nameRankRow: {
+  headerLeftGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
   },
-  heroNameText: {
-    fontSize: 18,
-    fontWeight: '700',
+  headerTokenName: {
+    fontSize: 22,
+    fontWeight: '800',
     letterSpacing: -0.3,
   },
-  rankBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
+  headerRightGroup: {
+    alignItems: 'flex-end',
   },
-  rankBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  heroSymbolText: {
-    fontSize: 12.5,
-    color: '#858585',
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 10,
-    marginBottom: 10,
-  },
-  priceNumber: {
-    fontSize: 28,
+  headerPriceText: {
+    fontSize: 22,
     fontWeight: '800',
-    letterSpacing: -0.6,
+    fontVariant: ['tabular-nums'],
   },
-  changeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  changeBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  holdingBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 0.5,
-    marginBottom: 12,
-  },
-  holdingBannerLabel: {
-    fontSize: 12,
-    color: '#858585',
-    fontWeight: '600',
-  },
-  holdingBannerValue: {
+  headerDeltaText: {
     fontSize: 13,
     fontWeight: '700',
+    marginTop: 3,
+    fontVariant: ['tabular-nums'],
   },
   chartWrapper: {
-    alignItems: 'center',
-    marginVertical: 10,
+    height: 170,
+    marginVertical: 4,
   },
-  timeframeBar: {
+  timeframeRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 14,
-    padding: 3,
-    marginTop: 6,
+    marginVertical: 12,
   },
-  timeframeBtn: {
-    flex: 1,
-    paddingVertical: 6,
+  candleBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 11,
   },
-  timeframeBtnText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-  },
-  actionButtonsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 18,
-  },
-  primaryActionBtn: {
-    flex: 1.2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 44,
+  timeframePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     borderRadius: 14,
-    gap: 6,
   },
-  primaryActionText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  secondaryActionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 44,
-    borderRadius: 14,
-    borderWidth: 0.5,
-    gap: 5,
-  },
-  secondaryActionText: {
+  timeframeText: {
     fontSize: 13,
-    fontWeight: '700',
   },
-  sectionHeaderRow: {
+  balanceRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(255,255,255,0.08)',
     marginTop: 6,
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  sectionHeading: {
-    fontSize: 11.5,
+  balanceLabel: {
+    fontSize: 16,
     fontWeight: '700',
-    color: '#858585',
-    letterSpacing: 0.8,
   },
-  sectionActionText: {
+  balanceUsdText: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  balanceTokenSub: {
     fontSize: 12,
-    fontWeight: '700',
+    color: '#888888',
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
   },
-  statsGrid: {
+  twoActionRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 12,
+  },
+  actionBtnPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    marginBottom: 16,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
   },
-  statBoxCard: {
-    width: (SCREEN_WIDTH - 40) / 2,
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 0.5,
-  },
-  statBoxLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#858585',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 4,
-  },
-  statBoxValue: {
+  actionBtnLabel: {
     fontSize: 15,
     fontWeight: '700',
-    letterSpacing: -0.2,
   },
-  newsListWrap: {
+  aiSummaryCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  aiSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 8,
   },
-  newsCard: {
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 0.5,
+  aiSummaryTitle: {
+    fontSize: 15,
+    fontWeight: '800',
   },
-  newsMetaRow: {
+  aiSummaryBody: {
+    fontSize: 13.5,
+    lineHeight: 20,
+  },
+  sectionHeading: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    marginBottom: 14,
+  },
+  statsSection: {
+    marginBottom: 22,
+  },
+  statsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 6,
-  },
-  newsSourceTag: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#858585',
-  },
-  newsDotDivider: {
-    fontSize: 11,
-    color: '#858585',
-  },
-  newsTimeText: {
-    fontSize: 11,
-    color: '#858585',
-  },
-  newsTitleText: {
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 19,
-    marginBottom: 4,
-  },
-  newsSnippetText: {
-    fontSize: 12,
-    color: '#858585',
-    lineHeight: 16,
-  },
-  txListContainer: {
-    borderRadius: 16,
-    borderWidth: 0.5,
-    marginBottom: 16,
-    overflow: 'hidden',
-  },
-  txRowItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    marginBottom: 16,
   },
-  txLeftCol: {
+  statCol: {
+    flex: 1,
+  },
+  statLabel: {
+    fontSize: 13,
+    color: '#8E95A5',
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  performanceSection: {
+    marginBottom: 22,
+  },
+  performanceCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 16,
+  },
+  perfTabsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 14,
   },
-  txIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  perfTabBtn: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
   },
-  txTitleText: {
-    fontSize: 14,
-    fontWeight: '700',
+  perfTabLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 2,
   },
-  txSubText: {
-    fontSize: 11,
-    color: '#858585',
-    marginTop: 2,
+  perfTabChange: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
   },
-  txRightCol: {
-    alignItems: 'flex-end',
-    gap: 3,
+  perfMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
-  txAmountText: {
-    fontSize: 14,
-    fontWeight: '700',
+  perfMetaText: {
+    fontSize: 12,
+    color: '#8E95A5',
+    fontWeight: '600',
   },
-  txMetaPillRow: {
+  buySellTrack: {
+    flexDirection: 'row',
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    backgroundColor: '#333333',
+    marginBottom: 8,
+  },
+  buyFill: {
+    backgroundColor: '#22C55E',
+  },
+  sellFill: {
+    backgroundColor: '#EF4444',
+  },
+  buySellLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  buyLabelText: {
+    color: '#22C55E',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  sellLabelText: {
+    color: '#EF4444',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  aboutSection: {
+    marginBottom: 16,
+  },
+  contractPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  txValueText: {
-    fontSize: 11,
-    color: '#858585',
-  },
-  confirmedPill: {
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 4,
-  },
-  confirmedPillText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    textTransform: 'capitalize',
-  },
-  emptyTxBox: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyTxText: {
-    fontSize: 12,
-    color: '#858585',
-  },
-  aboutCard: {
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    marginBottom: 24,
-  },
-  aboutBodyText: {
-    fontSize: 13,
-    lineHeight: 20,
+    gap: 8,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
     marginBottom: 12,
   },
-  tagChipsRow: {
+  contractPillText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  aboutText: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  stickyBottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 18,
+    paddingTop: 10,
+  },
+  floatingTradeBtn: {
+    backgroundColor: '#4F46E5',
+    height: 52,
+    borderRadius: 26,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  specTag: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 0.5,
-  },
-  specTagText: {
-    fontSize: 11,
-    fontWeight: '600',
+  floatingTradeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

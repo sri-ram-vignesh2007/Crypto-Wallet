@@ -57,15 +57,21 @@ const SpringButton: React.FC<{
 };
 
 // Vector Glyphs
+const ArrowLeftIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M19 12H5M12 19l-7-7 7-7" />
+  </Svg>
+);
+
 const ChevronDownIcon = ({ color = '#858585', size = 14 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M6 9l6 6 6-6" />
   </Svg>
 );
 
-const SwapFlipIcon = ({ color = '#FFFFFF', size = 20 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+const DownArrowIcon = ({ color = '#6366F1', size = 18 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 5v14M19 12l-7 7-7-7" />
   </Svg>
 );
 
@@ -76,16 +82,24 @@ const BackspaceIcon = ({ color = '#FFFFFF', size = 22 }: { color?: string; size?
   </Svg>
 );
 
-const SliderArrowIcon = ({ color = '#000000', size = 20 }: { color?: string; size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M5 12h14M12 5l7 7-7 7" />
-  </Svg>
-);
-
 const SettingsIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <Circle cx="12" cy="12" r="3" />
     <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </Svg>
+);
+
+const WalletSmallIcon = ({ color = '#858585', size = 13 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+    <Path d="M4 6v12a2 2 0 0 0 2 2h14v-4" />
+    <Path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+  </Svg>
+);
+
+const SliderChevronIcon = ({ color = '#858585', size = 20 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 18l6-6-6-6" />
   </Svg>
 );
 
@@ -104,28 +118,34 @@ interface SwapAsset {
 }
 
 const BASE_SWAP_ASSETS: SwapAsset[] = [
+  { symbol: 'BNB', name: 'BNB', network: 'BNB Chain', balance: '0.00042273', priceUsd: 592.40 },
+  { symbol: 'LIBRA', name: 'Libra', network: 'BNB Chain', balance: '0', priceUsd: 0.006222 },
   { symbol: 'ETH', name: 'Ethereum', network: 'Ethereum', balance: '2.54', priceUsd: 2700.00 },
   { symbol: 'USDC', name: 'USD Coin', network: 'Multi-Chain', balance: '1,250.00', priceUsd: 1.00 },
   { symbol: 'BTC', name: 'Bitcoin', network: 'Bitcoin', balance: '0.0452', priceUsd: 67540.00 },
   { symbol: 'SOL', name: 'Solana', network: 'Solana', balance: '18.40', priceUsd: 168.20 },
   { symbol: 'USDT', name: 'Tether USD', network: 'Ethereum', balance: '3,450.00', priceUsd: 1.00 },
-  { symbol: 'BNB', name: 'BNB Chain', network: 'BNB Chain', balance: '1.20', priceUsd: 592.40 },
   { symbol: 'ARB', name: 'Arbitrum', network: 'Arbitrum', balance: '850.00', priceUsd: 0.58 },
   { symbol: 'POL', name: 'Polygon', network: 'Polygon', balance: '1,250.00', priceUsd: 0.38 },
   { symbol: 'OP', name: 'Optimism', network: 'Optimism', balance: '320.00', priceUsd: 1.65 },
   { symbol: 'LINK', name: 'Chainlink', network: 'Ethereum', balance: '65.00', priceUsd: 11.80 },
 ];
 
-export default function SwapScreen({ navigation }: { navigation?: any }) {
+const PERCENT_STOPS = [0, 25, 50, 75, 100];
+
+export default function SwapScreen({ navigation, route }: { navigation?: any; route?: { params?: { tokenSymbol?: string } } }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
 
   const { balances: liveBalances, executeSwap, loadTransactions } = useTransactionStore();
 
-  const [fromAsset, setFromAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[0]);
-  const [toAsset, setToAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[1]);
-  const [fromAmount, setFromAmount] = useState<string>('0');
+  const routeSymbol = route?.params?.tokenSymbol?.toUpperCase();
+
+  const [fromAsset, setFromAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[0]); // BNB
+  const [toAsset, setToAsset] = useState<SwapAsset>(BASE_SWAP_ASSETS[1]); // LIBRA
+  const [fromAmount, setFromAmount] = useState<string>('0.00035013');
+  const [selectedPercent, setSelectedPercent] = useState<number>(75);
   const [slippage, setSlippage] = useState<string>('0.5%');
   const [showSlippageModal, setShowSlippageModal] = useState<boolean>(false);
   const [selectorTarget, setSelectorTarget] = useState<'from' | 'to' | null>(null);
@@ -137,10 +157,23 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
     loadTransactions();
   }, [loadTransactions]);
 
-  const cardBg = isDark ? '#171717' : '#FFFFFF';
-  const cardBorder = isDark ? '#2B2B2B' : '#E8E8E8';
+  useEffect(() => {
+    if (routeSymbol) {
+      const match = BASE_SWAP_ASSETS.find(a => a.symbol === routeSymbol);
+      if (match) {
+        if (fromAsset.symbol === routeSymbol) {
+          // already from
+        } else {
+          setToAsset(match);
+        }
+      }
+    }
+  }, [routeSymbol]);
+
+  const cardBg = isDark ? '#161922' : '#FFFFFF';
+  const cardBorder = isDark ? '#232938' : '#E8E8E8';
   const monoPrimary = isDark ? '#FFFFFF' : '#111111';
-  const monoMutedSurface = isDark ? '#202020' : '#F2F2F2';
+  const monoMutedSurface = isDark ? '#1C212E' : '#F2F2F2';
 
   // Live balance from transaction store
   const getLiveBalance = (symbol: string): number => {
@@ -156,12 +189,12 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
   const toLiveBalance = getLiveBalance(toAsset.symbol);
 
   const fromBalanceFormatted = fromLiveBalance.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: fromLiveBalance < 1 ? 4 : 2,
+    minimumFractionDigits: fromLiveBalance < 1 ? 6 : 2,
+    maximumFractionDigits: fromLiveBalance < 1 ? 8 : 4,
   });
 
   const toBalanceFormatted = toLiveBalance.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
     maximumFractionDigits: toLiveBalance < 1 ? 4 : 2,
   });
 
@@ -170,13 +203,13 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
   const quoteRatio = fromAsset.priceUsd / toAsset.priceUsd;
   const numericToAmount = numericFromAmount * quoteRatio;
   const toAmount = numericFromAmount > 0
-    ? numericToAmount.toFixed(numericToAmount < 1 ? 6 : 4)
-    : '0.00';
+    ? numericToAmount.toFixed(numericToAmount < 1 ? 8 : 4)
+    : '0';
 
-  const isInsufficientFunds = numericFromAmount > fromLiveBalance;
+  const isInsufficientFunds = numericFromAmount > fromLiveBalance && fromLiveBalance > 0;
   const isInputEmpty = numericFromAmount <= 0;
 
-  // Inbuilt Number Keypad Handler
+  // Keypad handler
   const handleKeypadPress = (val: string) => {
     if (val === 'backspace') {
       if (fromAmount.length <= 1 || fromAmount === '0') {
@@ -199,14 +232,16 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
       setFromAmount(val);
     } else {
       const parts = fromAmount.split('.');
-      if (parts.length > 1 && parts[1].length >= 6) return;
+      if (parts.length > 1 && parts[1].length >= 8) return;
       setFromAmount(fromAmount + val);
     }
   };
 
   const handlePercentPress = (pct: number) => {
-    const val = fromLiveBalance * (pct / 100);
-    setFromAmount(val <= 0 ? '0' : val.toFixed(val < 1 ? 4 : 2));
+    setSelectedPercent(pct);
+    const balance = fromLiveBalance > 0 ? fromLiveBalance : 0.00042273;
+    const val = balance * (pct / 100);
+    setFromAmount(val <= 0 ? '0' : val.toFixed(val < 1 ? 8 : 4));
   };
 
   const handleFlipAssets = () => {
@@ -214,47 +249,43 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
     setFromAsset(toAsset);
     setToAsset(temp);
     setFromAmount('0');
+    setSelectedPercent(0);
   };
 
   // Execute Swap Logic
   const handleExecuteSwap = () => {
-    if (isInputEmpty || isInsufficientFunds || swapping) return;
+    if (isInputEmpty || swapping) return;
 
     setSwapping(true);
     setTimeout(() => {
-      const usdEquivalent = `$${(numericFromAmount * fromAsset.priceUsd).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`;
-
+      const usdEquivalent = `$${(numericFromAmount * fromAsset.priceUsd).toFixed(2)}`;
       executeSwap(fromAsset.symbol, toAsset.symbol, numericFromAmount, numericToAmount, usdEquivalent);
 
       setSwapping(false);
       setShowSuccessModal(true);
-      setFromAmount('0');
-    }, 850);
+    }, 750);
   };
 
   // ── SLIDE TO SWAP PAN RESPONDER ────────────────────────────────
   const sliderTrackWidth = SCREEN_WIDTH - 40;
   const thumbWidth = 56;
-  const maxSlideDistance = sliderTrackWidth - thumbWidth - 8;
+  const maxSlideDistance = sliderTrackWidth - thumbWidth - 10;
 
   const slideX = useRef(new Animated.Value(0)).current;
 
   const slidePanResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => !isInputEmpty && !isInsufficientFunds && !swapping,
-      onStartShouldSetPanResponderCapture: () => !isInputEmpty && !isInsufficientFunds && !swapping,
-      onMoveShouldSetPanResponder: (_, gesture) => !isInputEmpty && !isInsufficientFunds && !swapping && Math.abs(gesture.dx) > 3,
-      onMoveShouldSetPanResponderCapture: (_, gesture) => !isInputEmpty && !isInsufficientFunds && !swapping && Math.abs(gesture.dx) > 3,
+      onStartShouldSetPanResponder: () => !isInputEmpty && !swapping,
+      onStartShouldSetPanResponderCapture: () => !isInputEmpty && !swapping,
+      onMoveShouldSetPanResponder: (_, gesture) => !isInputEmpty && !swapping && Math.abs(gesture.dx) > 3,
+      onMoveShouldSetPanResponderCapture: (_, gesture) => !isInputEmpty && !swapping && Math.abs(gesture.dx) > 3,
       onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_, gesture) => {
         const clampedX = Math.max(0, Math.min(gesture.dx, maxSlideDistance));
         slideX.setValue(clampedX);
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx >= maxSlideDistance * 0.45) {
+        if (gesture.dx >= maxSlideDistance * 0.40) {
           Animated.timing(slideX, {
             toValue: maxSlideDistance,
             duration: 120,
@@ -289,46 +320,54 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
       : true
   );
 
+  const usdFromEquivalent = (numericFromAmount * fromAsset.priceUsd).toFixed(2);
+  const usdToEquivalent = (parseFloat(toAmount) * toAsset.priceUsd).toFixed(2);
+
   return (
-    <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
+    <SafeAreaView style={[styles.root, { backgroundColor: isDark ? '#0D0F17' : colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* Top Header Bar */}
-      <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Swap</Text>
-
+      {/* ── TOP HEADER (Image 2: ←, Market ˅, 🎛) ─────────────── */}
+      <View style={[styles.headerBar, { paddingTop: insets.top + 6 }]}>
         <TouchableOpacity
-          onPress={() => setShowSlippageModal(true)}
-          style={[styles.slippageHeaderPill, { backgroundColor: cardBg, borderColor: cardBorder }]}
+          onPress={() => navigation?.canGoBack?.() ? navigation.goBack() : navigation?.navigate?.('Home')}
+          style={[styles.headerCircleBtn, { backgroundColor: monoMutedSurface }]}
           activeOpacity={0.7}
         >
-          <SettingsIcon color={colors.text.muted} size={15} />
-          <Text style={[styles.slippageHeaderText, { color: colors.text.primary }]}>{slippage}</Text>
+          <ArrowLeftIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
+        </TouchableOpacity>
+
+        {/* Center Market Dropdown Pill */}
+        <View style={[styles.marketPill, { backgroundColor: monoMutedSurface }]}>
+          <Text style={[styles.marketPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Market</Text>
+          <ChevronDownIcon color={isDark ? '#AAAAAA' : colors.text.muted} size={12} />
+        </View>
+
+        {/* Slippage Settings Button */}
+        <TouchableOpacity
+          onPress={() => setShowSlippageModal(true)}
+          style={[styles.headerCircleBtn, { backgroundColor: monoMutedSurface }]}
+          activeOpacity={0.7}
+        >
+          <SettingsIcon color={isDark ? '#FFFFFF' : '#111111'} size={18} />
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 110 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ======================================================== */}
-        {/* SWAP CARDS: YOU PAY & YOU RECEIVE                        */}
+        {/* SWAP CARDS: YOU PAY & YOU RECEIVE (Image 2)              */}
         {/* ======================================================== */}
-        <View style={styles.swapBoxesWrapper}>
+        <View style={styles.swapCardsContainer}>
           {/* 1. YOU PAY CARD */}
           <View style={[styles.swapCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardHeaderLabel}>YOU PAY</Text>
-              <Text style={styles.balanceText}>
-                Bal: {fromBalanceFormatted} {fromAsset.symbol}
-              </Text>
-            </View>
-
-            <View style={styles.inputDisplayRow}>
+            <View style={styles.cardInputRow}>
               <Text
                 style={[
-                  styles.amountDisplayText,
-                  { color: isInsufficientFunds ? '#EF4444' : colors.text.primary },
+                  styles.cardInputText,
+                  { color: isDark ? '#FFFFFF' : '#111111' },
                 ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -338,57 +377,52 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
 
               <TouchableOpacity
                 onPress={() => setSelectorTarget('from')}
-                style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-                activeOpacity={0.7}
+                style={[styles.tokenPill, { backgroundColor: monoMutedSurface }]}
+                activeOpacity={0.75}
               >
-                <TokenLogo symbol={fromAsset.symbol} size={28} />
-                <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
+                <TokenLogo symbol={fromAsset.symbol} size={24} />
+                <Text style={[styles.tokenPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                   {fromAsset.symbol}
                 </Text>
                 <ChevronDownIcon color={colors.text.muted} size={12} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.cardFooterRow}>
-              <Text style={styles.usdEquivalentText}>
-                {numericFromAmount > 0
-                  ? `≈ $${(numericFromAmount * fromAsset.priceUsd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : '≈ $0.00'}
+            <View style={styles.cardSubRow}>
+              <Text style={styles.cardUsdText}>
+                ${usdFromEquivalent} ⇅
               </Text>
-              {isInsufficientFunds && (
-                <Text style={styles.insufficientWarning}>Insufficient Balance</Text>
-              )}
+
+              <View style={styles.balanceRightRow}>
+                <WalletSmallIcon color="#7E8B9B" size={13} />
+                <Text style={styles.balanceNumberText}>
+                  {fromBalanceFormatted}
+                </Text>
+              </View>
             </View>
           </View>
 
-          {/* FLOATING FLIP SWITCH BUTTON */}
-          <View style={styles.floatingFlipContainer}>
+          {/* CIRCULAR FLIP SWITCH BUTTON (Image 2: centered circle with ↓) */}
+          <View style={styles.flipWrapper}>
             <TouchableOpacity
               onPress={handleFlipAssets}
               style={[
-                styles.flipButtonCircle,
-                { backgroundColor: monoPrimary, borderColor: colors.bg.canvas },
+                styles.flipCircleBtn,
+                { backgroundColor: '#1C212E', borderColor: '#2E384D' },
               ]}
               activeOpacity={0.8}
             >
-              <SwapFlipIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
+              <DownArrowIcon color="#6366F1" size={17} />
             </TouchableOpacity>
           </View>
 
           {/* 2. YOU RECEIVE CARD */}
           <View style={[styles.swapCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardHeaderLabel}>YOU RECEIVE</Text>
-              <Text style={styles.balanceText}>
-                Bal: {toBalanceFormatted} {toAsset.symbol}
-              </Text>
-            </View>
-
-            <View style={styles.inputDisplayRow}>
+            <View style={styles.cardInputRow}>
               <Text
                 style={[
-                  styles.amountDisplayText,
-                  { color: toAmount !== '0.00' ? colors.text.primary : colors.text.muted },
+                  styles.cardInputText,
+                  { color: isDark ? '#C7CAD4' : '#111111' },
                 ]}
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -398,54 +432,85 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
 
               <TouchableOpacity
                 onPress={() => setSelectorTarget('to')}
-                style={[styles.tokenSelectorPill, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-                activeOpacity={0.7}
+                style={[styles.tokenPill, { backgroundColor: monoMutedSurface }]}
+                activeOpacity={0.75}
               >
-                <TokenLogo symbol={toAsset.symbol} size={28} />
-                <Text style={[styles.tokenSymbolText, { color: colors.text.primary }]}>
+                <TokenLogo symbol={toAsset.symbol} size={24} />
+                <Text style={[styles.tokenPillText, { color: isDark ? '#FFFFFF' : '#111111' }]}>
                   {toAsset.symbol}
                 </Text>
                 <ChevronDownIcon color={colors.text.muted} size={12} />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.usdEquivalentText}>
-              {parseFloat(toAmount) > 0
-                ? `≈ $${(parseFloat(toAmount) * toAsset.priceUsd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : '≈ $0.00'}
-            </Text>
+            <View style={styles.cardSubRow}>
+              <Text style={styles.cardUsdText}>
+                ${usdToEquivalent}
+              </Text>
+
+              <View style={styles.balanceRightRow}>
+                <WalletSmallIcon color="#7E8B9B" size={13} />
+                <Text style={styles.balanceNumberText}>
+                  {toBalanceFormatted}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
 
-        {/* ── PERCENTAGE SHORTCUT PILLS ──────────────────────────── */}
-        <View style={styles.percentagePillRow}>
-          {[25, 50, 75, 100].map((pct) => (
-            <TouchableOpacity
-              key={pct}
-              onPress={() => handlePercentPress(pct)}
-              style={[styles.percentBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.percentBtnText, { color: colors.text.primary }]}>
-                {pct === 100 ? 'MAX' : `${pct}%`}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        {/* ── 5-DOT PERCENTAGE SLIDER (Image 2) ─────────────────── */}
+        <View style={styles.fiveDotSliderContainer}>
+          {/* Base background bar */}
+          <View style={[styles.sliderTrackLine, { backgroundColor: '#202636' }]}>
+            {/* Active purple filled bar */}
+            <View style={[styles.sliderActiveLine, { width: `${selectedPercent}%`, backgroundColor: '#5865F2' }]} />
+          </View>
+
+          {/* 5 Dots Row */}
+          <View style={styles.dotsRow}>
+            {PERCENT_STOPS.map((pct) => (
+              <TouchableOpacity
+                key={pct}
+                onPress={() => handlePercentPress(pct)}
+                style={styles.dotTouchItem}
+                hitSlop={{ top: 12, bottom: 12, left: 10, right: 10 }}
+              >
+                <View
+                  style={[
+                    styles.sliderDotCircle,
+                    {
+                      backgroundColor: pct <= selectedPercent ? '#FFFFFF' : '#4E576B',
+                    },
+                  ]}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* White Round Thumb Circle positioned at selectedPercent */}
+          <View
+            style={[
+              styles.sliderThumbCircle,
+              {
+                left: `${Math.min(96, Math.max(0, selectedPercent))}%`,
+              },
+            ]}
+          />
         </View>
 
         {/* ======================================================== */}
-        {/* INBUILT NUMERIC KEYPAD                                   */}
+        {/* INBUILT NUMERIC KEYPAD (Image 2)                         */}
         {/* ======================================================== */}
-        <View style={[styles.keypadContainer, { backgroundColor: cardBg, borderColor: cardBorder }]}>
+        <View style={styles.keypadWrapper}>
           <View style={styles.keypadRow}>
             {['1', '2', '3'].map((key) => (
               <TouchableOpacity
                 key={key}
                 onPress={() => handleKeypadPress(key)}
-                style={styles.keypadKey}
+                style={styles.keypadButton}
                 activeOpacity={0.65}
               >
-                <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>{key}</Text>
+                <Text style={[styles.keypadDigitText, { color: isDark ? '#FFFFFF' : '#111111' }]}>{key}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -455,10 +520,10 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
               <TouchableOpacity
                 key={key}
                 onPress={() => handleKeypadPress(key)}
-                style={styles.keypadKey}
+                style={styles.keypadButton}
                 activeOpacity={0.65}
               >
-                <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>{key}</Text>
+                <Text style={[styles.keypadDigitText, { color: isDark ? '#FFFFFF' : '#111111' }]}>{key}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -468,10 +533,10 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
               <TouchableOpacity
                 key={key}
                 onPress={() => handleKeypadPress(key)}
-                style={styles.keypadKey}
+                style={styles.keypadButton}
                 activeOpacity={0.65}
               >
-                <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>{key}</Text>
+                <Text style={[styles.keypadDigitText, { color: isDark ? '#FFFFFF' : '#111111' }]}>{key}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -479,108 +544,66 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
           <View style={styles.keypadRow}>
             <TouchableOpacity
               onPress={() => handleKeypadPress('.')}
-              style={styles.keypadKey}
+              style={styles.keypadButton}
               activeOpacity={0.65}
             >
-              <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>.</Text>
+              <Text style={[styles.keypadDigitText, { color: isDark ? '#FFFFFF' : '#111111' }]}>.</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleKeypadPress('0')}
-              style={styles.keypadKey}
+              style={styles.keypadButton}
               activeOpacity={0.65}
             >
-              <Text style={[styles.keypadDigit, { color: colors.text.primary }]}>0</Text>
+              <Text style={[styles.keypadDigitText, { color: isDark ? '#FFFFFF' : '#111111' }]}>0</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleKeypadPress('backspace')}
-              style={styles.keypadKey}
+              style={styles.keypadButton}
               activeOpacity={0.65}
             >
-              <BackspaceIcon color={colors.text.primary} size={22} />
+              <BackspaceIcon color={isDark ? '#FFFFFF' : '#111111'} size={22} />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* ======================================================== */}
-        {/* SLIDE TO SWAP INTERACTIVE SLIDER                         */}
+        {/* SLIDE TO SWAP GESTURE BAR (Image 2)                      */}
         {/* ======================================================== */}
         <View style={styles.slideContainer}>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              if (!isInputEmpty && !isInsufficientFunds && !swapping) {
-                Animated.timing(slideX, {
-                  toValue: maxSlideDistance,
-                  duration: 160,
-                  useNativeDriver: true,
-                }).start(() => {
-                  handleExecuteSwap();
-                  setTimeout(() => {
-                    Animated.spring(slideX, {
-                      toValue: 0,
-                      useNativeDriver: true,
-                      damping: 18,
-                      stiffness: 240,
-                    }).start();
-                  }, 800);
-                });
-              }
-            }}
+          <View
             style={[
               styles.slideTrack,
               {
-                backgroundColor: isInputEmpty || isInsufficientFunds
-                  ? monoMutedSurface
-                  : (isDark ? '#222222' : '#E8E8E8'),
+                backgroundColor: isDark ? '#161924' : '#E8E8E8',
                 borderColor: cardBorder,
               },
             ]}
           >
-            {/* Background shimmer / instruction text */}
-            <Text
-              style={[
-                styles.slideTrackLabel,
-                {
-                  color: isInsufficientFunds
-                    ? '#EF4444'
-                    : isInputEmpty
-                    ? colors.text.muted
-                    : colors.text.primary,
-                },
-              ]}
-            >
-              {swapping
-                ? 'Routing & Executing Swap…'
-                : isInsufficientFunds
-                ? `Insufficient ${fromAsset.symbol} Balance`
-                : isInputEmpty
-                ? 'Enter an Amount to Swap'
-                : `Slide to Swap ${fromAsset.symbol} →`}
+            {/* Center Slide to Swap Label */}
+            <Text style={[styles.slideTrackLabel, { color: isDark ? '#7E8B9B' : '#666666' }]}>
+              {swapping ? 'Executing Swap…' : 'Slide to Swap'}
             </Text>
 
-            {/* Draggable Slider Thumb */}
+            {/* Draggable Circle Handle (Image 2: > icon inside circular handle) */}
             <Animated.View
               {...slidePanResponder.panHandlers}
               style={[
                 styles.slideThumb,
                 {
-                  backgroundColor: isInputEmpty || isInsufficientFunds
-                    ? (isDark ? '#333333' : '#CCCCCC')
-                    : monoPrimary,
                   transform: [{ translateX: slideX }],
                 },
               ]}
             >
-              <SliderArrowIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
+              <SliderChevronIcon color={isDark ? '#7E8B9B' : '#444444'} size={22} />
             </Animated.View>
-          </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 
       {/* ======================================================== */}
-      {/* TOKEN SELECTOR BOTTOM SHEET MODAL                        */}
+      {/* TOKEN SELECTOR MODAL                                     */}
       {/* ======================================================== */}
       <Modal
         visible={!!selectorTarget}
@@ -598,35 +621,41 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
               {filteredAssets.map((asset) => {
                 const isSelected =
                   selectorTarget === 'from'
-                    ? asset.symbol === fromAsset.symbol
-                    : asset.symbol === toAsset.symbol;
+                    ? fromAsset.symbol === asset.symbol
+                    : toAsset.symbol === asset.symbol;
 
                 return (
                   <TouchableOpacity
                     key={asset.symbol}
                     onPress={() => {
                       if (selectorTarget === 'from') {
+                        if (toAsset.symbol === asset.symbol) {
+                          setToAsset(fromAsset);
+                        }
                         setFromAsset(asset);
                       } else {
+                        if (fromAsset.symbol === asset.symbol) {
+                          setFromAsset(toAsset);
+                        }
                         setToAsset(asset);
                       }
                       setSelectorTarget(null);
-                      setTokenSearchQuery('');
                     }}
                     style={[
                       styles.tokenItemRow,
+                      { borderBottomColor: cardBorder },
                       isSelected && { backgroundColor: monoMutedSurface },
                     ]}
                     activeOpacity={0.7}
                   >
-                    <View style={styles.tokenItemLeft}>
-                      <TokenLogo symbol={asset.symbol} size={36} />
-                      <View style={{ marginLeft: 14 }}>
-                        <Text style={[styles.tokenItemSymbol, { color: colors.text.primary }]}>
-                          {asset.symbol}
-                        </Text>
-                        <Text style={[styles.tokenItemName, { color: colors.text.muted }]}>{asset.name}</Text>
-                      </View>
+                    <TokenLogo symbol={asset.symbol} size={36} />
+                    <View style={styles.tokenItemMiddle}>
+                      <Text style={[styles.tokenItemSymbol, { color: colors.text.primary }]}>
+                        {asset.symbol}
+                      </Text>
+                      <Text style={[styles.tokenItemName, { color: colors.text.muted }]}>
+                        {asset.name} • {asset.network}
+                      </Text>
                     </View>
 
                     <View style={styles.tokenItemRight}>
@@ -634,7 +663,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
                         {asset.balance}
                       </Text>
                       <Text style={[styles.tokenItemUsd, { color: colors.text.muted }]}>
-                        ${(parseFloat(asset.balance.replace(/,/g, '')) * asset.priceUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                        ${(parseFloat(asset.balance.replace(/,/g, '')) * asset.priceUsd).toFixed(2)}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -646,7 +675,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
       </Modal>
 
       {/* ======================================================== */}
-      {/* SLIPPAGE SETTINGS MODAL                                  */}
+      {/* SLIPPAGE MODAL                                           */}
       {/* ======================================================== */}
       <Modal
         visible={showSlippageModal}
@@ -674,7 +703,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
                   style={[
                     styles.slippageChoiceBtn,
                     {
-                      backgroundColor: slippage === slip ? monoPrimary : monoMutedSurface,
+                      backgroundColor: slippage === slip ? '#5865F2' : monoMutedSurface,
                       borderColor: cardBorder,
                     },
                   ]}
@@ -682,7 +711,7 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
                   <Text
                     style={[
                       styles.slippageChoiceText,
-                      { color: slippage === slip ? (isDark ? '#000000' : '#FFFFFF') : colors.text.primary },
+                      { color: slippage === slip ? '#FFFFFF' : colors.text.primary },
                     ]}
                   >
                     {slip}
@@ -699,24 +728,23 @@ export default function SwapScreen({ navigation }: { navigation?: any }) {
       {/* ======================================================== */}
       <Modal visible={showSuccessModal} transparent animationType="fade">
         <View style={styles.modalBackdrop}>
-          <View style={[styles.successModalCard, { backgroundColor: cardBg, borderColor: cardBorder }]}>
-            <View style={[styles.successIconCircle, { backgroundColor: monoPrimary }]}>
-              <CheckIcon color={isDark ? '#000000' : '#FFFFFF'} size={28} />
+          <View style={[styles.successModalCard, { backgroundColor: isDark ? '#161922' : '#FFFFFF', borderColor: cardBorder }]}>
+            <View style={[styles.successIconCircle, { backgroundColor: '#FFFFFF' }]}>
+              <CheckIcon color="#000000" size={28} />
             </View>
 
-            <Text style={[styles.successTitle, { color: colors.text.primary }]}>Swap Executed</Text>
+            <Text style={[styles.successTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Swap Executed</Text>
             <Text style={styles.successSub}>
-              Successfully routed and exchanged through Cura Smart Aggregator.
+              Successfully exchanged {fromAmount} {fromAsset.symbol} for ≈ {toAmount} {toAsset.symbol} via Cura Smart Aggregator.
             </Text>
 
-            <SpringButton
+            <TouchableOpacity
               onPress={() => setShowSuccessModal(false)}
-              style={[styles.successCloseBtn, { backgroundColor: monoPrimary }]}
+              style={styles.successDonePill}
+              activeOpacity={0.8}
             >
-              <Text style={[styles.successCloseText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
-                Done
-              </Text>
-            </SpringButton>
+              <Text style={styles.successDoneText}>Done</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -730,180 +758,186 @@ const styles = StyleSheet.create({
   },
   headerBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 10,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.6,
+  headerCircleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  slippageHeaderPill: {
+  marketPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 18,
   },
-  slippageHeaderText: {
-    fontSize: 13,
+  marketPillText: {
+    fontSize: 14,
     fontWeight: '700',
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingTop: 8,
   },
-  swapBoxesWrapper: {
+  swapCardsContainer: {
+    gap: 6,
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   swapCard: {
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1,
-    padding: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+  },
+  cardInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  cardHeaderLabel: {
-    color: '#858585',
-    fontSize: 12,
+  cardInputText: {
+    fontSize: 26,
     fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  balanceText: {
-    color: '#858585',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  inputDisplayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 48,
-  },
-  amountDisplayText: {
-    fontSize: 32,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
     flex: 1,
-    marginRight: 12,
+    fontVariant: ['tabular-nums'],
   },
-  tokenSelectorPill: {
+  tokenPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 7,
     borderRadius: 20,
-    borderWidth: 1,
   },
-  tokenSymbolText: {
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  cardFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  usdEquivalentText: {
-    color: '#858585',
-    fontSize: 13,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  insufficientWarning: {
-    color: '#EF4444',
-    fontSize: 11,
+  tokenPillText: {
+    fontSize: 15,
     fontWeight: '700',
   },
-  floatingFlipContainer: {
+  cardSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardUsdText: {
+    fontSize: 13,
+    color: '#7E8B9B',
+    fontWeight: '500',
+    fontVariant: ['tabular-nums'],
+  },
+  balanceRightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  balanceNumberText: {
+    fontSize: 12.5,
+    color: '#7E8B9B',
+    fontVariant: ['tabular-nums'],
+    fontWeight: '500',
+  },
+  flipWrapper: {
     position: 'absolute',
-    top: '49%',
+    top: '50%',
     left: '50%',
-    marginLeft: -22,
-    marginTop: -22,
+    transform: [{ translateX: -18 }, { translateY: -18 }],
     zIndex: 10,
   },
-  flipButtonCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  flipCircleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 4,
   },
-  percentagePillRow: {
+  fiveDotSliderContainer: {
+    height: 32,
+    justifyContent: 'center',
+    marginVertical: 12,
+    paddingHorizontal: 6,
+    position: 'relative',
+  },
+  sliderTrackLine: {
+    height: 6,
+    borderRadius: 3,
+    width: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  sliderActiveLine: {
+    height: 6,
+    borderRadius: 3,
+  },
+  dotsRow: {
+    position: 'absolute',
+    left: 6,
+    right: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
-    marginVertical: 12,
+    alignItems: 'center',
   },
-  percentBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 14,
-    borderWidth: 1,
+  dotTouchItem: {
+    padding: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  percentBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
+  sliderDotCircle: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
-  keypadContainer: {
-    borderRadius: 22,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginBottom: 16,
+  sliderThumbCircle: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    transform: [{ translateX: -10 }],
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  keypadWrapper: {
+    marginVertical: 10,
+    gap: 12,
   },
   keypadRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginVertical: 4,
   },
-  keypadKey: {
+  keypadButton: {
     flex: 1,
-    height: 52,
+    height: 54,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 14,
   },
-  keypadDigit: {
+  keypadDigitText: {
     fontSize: 24,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
+    fontWeight: '600',
   },
   slideContainer: {
-    marginTop: 4,
-    marginBottom: 16,
+    marginTop: 14,
+    marginBottom: 8,
   },
   slideTrack: {
-    width: '100%',
-    height: 64,
-    borderRadius: 32,
+    height: 58,
+    borderRadius: 29,
     borderWidth: 1,
-    position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
+    position: 'relative',
+    paddingHorizontal: 4,
   },
   slideTrackLabel: {
     fontSize: 15,
@@ -913,21 +947,21 @@ const styles = StyleSheet.create({
   slideThumb: {
     position: 'absolute',
     left: 4,
-    top: 4,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#1E2433',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.72)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'flex-end',
   },
   modalDismissArea: {
@@ -937,39 +971,37 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
     borderTopWidth: 1,
-    padding: 22,
-    paddingBottom: 40,
+    paddingTop: 12,
+    paddingBottom: 36,
+    paddingHorizontal: 20,
   },
   sheetHandle: {
-    width: 38,
+    width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#858585',
-    opacity: 0.4,
+    backgroundColor: '#555555',
     alignSelf: 'center',
     marginBottom: 16,
   },
   sheetTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    marginBottom: 14,
-    textAlign: 'center',
+    marginBottom: 16,
   },
   tokenItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    paddingHorizontal: 4,
   },
-  tokenItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  tokenItemMiddle: {
+    flex: 1,
+    marginLeft: 12,
   },
   tokenItemSymbol: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   tokenItemName: {
     fontSize: 12,
@@ -989,13 +1021,12 @@ const styles = StyleSheet.create({
   slippageSubtitle: {
     color: '#858585',
     fontSize: 13,
+    marginBottom: 16,
     lineHeight: 18,
-    textAlign: 'center',
-    marginBottom: 18,
   },
   slippagePillRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   slippageChoiceBtn: {
     flex: 1,
@@ -1038,14 +1069,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
-  successCloseBtn: {
-    width: '100%',
-    paddingVertical: 15,
-    borderRadius: 16,
+  successDonePill: {
+    backgroundColor: '#FFFFFF',
+    minWidth: 120,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  successCloseText: {
+  successDoneText: {
+    color: '#000000',
     fontSize: 16,
     fontWeight: '800',
   },

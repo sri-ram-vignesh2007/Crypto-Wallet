@@ -617,9 +617,18 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </View>
       )}
 
-      {/* Top Header Bar (Clean: "Community" title) */}
+      {/* Top Header Bar (Clean: "Community" title + Write News Button) */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={[styles.screenTitle, { color: colors.text.primary }]}>Community</Text>
+        <Text style={[styles.screenTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Community</Text>
+        <TouchableOpacity
+          onPress={handleOpenPostDispatch}
+          style={[styles.writeNewsHeaderBtn, { backgroundColor: monoPrimary }]}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.writeNewsHeaderBtnText, { color: isDark ? '#000000' : '#FFFFFF' }]}>
+            + Write News
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Search Bar */}
@@ -776,9 +785,13 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
                           )}
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                          <Text style={styles.orgHandleText}>{broadcast.orgHandle.replace(/_/g, '')}</Text>
-                          <Text style={styles.dotDivider}>•</Text>
                           <Text style={styles.timeAgoText}>{broadcast.timeAgo}</Text>
+                          {broadcast.orgCategory && (
+                            <>
+                              <Text style={styles.dotDivider}>•</Text>
+                              <Text style={styles.timeAgoText}>{broadcast.orgCategory}</Text>
+                            </>
+                          )}
                         </View>
                       </View>
                     </View>
@@ -1346,6 +1359,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.6,
+  },
+  writeNewsHeaderBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 14,
+  },
+  writeNewsHeaderBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
   },
   orgSubmitBtn: {
     paddingHorizontal: 14,

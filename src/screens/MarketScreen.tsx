@@ -1,14 +1,15 @@
 // src/screens/MarketScreen.tsx - Institutional Multi-Chain Crypto Markets Hub with CoinGecko Top Assets
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
-  SafeAreaView, StatusBar, RefreshControl,
+  SafeAreaView, StatusBar, RefreshControl, Modal, Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { TokenLogo } from '../components/TokenLogo';
+import { useWatchlistStore } from '../store/watchlistStore';
 
 // Vector Search Glyph
 const SearchIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: number }) => (
@@ -18,15 +19,25 @@ const SearchIcon = ({ color = '#858585', size = 18 }: { color?: string; size?: n
   </Svg>
 );
 
+const StarIcon = ({ filled = false, color = '#FFFFFF', size = 18 }: { filled?: boolean; color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </Svg>
+);
+
 export type MarketCategory =
   | 'Trending'
+  | 'bStocks'
+  | 'Stock tokens'
+  | 'Ondo'
+  | 'Stonks'
+  | 'Majors'
+  | 'DeFi'
+  | 'Layer 2'
   | 'Top Gainers'
   | 'Top Losers'
   | 'New'
-  | 'Majors'
-  | 'RWA & Stocks'
-  | 'DeFi'
-  | 'Layer 2';
+  | 'RWA & Stocks';
 
 export interface MarketToken {
   symbol: string;
@@ -622,19 +633,75 @@ const ALL_MARKET_TOKENS: MarketToken[] = [
     marketCap: '$690B Eq.',
     numericMarketCap: 690000000000,
     chain: 'Solana',
-    category: ['RWA & Stocks', 'Trending'],
+    category: ['bStocks', 'Stock tokens', 'Stonks', 'RWA & Stocks', 'Trending'],
+  },
+  {
+    symbol: 'NVDAx',
+    name: 'Tokenized NVIDIA Corp.',
+    price: '$128.50',
+    numericPrice: 128.5,
+    change1h: '+0.50%',
+    positive1h: true,
+    change7h: '+1.80%',
+    positive7h: true,
+    change24h: '+3.95%',
+    positive24h: true,
+    numericChange: 3.95,
+    volume24h: '$92M',
+    marketCap: '$3.15T Eq.',
+    numericMarketCap: 3150000000000,
+    chain: 'Solana',
+    category: ['bStocks', 'Stock tokens', 'Stonks', 'Trending'],
+  },
+  {
+    symbol: 'ONDO',
+    name: 'Ondo',
+    price: '$0.785',
+    numericPrice: 0.785,
+    change1h: '+0.80%',
+    positive1h: true,
+    change7h: '+2.40%',
+    positive7h: true,
+    change24h: '+5.80%',
+    positive24h: true,
+    numericChange: 5.80,
+    volume24h: '$145M',
+    marketCap: '$1.08B',
+    numericMarketCap: 1080000000,
+    chain: 'Ethereum',
+    category: ['Ondo', 'RWA & Stocks', 'Trending'],
+  },
+  {
+    symbol: 'LIBRA',
+    name: 'Libra',
+    price: '$0.006222',
+    numericPrice: 0.006222,
+    change1h: '-1.01%',
+    positive1h: false,
+    change7h: '-1.45%',
+    positive7h: false,
+    change24h: '-2.00%',
+    positive24h: false,
+    numericChange: -2.00,
+    volume24h: '$283.13M',
+    marketCap: '$6.22M',
+    numericMarketCap: 6220000,
+    chain: 'BNB Chain',
+    category: ['Trending', 'New', 'DeFi'],
   },
 ];
 
 const CATEGORIES: MarketCategory[] = [
   'Trending',
-  'Top Gainers',
-  'Top Losers',
-  'New',
+  'bStocks',
+  'Stock tokens',
+  'Ondo',
+  'Stonks',
   'Majors',
-  'RWA & Stocks',
   'DeFi',
   'Layer 2',
+  'Top Gainers',
+  'Top Losers',
 ];
 
 const NETWORKS = [
@@ -649,11 +716,20 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
   const colors = useColors();
   const isDark = useIsDark();
 
+  const { watchlist, loadWatchlist } = useWatchlistStore();
+
   const [selectedCategory, setSelectedCategory] = useState<MarketCategory>('Trending');
   const [selectedNetwork, setSelectedNetwork] = useState('All Chains');
   const [selectedTimeframe, setSelectedTimeframe] = useState<'1h' | '7h' | '24h'>('24h');
+  const [isWatchlistFilter, setIsWatchlistFilter] = useState(false);
+  const [showNetworkModal, setShowNetworkModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    loadWatchlist();
+  }, [loadWatchlist]);
 
   const cardBg = isDark ? '#171717' : '#FFFFFF';
   const cardBorder = isDark ? '#2B2B2B' : '#E8E8E8';
@@ -662,19 +738,24 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
 
   const filteredTokens = useMemo(() => {
     let list = ALL_MARKET_TOKENS.filter((t) => {
-      // Category filter
-      if (selectedCategory === 'Top Gainers') {
-        const changeNum = selectedTimeframe === '1h'
-          ? (t.positive1h ? 1 : -1)
-          : selectedTimeframe === '7h'
-          ? (t.positive7h ? 1 : -1)
-          : (t.positive24h ? t.numericChange : -1);
-        if (changeNum <= 0) return false;
-      } else if (selectedCategory === 'Top Losers') {
-        const isPos = selectedTimeframe === '1h' ? t.positive1h : selectedTimeframe === '7h' ? t.positive7h : t.positive24h;
-        if (isPos) return false;
+      // Watchlist filter if star is selected
+      if (isWatchlistFilter) {
+        if (!watchlist.includes(t.symbol.toUpperCase())) return false;
       } else {
-        if (!t.category.includes(selectedCategory)) return false;
+        // Category filter
+        if (selectedCategory === 'Top Gainers') {
+          const changeNum = selectedTimeframe === '1h'
+            ? (t.positive1h ? 1 : -1)
+            : selectedTimeframe === '7h'
+            ? (t.positive7h ? 1 : -1)
+            : (t.positive24h ? t.numericChange : -1);
+          if (changeNum <= 0) return false;
+        } else if (selectedCategory === 'Top Losers') {
+          const isPos = selectedTimeframe === '1h' ? t.positive1h : selectedTimeframe === '7h' ? t.positive7h : t.positive24h;
+          if (isPos) return false;
+        } else {
+          if (!t.category.includes(selectedCategory)) return false;
+        }
       }
 
       // Network filter
@@ -695,11 +776,19 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
       return true;
     });
 
+    // Volume Sort
+    list = [...list].sort((a, b) => {
+      const volA = parseFloat(a.volume24h.replace(/[^0-9.]/g, '')) * (a.volume24h.includes('B') ? 1000 : 1);
+      const volB = parseFloat(b.volume24h.replace(/[^0-9.]/g, '')) * (b.volume24h.includes('B') ? 1000 : 1);
+      return sortOrder === 'desc' ? volB - volA : volA - volB;
+    });
+
     return list;
-  }, [selectedCategory, selectedNetwork, selectedTimeframe, searchQuery]);
+  }, [isWatchlistFilter, watchlist, selectedCategory, selectedNetwork, selectedTimeframe, searchQuery, sortOrder]);
 
   const onRefresh = () => {
     setRefreshing(true);
+    loadWatchlist();
     setTimeout(() => setRefreshing(false), 800);
   };
 
@@ -707,14 +796,10 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
     <SafeAreaView style={[styles.root, { backgroundColor: colors.bg.canvas }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-      {/* ── HEADER (Coinbase / Trust Wallet Scale) ─────────── */}
+      {/* ── HEADER ─────────────────────────────────────────── */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 8 }]}>
         <View style={styles.headerTitleRow}>
-          <Text style={[styles.headerTitleText, { color: colors.text.primary }]}>Markets</Text>
-          <View style={[styles.liveIndicatorPill, { backgroundColor: monoMutedSurface }]}>
-            <View style={styles.livePulseDot} />
-            <Text style={[styles.liveIndicatorText, { color: colors.text.primary }]}>Live Feeds</Text>
-          </View>
+          <Text style={[styles.headerTitleText, { color: isDark ? '#FFFFFF' : '#111111' }]}>Markets</Text>
         </View>
 
         {/* Big Search Input */}
@@ -732,97 +817,131 @@ export default function MarketScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      {/* ── CATEGORY PILLS (Horizontal Scroll) ─────────────── */}
+      {/* ── ROW 1: [★] STAR WATCHLIST BUTTON + CATEGORY PILLS (Image 1) ── */}
       <View style={styles.categoriesWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContent}>
-          {CATEGORIES.map((cat) => {
-            const active = selectedCategory === cat;
-            return (
-              <TouchableOpacity
-                key={cat}
-                onPress={() => setSelectedCategory(cat)}
-                style={[
-                  styles.categoryPill,
-                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
-                ]}
-                activeOpacity={0.75}
-              >
-                <Text
-                  style={[
-                    styles.categoryText,
-                    { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted, fontWeight: active ? '800' : '600' },
-                  ]}
-                >
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+        <View style={styles.categoryRowContainer}>
+          <TouchableOpacity
+            onPress={() => setIsWatchlistFilter(prev => !prev)}
+            style={[
+              styles.starFilterBtn,
+              {
+                backgroundColor: isWatchlistFilter ? (isDark ? '#5B73E8' : '#2563EB') : monoMutedSurface,
+                borderColor: cardBorder,
+              },
+            ]}
+            activeOpacity={0.75}
+          >
+            <StarIcon filled={isWatchlistFilter} color={isWatchlistFilter ? '#FFFFFF' : (isDark ? '#AAAAAA' : '#666666')} size={18} />
+          </TouchableOpacity>
 
-      {/* ── CHOOSE CHAINS FILTER BAR ─────────────────────────── */}
-      <View style={styles.filterBarRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterBarContent}>
-          <View style={[styles.chainLabelBadge, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
-            <Text style={[styles.chainLabelBadgeText, { color: colors.text.primary }]}>Chains:</Text>
-          </View>
-
-          {NETWORKS.map((net) => {
-            const active = selectedNetwork === net;
-            return (
-              <TouchableOpacity
-                key={net}
-                onPress={() => setSelectedNetwork(net)}
-                style={[
-                  styles.filterSmallChip,
-                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
-                ]}
-                activeOpacity={0.75}
-              >
-                <Text
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContent}>
+            {CATEGORIES.map((cat) => {
+              const active = !isWatchlistFilter && selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => {
+                    setIsWatchlistFilter(false);
+                    setSelectedCategory(cat);
+                  }}
                   style={[
-                    styles.filterChipText,
-                    { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted, fontWeight: active ? '800' : '600' },
+                    styles.categoryPill,
+                    {
+                      backgroundColor: active ? (isDark ? '#5B73E8' : '#2563EB') : monoMutedSurface,
+                      borderColor: active ? 'transparent' : cardBorder,
+                    },
                   ]}
+                  activeOpacity={0.75}
                 >
-                  {net}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      {/* ── TIMEFRAME SELECTOR: 1h, 7h, 24h ──────────────────── */}
-      <View style={styles.timeframeBarRow}>
-        <View style={styles.timeframeContainer}>
-          <Text style={[styles.timeframeLabel, { color: colors.text.muted }]}>Period:</Text>
-          {TIMEFRAMES.map((tf) => {
-            const active = selectedTimeframe === tf;
-            return (
-              <TouchableOpacity
-                key={tf}
-                onPress={() => setSelectedTimeframe(tf)}
-                style={[
-                  styles.timeframeChip,
-                  { backgroundColor: active ? monoPrimary : monoMutedSurface, borderColor: cardBorder },
-                ]}
-                activeOpacity={0.75}
-              >
-                <Text
-                  style={[
-                    styles.timeframeChipText,
-                    { color: active ? (isDark ? '#000000' : '#FFFFFF') : colors.text.muted, fontWeight: active ? '800' : '600' },
-                  ]}
-                >
-                  {tf}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      { color: active ? '#FFFFFF' : (isDark ? '#DDDDDD' : colors.text.muted), fontWeight: active ? '800' : '600' },
+                    ]}
+                  >
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
       </View>
+
+      {/* ── ROW 2: [Network ˅] ON LEFT, [Volume ↓] & [24h ˅] ON RIGHT (Image 1) ── */}
+      <View style={styles.filterControlsRow}>
+        {/* Network Dropdown Button */}
+        <TouchableOpacity
+          onPress={() => setShowNetworkModal(true)}
+          style={[styles.networkDropdownBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+          activeOpacity={0.75}
+        >
+          <Text style={[styles.networkDropdownText, { color: isDark ? '#FFFFFF' : colors.text.primary }]}>
+            {selectedNetwork === 'All Chains' ? 'Network' : selectedNetwork}
+          </Text>
+          <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={isDark ? '#FFFFFF' : colors.text.primary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M6 9l6 6 6-6" />
+          </Svg>
+        </TouchableOpacity>
+
+        {/* Right Action Buttons */}
+        <View style={styles.filterRightGroup}>
+          <TouchableOpacity
+            onPress={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+            style={[styles.smallFilterBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+            activeOpacity={0.75}
+          >
+            <Text style={[styles.smallFilterText, { color: isDark ? '#FFFFFF' : colors.text.primary }]}>
+              Volume {sortOrder === 'desc' ? '↓' : '↑'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setSelectedTimeframe(prev => prev === '1h' ? '7h' : prev === '7h' ? '24h' : '1h')}
+            style={[styles.smallFilterBtn, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}
+            activeOpacity={0.75}
+          >
+            <Text style={[styles.smallFilterText, { color: isDark ? '#FFFFFF' : colors.text.primary }]}>
+              {selectedTimeframe} ˅
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* ── NETWORK CHOOSER POPUP MODAL ───────────────────────── */}
+      <Modal visible={showNetworkModal} transparent animationType="fade">
+        <Pressable style={styles.modalBackdrop} onPress={() => setShowNetworkModal(false)}>
+          <View style={[styles.modalSheet, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: cardBorder }]}>
+            <View style={styles.modalHandle} />
+            <Text style={[styles.modalTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>Choose Network</Text>
+            <ScrollView style={{ maxHeight: 360 }}>
+              {NETWORKS.map(net => {
+                const isSelected = selectedNetwork === net;
+                return (
+                  <TouchableOpacity
+                    key={net}
+                    onPress={() => {
+                      setSelectedNetwork(net);
+                      setShowNetworkModal(false);
+                    }}
+                    style={[styles.networkOptionRow, { borderBottomColor: cardBorder }]}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.networkOptionText, { color: isSelected ? (isDark ? '#5B73E8' : '#2563EB') : (isDark ? '#FFFFFF' : '#111111'), fontWeight: isSelected ? '800' : '500' }]}>
+                      {net}
+                    </Text>
+                    {isSelected && (
+                      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={isDark ? '#5B73E8' : '#2563EB'} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+                        <Path d="M20 6L9 17l-5-5" />
+                      </Svg>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* ── TOKEN LIST (No mini graphs, delta directly under price, high visibility) ── */}
       <ScrollView
@@ -973,69 +1092,104 @@ const styles = StyleSheet.create({
   categoriesWrap: {
     paddingVertical: 6,
   },
-  categoriesContent: {
+  categoryRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
     gap: 8,
   },
+  starFilterBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoriesContent: {
+    gap: 8,
+    paddingRight: 20,
+  },
   categoryPill: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 18,
+    paddingVertical: 9,
+    borderRadius: 20,
     borderWidth: 1,
   },
   categoryText: {
     fontSize: 14,
   },
-  filterBarRow: {
-    paddingVertical: 4,
+  filterControlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
     marginBottom: 4,
   },
-  filterBarContent: {
-    paddingHorizontal: 20,
+  networkDropdownBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  chainLabelBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 0.5,
-  },
-  chainLabelBadgeText: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  filterSmallChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    gap: 6,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 14,
     borderWidth: 1,
   },
-  filterChipText: {
-    fontSize: 12.5,
+  networkDropdownText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
-  timeframeBarRow: {
-    paddingHorizontal: 20,
-    paddingVertical: 4,
-    marginBottom: 8,
-  },
-  timeframeContainer: {
+  filterRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  timeframeLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  timeframeChip: {
+  smallFilterBtn: {
     paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 10,
+    paddingVertical: 7,
+    borderRadius: 14,
     borderWidth: 1,
   },
-  timeframeChipText: {
-    fontSize: 12,
+  smallFilterText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 12,
+    paddingBottom: 34,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#888888',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 16,
+  },
+  networkOptionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 0.5,
+  },
+  networkOptionText: {
+    fontSize: 15,
   },
   tokenListContent: {
     paddingHorizontal: 18,

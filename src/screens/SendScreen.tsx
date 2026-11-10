@@ -101,7 +101,9 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
   const currentChainObj = CHAINS[selectedChain] || CHAINS.ethereum;
 
   // Selected token state
-  const [selectedTokenSymbol, setSelectedTokenSymbol] = useState(currentChainObj.symbol);
+  const [selectedTokenSymbol, setSelectedTokenSymbol] = useState(
+    route?.params?.tokenSymbol ? route.params.tokenSymbol.toUpperCase() : currentChainObj.symbol
+  );
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
@@ -112,6 +114,12 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
   const [gasSpeed, setGasSpeed] = useState<'economy' | 'standard' | 'instant'>('standard');
   const [gasFeeEstimate, setGasFeeEstimate] = useState<string>('~0.0004 ' + currentChainObj.symbol);
   const [txSuccessHash, setTxSuccessHash] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (route?.params?.tokenSymbol) {
+      setSelectedTokenSymbol(route.params.tokenSymbol.toUpperCase());
+    }
+  }, [route?.params?.tokenSymbol]);
 
   // Directly launch QR camera if openScanner param passed
   useEffect(() => {

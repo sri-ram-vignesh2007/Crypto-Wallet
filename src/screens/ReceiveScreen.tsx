@@ -1,6 +1,6 @@
 // src/screens/ReceiveScreen.tsx - Institutional-Grade Fintech Receive Screen for Cura Wallet
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, SafeAreaView, StatusBar,
   Alert, Share, Animated, Pressable, Platform, TouchableOpacity,
@@ -78,24 +78,48 @@ const ShieldCheckIcon = ({ color = '#858585', size = 15 }: { color?: string; siz
 );
 
 const SUPPORTED_CHAINS = [
-  { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
-  { id: 'solana', name: 'Solana', symbol: 'SOL' },
-  { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
-  { id: 'polygon', name: 'Polygon', symbol: 'POL' },
-  { id: 'arbitrum', name: 'Arbitrum', symbol: 'ARB' },
+  { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', network: 'Ethereum Mainnet' },
+  { id: 'solana', name: 'Solana', symbol: 'SOL', network: 'Solana Mainnet' },
+  { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', network: 'Bitcoin Core' },
+  { id: 'bnb', name: 'BNB Chain', symbol: 'BNB', network: 'BNB Smart Chain' },
+  { id: 'libra', name: 'Libra', symbol: 'LIBRA', network: 'BNB Smart Chain' },
+  { id: 'usdc', name: 'USD Coin', symbol: 'USDC', network: 'Multi-Chain Standard' },
+  { id: 'polygon', name: 'Polygon', symbol: 'POL', network: 'Polygon PoS' },
+  { id: 'arbitrum', name: 'Arbitrum', symbol: 'ARB', network: 'Arbitrum One' },
 ];
 
-export default function ReceiveScreen({ navigation }: { navigation: any }) {
+export default function ReceiveScreen({ navigation, route }: { navigation: any; route?: { params?: { tokenSymbol?: string } } }) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
   const { address } = useWalletStore();
 
-  const [activeChainId, setActiveChainId] = useState('ethereum');
+  const tokenParam = route?.params?.tokenSymbol?.toLowerCase();
+  const initialChain = SUPPORTED_CHAINS.find(c => c.id === tokenParam || c.symbol.toLowerCase() === tokenParam) || SUPPORTED_CHAINS[0];
+
+  const [activeChainId, setActiveChainId] = useState(initialChain.id);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    if (tokenParam) {
+      const match = SUPPORTED_CHAINS.find(c => c.id === tokenParam || c.symbol.toLowerCase() === tokenParam);
+      if (match) {
+        setActiveChainId(match.id);
+      }
+    }
+  }, [tokenParam]);
+
   const activeChain = SUPPORTED_CHAINS.find(c => c.id === activeChainId) || SUPPORTED_CHAINS[0];
-  const displayAddress = address || '0x25a4a159954a65463660591e5d71c4c1605f6e89';
+
+  const displayAddress = React.useMemo(() => {
+    if (activeChain.symbol === 'SOL') {
+      return '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+    }
+    if (activeChain.symbol === 'BTC') {
+      return 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+    }
+    return address || '0x25a4a159954a65463660591e5d71c4c1605f6e89';
+  }, [activeChain.symbol, address]);
 
   const copyAddress = async () => {
     try {
@@ -132,11 +156,11 @@ export default function ReceiveScreen({ navigation }: { navigation: any }) {
           style={[styles.backButton, { backgroundColor: monoMutedSurface }]}
           activeOpacity={0.7}
         >
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.text.primary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={isDark ? '#FFFFFF' : colors.text.primary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
             <Path d="M15 18l-6-6 6-6" />
           </Svg>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Receive {activeChain.name}</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Receive {activeChain.symbol}</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('Send', { openScanner: true })}
           style={[styles.backButton, { backgroundColor: monoMutedSurface }]}

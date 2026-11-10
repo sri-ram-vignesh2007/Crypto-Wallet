@@ -469,7 +469,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       {/* ======================================================== */}
       {/* TOP HEADER: WALLET CHOOSER, SCANNER & AI ASSISTANT        */}
       {/* ======================================================== */}
-      <View style={[styles.navBar, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.navBar, { paddingTop: insets.top + 8, backgroundColor: canvasBg, zIndex: 100 }]}>
         {/* Wallet Chooser Trigger (Icon + Wallet Name + Chevron) */}
         <SpringButton
           onPress={() => setShowWalletModal(true)}
@@ -631,8 +631,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.actionsBarRow}>
           {/* Send */}
           <SpringButton onPress={() => navigation.navigate('Send')} style={styles.actionBtnItem}>
-            <View style={[styles.actionIconCircle, { backgroundColor: monoPrimary }]}>
-              <SendActionIcon color={isDark ? '#000000' : '#FFFFFF'} size={24} />
+            <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
+              <SendActionIcon color={monoPrimary} size={24} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Send</Text>
           </SpringButton>
@@ -645,10 +645,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Receive</Text>
           </SpringButton>
 
-          {/* Swap */}
+          {/* Swap (White highlight background) */}
           <SpringButton onPress={() => navigation.navigate('Swap')} style={styles.actionBtnItem}>
-            <View style={[styles.actionIconCircle, { backgroundColor: monoMutedSurface }]}>
-              <SwapActionIcon color={monoPrimary} size={24} />
+            <View style={[styles.actionIconCircle, { backgroundColor: monoPrimary }]}>
+              <SwapActionIcon color={isDark ? '#000000' : '#FFFFFF'} size={24} />
             </View>
             <Text style={[styles.actionBtnLabel, { color: colors.text.primary }]}>Swap</Text>
           </SpringButton>
@@ -666,7 +666,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* ASSET OVERVIEW SECTION (ASSETS UP)                       */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>Assets</Text>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>Assets</Text>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Portfolio', { initialTab: 'assets' })}
@@ -709,7 +709,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* MARKET MOVERS: TOP GAINERS & TOP LOSERS (MOVERS DOWN)    */}
         {/* ======================================================== */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionHeading}>MARKET MOVERS</Text>
+          <Text style={[styles.sectionHeading, { color: isDark ? '#FFFFFF' : '#111111' }]}>MARKET MOVERS</Text>
           <View style={[styles.moversSegmentPill, { backgroundColor: monoMutedSurface }]}>
             <TouchableOpacity
               onPress={() => setMoversTab('gainers')}

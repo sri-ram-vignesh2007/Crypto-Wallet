@@ -62,9 +62,9 @@ type RootStackParamList = {
   Community: undefined;
   Explore: undefined;
   Assets: undefined;
-  Send: undefined;
-  Receive: undefined;
-  Swap: undefined;
+  Send: { tokenSymbol?: string; openScanner?: boolean } | undefined;
+  Receive: { tokenSymbol?: string } | undefined;
+  Swap: { tokenSymbol?: string } | undefined;
   Buy: undefined;
   History: undefined;
   Activity: undefined;
@@ -75,7 +75,7 @@ type RootStackParamList = {
   Settings: undefined;
   AIChatbot: undefined;
   AIAssistant: { context?: string; asset?: any; tx?: any } | undefined;
-  TokenDetail: { symbol: string; name: string; price: string; change: string };
+  TokenDetail: { symbol: string; name: string; price: string; change: string; positive?: boolean; usd?: string; balance?: string; network?: string };
   ChainDetail: { chain: any };
   CustomToken: undefined;
   ConnectedApps: undefined;
@@ -237,6 +237,7 @@ function MainTabs() {
         name="Swap"
         component={SwapScreen}
         options={{
+          tabBarStyle: { display: 'none' },
           tabBarIcon: ({ focused, color }) => <TabIcon name="Swap" focused={focused} color={color} size={29} />,
         }}
       />
