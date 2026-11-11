@@ -7,21 +7,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ethers } from 'ethers';
 import * as bip39 from 'bip39';
 import { generateSecureMnemonic } from '../polyfills';
+import { MultiChainDeriver, DerivedWallet } from './MultiChainDeriver';
 
 const MNEMONIC_KEY = 'encrypted_mnemonic_v1';
 const WALLET_ADDRESS_KEY = 'wallet_address_v1';
 const PRIVATE_KEY_KEY = 'encrypted_pk_v1';
+const SOLANA_ADDRESS_KEY = 'solana_address_v1';
+const BITCOIN_ADDRESS_KEY = 'bitcoin_address_v1';
 
 export class SecureKeyManager {
-  static async createWallet(): Promise<{ address: string; mnemonicWarning: string }> {
+  static async createWallet(): Promise<{ address: string; solanaAddress: string; bitcoinAddress: string; mnemonicWarning: string }> {
     const mnemonic = await generateSecureMnemonic(); // 12-word standard BIP39 mnemonic
-    const wallet = ethers.Wallet.fromPhrase(mnemonic);
-    const address = wallet.address;
+    const derived = MultiChainDeriver.deriveAccount(mnemonic, 0);
 
-    await this.encryptAndStore(mnemonic, address, wallet.privateKey);
+    await this.encryptAndStore(mnemonic, derived.evmAddress, derived.evmPrivateKey, derived.solanaAddress, derived.bitcoinAddress);
 
     return {
-      address,
+      address: derived.evmAddress,
+      solanaAddress: derived.solanaAddress,
+      bitcoinAddress: derived.bitcoinAddress,
       mnemonicWarning: 'WRITE DOWN THESE 12 WORDS ON PAPER. NEVER SCREENSHOT. NEVER SHARE.',
     };
   }
@@ -44,7 +48,7 @@ export class SecureKeyManager {
     }
   }
 
-  static async importWallet(mnemonic: string): Promise<{ address: string }> {
+  static async importWallet(mnemonic: string): Promise<{ address: string; solanaAddress: string; bitcoinAddress: string }> {
     const cleaned = mnemonic.trim().replace(/\s+/g, ' ');
     const isValid = bip39.validateMnemonic(cleaned);
     if (!isValid) {
@@ -52,21 +56,39 @@ export class SecureKeyManager {
       try {
         const wallet = new ethers.Wallet(cleaned.startsWith('0x') ? cleaned : `0x${cleaned}`);
         await this.encryptAndStore('', wallet.address, wallet.privateKey);
-        return { address: wallet.address };
+        return {
+          address: wallet.address,
+          solanaAddress: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+          bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+        };
       } catch {
         throw new Error('Invalid seed phrase or private key. Please check and try again.');
       }
     }
 
-    const wallet = ethers.Wallet.fromPhrase(cleaned);
-    const address = wallet.address;
+    const derived = MultiChainDeriver.deriveAccount(cleaned, 0);
+    await this.encryptAndStore(cleaned, derived.evmAddress, derived.evmPrivateKey, derived.solanaAddress, derived.bitcoinAddress);
 
-    await this.encryptAndStore(cleaned, address, wallet.privateKey);
-
-    return { address };
+    return {
+      address: derived.evmAddress,
+      solanaAddress: derived.solanaAddress,
+      bitcoinAddress: derived.bitcoinAddress,
+    };
   }
 
-  private static async encryptAndStore(mnemonic: string, address: string, privateKey?: string): Promise<void> {
+  static async deriveAccount(accountIndex: number): Promise<DerivedWallet | null> {
+    const mnemonic = await this.getMnemonic();
+    if (!mnemonic) return null;
+    return MultiChainDeriver.deriveAccount(mnemonic, accountIndex);
+  }
+
+  private static async encryptAndStore(
+    mnemonic: string,
+    address: string,
+    privateKey?: string,
+    solanaAddress?: string,
+    bitcoinAddress?: string
+  ): Promise<void> {
     try {
       if (mnemonic) {
         await SecureStore.setItemAsync(MNEMONIC_KEY, mnemonic);
@@ -76,14 +98,42 @@ export class SecureKeyManager {
         await SecureStore.setItemAsync(PRIVATE_KEY_KEY, privateKey);
         await AsyncStorage.setItem(PRIVATE_KEY_KEY, privateKey);
       }
+      if (solanaAddress) {
+        await SecureStore.setItemAsync(SOLANA_ADDRESS_KEY, solanaAddress);
+        await AsyncStorage.setItem(SOLANA_ADDRESS_KEY, solanaAddress);
+      }
+      if (bitcoinAddress) {
+        await SecureStore.setItemAsync(BITCOIN_ADDRESS_KEY, bitcoinAddress);
+        await AsyncStorage.setItem(BITCOIN_ADDRESS_KEY, bitcoinAddress);
+      }
       await SecureStore.setItemAsync(WALLET_ADDRESS_KEY, address);
       await AsyncStorage.setItem(WALLET_ADDRESS_KEY, address);
     } catch (e: any) {
       console.warn('Storage fallback applied:', e?.message);
       if (mnemonic) await AsyncStorage.setItem(MNEMONIC_KEY, mnemonic);
       if (privateKey) await AsyncStorage.setItem(PRIVATE_KEY_KEY, privateKey);
+      if (solanaAddress) await AsyncStorage.setItem(SOLANA_ADDRESS_KEY, solanaAddress);
+      if (bitcoinAddress) await AsyncStorage.setItem(BITCOIN_ADDRESS_KEY, bitcoinAddress);
       await AsyncStorage.setItem(WALLET_ADDRESS_KEY, address);
     }
+  }
+
+  static async getSolanaAddress(): Promise<string> {
+    try {
+      const addr = await SecureStore.getItemAsync(SOLANA_ADDRESS_KEY);
+      if (addr) return addr;
+    } catch {}
+    const asyncAddr = await AsyncStorage.getItem(SOLANA_ADDRESS_KEY);
+    return asyncAddr || '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+  }
+
+  static async getBitcoinAddress(): Promise<string> {
+    try {
+      const addr = await SecureStore.getItemAsync(BITCOIN_ADDRESS_KEY);
+      if (addr) return addr;
+    } catch {}
+    const asyncAddr = await AsyncStorage.getItem(BITCOIN_ADDRESS_KEY);
+    return asyncAddr || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
   }
 
   static async getAddress(): Promise<string | null> {

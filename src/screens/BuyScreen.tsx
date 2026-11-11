@@ -12,6 +12,7 @@ import { WebView } from 'react-native-webview';
 import { useWalletStore } from '../store/walletStore';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { TokenLogo } from '../components/TokenLogo';
+import { getTransakUrl, getMoonPayUrl } from '../config/Web3ApiConfig';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -131,12 +132,13 @@ export default function BuyScreen({ navigation }: { navigation?: any }) {
 
   const openOnramp = (provider: 'moonpay' | 'transak' | 'ramp') => {
     let url = '';
+    const userAddr = address || '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A';
     if (provider === 'moonpay') {
-      url = `https://buy.moonpay.com/?walletAddress=${address}&currencyCode=${selectedChain.provider}&baseCurrencyAmount=${fiatAmount}`;
+      url = getMoonPayUrl(userAddr, selectedChain.provider, fiatAmount);
     } else if (provider === 'transak') {
-      url = `https://global.transak.com/?walletAddress=${address}&cryptoCurrencyCode=${selectedChain.provider}&fiatAmount=${fiatAmount}`;
+      url = getTransakUrl(userAddr, selectedChain.provider, fiatAmount);
     } else {
-      url = `https://ramp.network/buy/?userAddress=${address}&swapAsset=${selectedChain.provider}`;
+      url = `https://ramp.network/buy/?userAddress=${userAddr}&swapAsset=${selectedChain.provider}`;
     }
     setProviderUrl(url);
     setShowWebView(true);

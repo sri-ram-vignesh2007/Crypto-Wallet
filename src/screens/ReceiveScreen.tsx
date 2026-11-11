@@ -92,7 +92,7 @@ export default function ReceiveScreen({ navigation, route }: { navigation: any; 
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const isDark = useIsDark();
-  const { address } = useWalletStore();
+  const { address, activeWallet } = useWalletStore();
 
   const tokenParam = route?.params?.tokenSymbol?.toLowerCase();
   const initialChain = SUPPORTED_CHAINS.find(c => c.id === tokenParam || c.symbol.toLowerCase() === tokenParam) || SUPPORTED_CHAINS[0];
@@ -113,13 +113,13 @@ export default function ReceiveScreen({ navigation, route }: { navigation: any; 
 
   const displayAddress = React.useMemo(() => {
     if (activeChain.symbol === 'SOL') {
-      return '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+      return activeWallet?.solanaAddress || '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
     }
     if (activeChain.symbol === 'BTC') {
-      return 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+      return activeWallet?.bitcoinAddress || 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
     }
-    return address || '0x25a4a159954a65463660591e5d71c4c1605f6e89';
-  }, [activeChain.symbol, address]);
+    return activeWallet?.address || address || '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A';
+  }, [activeChain.symbol, activeWallet, address]);
 
   const copyAddress = async () => {
     try {

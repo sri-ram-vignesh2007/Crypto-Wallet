@@ -16,6 +16,15 @@ import { useColors, useIsDark } from '../theme/ThemeContext';
 import { CHAINS } from '../core/ChainConfig';
 import { rpcManager } from '../core/RPCManager';
 import { TokenLogo } from '../components/TokenLogo';
+import { AddressBookService, Contact } from '../services/AddressBookService';
+
+const BookUserIcon = ({ color = '#8E8E93', size = 16 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    <Path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    <Circle cx="12" cy="10" r="3" />
+  </Svg>
+);
 
 // Smooth iOS Spring Button Component
 function SpringButton({
@@ -115,6 +124,36 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
   const [gasFeeEstimate, setGasFeeEstimate] = useState<string>('~0.0004 ' + currentChainObj.symbol);
   const [txSuccessHash, setTxSuccessHash] = useState<string | null>(null);
 
+  // Address Book & ENS State
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [showContactsModal, setShowContactsModal] = useState(false);
+  const [resolvingEns, setResolvingEns] = useState(false);
+  const [resolvedEnsAddr, setResolvedEnsAddr] = useState<string | null>(null);
+  const [showSaveContactPrompt, setShowSaveContactPrompt] = useState(false);
+  const [newContactNickname, setNewContactNickname] = useState('');
+
+  useEffect(() => {
+    AddressBookService.getContacts().then(setContacts);
+  }, []);
+
+  useEffect(() => {
+    const trimmed = recipient.trim();
+    if (trimmed.endsWith('.eth') && trimmed.length > 4) {
+      setResolvingEns(true);
+      AddressBookService.resolveENS(trimmed).then((res) => {
+        setResolvingEns(false);
+        if (res.address) {
+          setResolvedEnsAddr(res.address);
+        } else {
+          setResolvedEnsAddr(null);
+        }
+      });
+    } else {
+      setResolvedEnsAddr(null);
+      setResolvingEns(false);
+    }
+  }, [recipient]);
+
   useEffect(() => {
     if (route?.params?.tokenSymbol) {
       setSelectedTokenSymbol(route.params.tokenSymbol.toUpperCase());
@@ -213,13 +252,20 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
   };
 
   const handleSendPress = () => {
-    const cleanRecipient = recipient.trim();
+    let cleanRecipient = recipient.trim();
     if (!cleanRecipient) {
-      Alert.alert('Missing Address', 'Please enter a recipient address.');
+      Alert.alert('Missing Address', 'Please enter a recipient address or ENS name.');
       return;
     }
-    if (!ethers.isAddress(cleanRecipient)) {
-      Alert.alert('Invalid Address', 'Please enter a valid EVM address (starts with 0x).');
+    if (cleanRecipient.endsWith('.eth')) {
+      if (resolvedEnsAddr) {
+        cleanRecipient = resolvedEnsAddr;
+      } else {
+        Alert.alert('ENS Not Found', 'Could not resolve this .eth name to a valid on-chain address.');
+        return;
+      }
+    } else if (!ethers.isAddress(cleanRecipient)) {
+      Alert.alert('Invalid Address', 'Please enter a valid address (0x...) or ENS name (.eth).');
       return;
     }
     const sendNum = parseFloat(amount);
@@ -239,8 +285,9 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
   const executeSend = async () => {
     setLoading(true);
     try {
+      const targetAddress = resolvedEnsAddr || recipient.trim();
       const result = await sendCrypto(
-        recipient.trim(),
+        targetAddress,
         amount.trim(),
         currentSelectedBalance.token
       );
@@ -336,12 +383,17 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
           </SpringButton>
 
           {/* Section: Recipient Address */}
-          <Text style={[styles.sectionHeader, { color: isDark ? '#FFFFFF' : colors.text.secondary }]}>RECIPIENT</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.sectionHeader, { color: isDark ? '#FFFFFF' : colors.text.secondary }]}>RECIPIENT</Text>
+            <TouchableOpacity onPress={() => setShowContactsModal(true)} style={{ paddingHorizontal: 4, paddingVertical: 2 }}>
+              <Text style={{ fontSize: 12, color: '#3B82F6', fontWeight: '600' }}>Contacts</Text>
+            </TouchableOpacity>
+          </View>
           <View style={[styles.insetCard, { backgroundColor: cardBg, borderColor: hairline }]}>
             <View style={styles.inputInnerRow}>
               <TextInput
                 style={[styles.addressInput, { color: colors.text.primary }]}
-                placeholder="EVM address (0x...)"
+                placeholder="EVM address (0x...) or ENS (.eth)"
                 placeholderTextColor={colors.text.muted}
                 value={recipient}
                 onChangeText={setRecipient}
@@ -352,11 +404,29 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
                 <SpringButton onPress={handlePaste} style={[styles.pastePill, { backgroundColor: monoMuted }]}>
                   <Text style={[styles.pastePillText, { color: colors.text.primary }]}>Paste</Text>
                 </SpringButton>
-                <SpringButton onPress={() => setShowScannerModal(true)} style={[styles.pastePill, { backgroundColor: monoMuted, paddingHorizontal: 9 }]}>
+                <SpringButton onPress={() => setShowContactsModal(true)} style={[styles.pastePill, { backgroundColor: monoMuted, paddingHorizontal: 8 }]}>
+                  <BookUserIcon color={colors.text.primary} size={15} />
+                </SpringButton>
+                <SpringButton onPress={() => setShowScannerModal(true)} style={[styles.pastePill, { backgroundColor: monoMuted, paddingHorizontal: 8 }]}>
                   <ScanQrIcon color={colors.text.primary} size={15} />
                 </SpringButton>
               </View>
             </View>
+
+            {resolvingEns && (
+              <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <ActivityIndicator size="small" color="#3B82F6" />
+                <Text style={{ fontSize: 12, color: '#3B82F6' }}>Resolving ENS on Ethereum...</Text>
+              </View>
+            )}
+
+            {resolvedEnsAddr && (
+              <View style={{ marginTop: 8, backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : '#DCFCE7', padding: 8, borderRadius: 8 }}>
+                <Text style={{ fontSize: 12, color: '#10B981', fontWeight: '600' }} numberOfLines={1}>
+                  ✓ Verified: {resolvedEnsAddr}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Section: Amount */}
@@ -730,6 +800,124 @@ export default function SendScreen({ navigation, route }: { navigation: any; rou
             >
               <Text style={[styles.primaryActionBtnText, { color: colors.text.primary }]}>Close</Text>
             </SpringButton>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Address Book Modal */}
+      <Modal
+        visible={showContactsModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowContactsModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity
+            style={{ flex: 1, width: '100%' }}
+            activeOpacity={1}
+            onPress={() => setShowContactsModal(false)}
+          />
+          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline, maxHeight: '80%' }]}>
+            <View style={[styles.sheetGrabber, { backgroundColor: isDark ? '#3A3A3C' : '#D1D1D6' }]} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary }]}>Address Book</Text>
+              <TouchableOpacity
+                onPress={() => setShowSaveContactPrompt(true)}
+                style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, backgroundColor: primaryBtnBg }}
+              >
+                <Text style={{ color: primaryBtnText, fontSize: 13, fontWeight: '700' }}>+ Add</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={[styles.confirmHeaderSubtitle, { color: colors.text.muted, marginBottom: 12 }]}>
+              Select a saved wallet contact or verified ENS name
+            </Text>
+
+            <ScrollView style={{ marginTop: 8 }} showsVerticalScrollIndicator={false}>
+              {contacts.map((c) => (
+                <TouchableOpacity
+                  key={c.id}
+                  onPress={() => {
+                    setRecipient(c.ensName || c.address);
+                    setShowContactsModal(false);
+                  }}
+                  style={{
+                    paddingVertical: 12,
+                    borderBottomWidth: 0.5,
+                    borderBottomColor: hairline,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text.primary }}>{c.name}</Text>
+                    {c.ensName && (
+                      <Text style={{ fontSize: 12, color: '#3B82F6', marginTop: 2 }}>{c.ensName}</Text>
+                    )}
+                    <Text style={{ fontSize: 12, color: colors.text.muted, marginTop: 2 }} numberOfLines={1}>
+                      {c.address}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 13, fontWeight: '600', color: '#10B981' }}>Select</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Save Contact Quick Prompt Modal */}
+      <Modal
+        visible={showSaveContactPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSaveContactPrompt(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalSheet, { backgroundColor: cardBg, borderColor: hairline, padding: 20 }]}>
+            <Text style={[styles.confirmHeaderTitle, { color: colors.text.primary, marginBottom: 8 }]}>Save New Contact</Text>
+            <TextInput
+              style={[styles.addressInput, { color: colors.text.primary, backgroundColor: monoMuted, padding: 12, borderRadius: 10, marginVertical: 6 }]}
+              placeholder="Contact Name (e.g. Alice, Binance Cold)"
+              placeholderTextColor={colors.text.muted}
+              value={newContactNickname}
+              onChangeText={setNewContactNickname}
+            />
+            <TextInput
+              style={[styles.addressInput, { color: colors.text.primary, backgroundColor: monoMuted, padding: 12, borderRadius: 10, marginVertical: 6 }]}
+              placeholder="Address (0x...) or ENS (.eth)"
+              placeholderTextColor={colors.text.muted}
+              value={recipient}
+              onChangeText={setRecipient}
+            />
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+              <TouchableOpacity
+                onPress={() => setShowSaveContactPrompt(false)}
+                style={{ flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12, backgroundColor: monoMuted }}
+              >
+                <Text style={{ color: colors.text.primary, fontWeight: '600' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  if (!newContactNickname.trim() || !recipient.trim()) {
+                    Alert.alert('Required', 'Please enter both name and address');
+                    return;
+                  }
+                  await AddressBookService.saveContact({
+                    name: newContactNickname,
+                    address: recipient,
+                  });
+                  const updated = await AddressBookService.getContacts();
+                  setContacts(updated);
+                  setShowSaveContactPrompt(false);
+                  setNewContactNickname('');
+                  Alert.alert('Saved', 'Contact added to Address Book!');
+                }}
+                style={{ flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12, backgroundColor: primaryBtnBg }}
+              >
+                <Text style={{ color: primaryBtnText, fontWeight: '700' }}>Save</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

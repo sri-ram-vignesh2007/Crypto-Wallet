@@ -5,6 +5,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ethers } from 'ethers';
 import { WalletManager } from '../core/WalletManager';
+import { SecureKeyManager } from '../core/SecureKeyManager';
 import { rpcManager } from '../core/RPCManager';
 import { Token } from '../core/ChainConfig';
 
@@ -18,6 +19,8 @@ export interface MultiWalletItem {
   id: string;
   name: string;
   address: string;
+  solanaAddress?: string;
+  bitcoinAddress?: string;
   createdAt: number;
 }
 
@@ -98,9 +101,16 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       const exists = await WalletManager.hasWallet();
 
       let primaryAddress = '0x71C67EaE6976A0C3e54BaF88215382A61d4b389A';
+      let primarySol = '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+      let primaryBtc = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+
       if (exists) {
         const addr = await WalletManager.getReceiveAddress();
         if (addr) primaryAddress = addr;
+        const solAddr = await WalletManager.getSolanaAddress();
+        if (solAddr) primarySol = solAddr;
+        const btcAddr = await WalletManager.getBitcoinAddress();
+        if (btcAddr) primaryBtc = btcAddr;
       }
 
       // Load saved multi-wallets from storage
@@ -116,6 +126,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
             id: 'wallet-1',
             name: 'Main Wallet',
             address: primaryAddress,
+            solanaAddress: primarySol,
+            bitcoinAddress: primaryBtc,
             createdAt: Date.now(),
           },
         ];
@@ -174,27 +186,33 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     }
 
     try {
-      // Generate a new random Ethereum address for this secondary wallet
-      const randomWallet = ethers.Wallet.createRandom();
+      const nextAccountIndex = wallets.length;
+      const derived = await SecureKeyManager.deriveAccount(nextAccountIndex);
+      const evmAddr = derived ? derived.evmAddress : ethers.Wallet.createRandom().address;
+      const solAddr = derived ? derived.solanaAddress : undefined;
+      const btcAddr = derived ? derived.bitcoinAddress : undefined;
+
       const newWallet: MultiWalletItem = {
         id: `wallet-${Date.now()}`,
         name: customName?.trim() || `Wallet ${wallets.length + 1}`,
-        address: randomWallet.address,
+        address: evmAddr,
+        solanaAddress: solAddr,
+        bitcoinAddress: btcAddr,
         createdAt: Date.now(),
       };
 
       const updated = [...wallets, newWallet];
-      const newIdx = updated.length - 1;
+      const newActiveIdx = updated.length - 1;
 
       set({
         wallets: updated,
-        activeWalletIndex: newIdx,
+        activeWalletIndex: newActiveIdx,
         activeWallet: newWallet,
         address: newWallet.address,
       });
 
       await AsyncStorage.setItem(STORAGE_MULTI_WALLETS, JSON.stringify(updated));
-      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, newIdx.toString());
+      await AsyncStorage.setItem(STORAGE_ACTIVE_INDEX, newActiveIdx.toString());
 
       await get().refreshBalances();
       return { success: true, wallet: newWallet };
@@ -288,6 +306,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         id: 'wallet-1',
         name: 'Main Wallet',
         address: result.address,
+        solanaAddress: result.solanaAddress,
+        bitcoinAddress: result.bitcoinAddress,
         createdAt: Date.now(),
       };
       set({
@@ -316,8 +336,10 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       const result = await WalletManager.importWallet(mnemonic);
       const initialWallet: MultiWalletItem = {
         id: 'wallet-1',
-        name: 'Imported Wallet',
+        name: 'Main Wallet',
         address: result.address,
+        solanaAddress: result.solanaAddress,
+        bitcoinAddress: result.bitcoinAddress,
         createdAt: Date.now(),
       };
       set({

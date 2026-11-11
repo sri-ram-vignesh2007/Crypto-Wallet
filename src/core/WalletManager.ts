@@ -13,16 +13,26 @@ export interface WalletInfo {
 }
 
 export class WalletManager {
-  static async createWallet(): Promise<{ address: string; warning: string }> {
+  static async createWallet(): Promise<{ address: string; solanaAddress: string; bitcoinAddress: string; warning: string }> {
     const result = await SecureKeyManager.createWallet();
     return {
       address: result.address,
+      solanaAddress: result.solanaAddress,
+      bitcoinAddress: result.bitcoinAddress,
       warning: result.mnemonicWarning,
     };
   }
 
-  static async importWallet(mnemonic: string): Promise<{ address: string }> {
+  static async importWallet(mnemonic: string): Promise<{ address: string; solanaAddress: string; bitcoinAddress: string }> {
     return await SecureKeyManager.importWallet(mnemonic);
+  }
+
+  static async getSolanaAddress(): Promise<string> {
+    return await SecureKeyManager.getSolanaAddress();
+  }
+
+  static async getBitcoinAddress(): Promise<string> {
+    return await SecureKeyManager.getBitcoinAddress();
   }
 
   static async getWalletInfo(chainKey: string = 'ethereum'): Promise<WalletInfo | null> {
