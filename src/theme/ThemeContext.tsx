@@ -3,7 +3,10 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Appearance, useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createTheme, Theme, ColorScheme } from './Theme';
+
+const THEME_STORAGE_KEY = 'user_theme_preference_v1';
 
 type ThemeContextType = {
   theme: Theme;
@@ -15,38 +18,38 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const systemColorScheme = useColorScheme();
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>('light');
-  const [theme, setTheme] = useState<Theme>(() => createTheme('light'));
+  // DEFAULT TO DARK MODE AS REQUESTED
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>('dark');
+  const [theme, setTheme] = useState<Theme>(() => createTheme('dark'));
 
-  // Initialize from system or stored preference
+  // Initialize from stored preference, default to 'dark'
   useEffect(() => {
-    const stored = Appearance.getColorScheme();
-    const initial: ColorScheme = (stored === 'dark') ? 'dark' : 'light';
-    setColorSchemeState(initial);
-    setTheme(createTheme(initial === 'dark' ? 'dark' : 'light'));
-  }, []);
-
-  // Listen for system changes
-  useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme: newScheme }) => {
-      if (colorScheme === 'system') {
-        const s: ColorScheme = (newScheme === 'dark') ? 'dark' : 'light';
-        setColorSchemeState(s);
-        setTheme(createTheme(s === 'dark' ? 'dark' : 'light'));
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (stored === 'light') {
+          setColorSchemeState('light');
+          setTheme(createTheme('light'));
+        } else {
+          // Default to dark mode
+          setColorSchemeState('dark');
+          setTheme(createTheme('dark'));
+        }
+      } catch {
+        setColorSchemeState('dark');
+        setTheme(createTheme('dark'));
       }
-    });
-    return () => subscription.remove();
-  }, [colorScheme]);
+    })();
+  }, []);
 
   const setColorScheme = useCallback((scheme: ColorScheme) => {
     setColorSchemeState(scheme);
-    setTheme(createTheme(scheme === 'dark' ? 'dark' : 'light'));
-    // Could persist to AsyncStorage here
+    setTheme(createTheme(scheme === 'light' ? 'light' : 'dark'));
+    AsyncStorage.setItem(THEME_STORAGE_KEY, scheme).catch(() => {});
   }, []);
 
   const toggleTheme = useCallback(() => {
-    const newScheme: ColorScheme = colorScheme === 'light' ? 'dark' : 'light';
+    const newScheme: ColorScheme = colorScheme === 'dark' ? 'light' : 'dark';
     setColorScheme(newScheme);
   }, [colorScheme, setColorScheme]);
 

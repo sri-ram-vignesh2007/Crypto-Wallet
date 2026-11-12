@@ -91,11 +91,11 @@ export default function WelcomeScreen({ navigation }: { navigation: any }) {
   }, [fadeAnim, slideAnim, cardScaleAnim]);
 
   const handleCreate = () => {
-    navigation.navigate('SeedPhrase', { mode: 'create' });
+    navigation.navigate('Verification', { mode: 'create' });
   };
 
   const handleImport = () => {
-    navigation.navigate('SeedPhrase', { mode: 'import' });
+    navigation.navigate('Verification', { mode: 'import' });
   };
 
   return (

@@ -16,6 +16,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 // Onboarding screens
 import WelcomeScreen from './src/screens/onboarding/WelcomeScreen';
+import VerificationScreen from './src/screens/onboarding/VerificationScreen';
 import SeedPhraseScreen from './src/screens/onboarding/SeedPhraseScreen';
 import LockScreen from './src/screens/LockScreen';
 
@@ -56,6 +57,7 @@ const Tab = createBottomTabNavigator<TabParamList>();
 type RootStackParamList = {
   Lock: undefined;
   Welcome: undefined;
+  Verification: { mode?: 'create' | 'import' } | undefined;
   SeedPhrase: { mode: 'create' | 'import' } | undefined;
   Main: undefined;
   Market: undefined;
@@ -261,7 +263,7 @@ function MainTabs() {
 // Main App Content
 function AppContent() {
   const { loadWallet, hasWallet } = useWalletStore();
-  const { loadProfile } = useProfileStore();
+  const { loadProfile, hasCompletedOnboarding } = useProfileStore();
   const { state: lockState } = useAppLock();
   const { theme } = useTheme();
 
@@ -302,9 +304,10 @@ function AppContent() {
           >
             {isLocked ? (
               <Stack.Screen name="Lock" component={LockScreen} />
-            ) : !hasWallet ? (
+            ) : (!hasCompletedOnboarding || !hasWallet) ? (
               <>
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="Verification" component={VerificationScreen} />
                 <Stack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
               </>
             ) : (
@@ -341,6 +344,7 @@ function AppContent() {
                 <Stack.Screen name="Help" component={HelpScreen} options={{ title: 'Help' }} />
                 <Stack.Screen name="Feedback" component={FeedbackScreen} options={{ title: 'Feedback' }} />
                 <Stack.Screen name="About" component={AboutScreen} options={{ title: 'About' }} />
+                <Stack.Screen name="Verification" component={VerificationScreen} options={{ title: 'Personal Details' }} />
                 <Stack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
               </>
             )}

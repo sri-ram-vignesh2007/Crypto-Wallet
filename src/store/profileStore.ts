@@ -10,18 +10,33 @@ interface ProfileState {
   name: string;
   username: string;
   avatar: string;
+  googleAccount: string;
+  isGoogleVerified: boolean;
+  country: string;
+  phoneNumber: string;
   isEmailVerified: boolean;
-  hasCompletedOnboarding: boolean;  // persisted: has user ever completed initial onboarding?
-  isSignedIn: boolean;              // NOT persisted — resets to false on every cold launch.
-  showPortfolioBalance: boolean;    // persisted: option to show or hide portfolio balance
-  allowPublicPortfolio: boolean;    // persisted: whether others can see portfolio in community
-  allowDirectMessages: boolean;     // persisted: whether others can message user in community
-  isBiometricEnabled: boolean;      // persisted: Face ID / Biometric toggle
+  hasCompletedOnboarding: boolean;  // persisted: has user completed initial onboarding?
+  isSignedIn: boolean;
+  showPortfolioBalance: boolean;
+  allowPublicPortfolio: boolean;
+  allowDirectMessages: boolean;
+  isBiometricEnabled: boolean;
 
   setEmail: (email: string) => void;
   setName: (name: string) => void;
   setUsername: (username: string) => void;
   setAvatar: (avatar: string) => void;
+  setGoogleVerified: (googleEmail: string, verified?: boolean) => void;
+  setCountry: (country: string) => void;
+  setPhoneNumber: (phoneNumber: string) => void;
+  updatePersonalDetails: (data: {
+    name: string;
+    username: string;
+    email: string;
+    googleAccount?: string;
+    country?: string;
+    phoneNumber?: string;
+  }) => void;
   setEmailVerified: (verified: boolean) => void;
   setOnboardingComplete: (complete: boolean) => void;
   setSignedIn: (signedIn: boolean) => void;
@@ -40,6 +55,10 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   name: '',
   username: '',
   avatar: 'U',
+  googleAccount: '',
+  isGoogleVerified: false,
+  country: 'India 🇮🇳',
+  phoneNumber: '',
   isEmailVerified: false,
   hasCompletedOnboarding: false,
   isSignedIn: false,
@@ -59,6 +78,31 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
   setAvatar: (avatar) => {
     set({ avatar });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setGoogleVerified: (googleAccount, verified = true) => {
+    set({ googleAccount, isGoogleVerified: verified, email: googleAccount });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setCountry: (country) => {
+    set({ country });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  setPhoneNumber: (phoneNumber) => {
+    set({ phoneNumber });
+    setTimeout(() => get().saveProfile(), 0);
+  },
+  updatePersonalDetails: (data) => {
+    set({
+      name: data.name,
+      username: data.username,
+      email: data.email,
+      googleAccount: data.googleAccount || get().googleAccount,
+      country: data.country || get().country,
+      phoneNumber: data.phoneNumber || get().phoneNumber,
+      isGoogleVerified: data.googleAccount ? true : get().isGoogleVerified,
+      avatar: (data.name ? data.name.charAt(0).toUpperCase() : 'U'),
+    });
     setTimeout(() => get().saveProfile(), 0);
   },
   setEmailVerified: (isEmailVerified) => set({ isEmailVerified }),
@@ -100,6 +144,10 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           name: data.name || '',
           username: data.username || '',
           avatar: data.avatar || 'U',
+          googleAccount: data.googleAccount || '',
+          isGoogleVerified: data.isGoogleVerified || false,
+          country: data.country || 'India 🇮🇳',
+          phoneNumber: data.phoneNumber || '',
           isEmailVerified: data.isEmailVerified || false,
           hasCompletedOnboarding: data.hasCompletedOnboarding || false,
           showPortfolioBalance: data.showPortfolioBalance !== undefined ? data.showPortfolioBalance : true,
@@ -121,6 +169,10 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         name: state.name,
         username: state.username,
         avatar: state.avatar,
+        googleAccount: state.googleAccount,
+        isGoogleVerified: state.isGoogleVerified,
+        country: state.country,
+        phoneNumber: state.phoneNumber,
         isEmailVerified: state.isEmailVerified,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         showPortfolioBalance: state.showPortfolioBalance,

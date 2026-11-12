@@ -83,3 +83,4 @@ export function getMoonPayUrl(address: string, cryptoSymbol: string = 'ETH', fia
 
   return `https://buy.moonpay.com/?apiKey=${apiKey}&walletAddress=${address}&currencyCode=${symbol}&baseCurrencyAmount=${fiatAmount}&baseCurrencyCode=usd`;
 }
+

@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, Switch,
-  SafeAreaView, StatusBar, Alert, Modal, Animated, Pressable, Platform,
+  SafeAreaView, StatusBar, Alert, Modal, Animated, Pressable, Platform, TouchableOpacity,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -117,6 +117,10 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   const { address, selectedChain, resetWallet } = useWalletStore();
   const {
     name,
+    email,
+    username,
+    googleAccount,
+    isGoogleVerified,
     showPortfolioBalance,
     setShowPortfolioBalance,
     allowPublicPortfolio,
@@ -241,23 +245,34 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
         contentContainerStyle={[styles.content, { paddingBottom: Math.max(34, insets.bottom + 24) }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Wallet Profile Card */}
-        <View style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}>
+        {/* Wallet Profile Card with Google Verification & Personal Details */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Verification')}
+          activeOpacity={0.8}
+          style={[styles.insetGroupCard, { backgroundColor: cardBg, borderColor: hairline }]}
+        >
           <View style={styles.walletProfileRow}>
             <View style={[styles.walletAvatar, { backgroundColor: monoPrimary }]}>
-              <Text style={{ fontSize: 16 }}>💎</Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={[styles.walletTitle, { color: colors.text.primary }]}>{name || 'Cura Vault'}</Text>
-              <Text style={[styles.walletSubtitle, { color: colors.text.muted }]}>
-                {displayAddress.slice(0, 8)}...{displayAddress.slice(-6)}
+              <Text style={{ fontSize: 18, fontWeight: '700', color: isDark ? '#000000' : '#FFFFFF' }}>
+                {name ? name.charAt(0).toUpperCase() : 'S'}
               </Text>
             </View>
-            <View style={[styles.activeCapsule, { backgroundColor: monoMuted }]}>
-              <Text style={[styles.activeCapsuleText, { color: colors.text.primary }]}>Active</Text>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={[styles.walletTitle, { color: colors.text.primary }]}>{name || 'Sri Ram Vignesh'}</Text>
+                {isGoogleVerified && (
+                  <View style={{ marginLeft: 6, flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? 'rgba(52, 168, 83, 0.15)' : '#DCFCE7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                    <Text style={{ fontSize: 10, color: '#10B981', fontWeight: '800' }}>✓ Google Verified</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.walletSubtitle, { color: colors.text.muted, marginTop: 2 }]} numberOfLines={1}>
+                {googleAccount || email || `${displayAddress.slice(0, 8)}...${displayAddress.slice(-6)}`}
+              </Text>
             </View>
+            <ChevronRightIcon color={colors.text.muted} size={14} />
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Section: Wallet Security & Keys (Line-by-line matching Display & Privacy) */}
         <Text style={[styles.sectionHeader, { color: colors.text.secondary }]}>WALLET SECURITY & KEYS</Text>
