@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Alert, StatusBar, TextInput,
-  SafeAreaView, ActivityIndicator, Animated, Pressable,
+  ActivityIndicator, Animated, Pressable,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { useWalletStore } from '../../store/walletStore';

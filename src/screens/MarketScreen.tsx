@@ -3,9 +3,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
-  SafeAreaView, StatusBar, RefreshControl, Modal, Pressable,
+  StatusBar, RefreshControl, Modal, Pressable,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { TokenLogo } from '../components/TokenLogo';

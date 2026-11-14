@@ -2,21 +2,11 @@
 // Clean OTP Verification Screen
 
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, TextInput as RNTextInput, KeyboardAvoidingView, Platform, Text, SafeAreaView } from 'react-native';
+import { View, StyleSheet, TextInput as RNTextInput, KeyboardAvoidingView, Platform, Text } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from 'react-native-paper';
 import { useProfileStore } from '../../store/profileStore';
 import { useColors, useIsDark, useSpacing, useBorderRadius, useTypography } from '../../theme/ThemeContext';
-
-// Safe area hook with fallback
-let useSafeAreaInsets = () => ({ top: 0, bottom: 0, left: 0, right: 0 });
-try {
-  const safeAreaContext = require('react-native-safe-area-context');
-  if (safeAreaContext.useSafeAreaInsets) {
-    useSafeAreaInsets = safeAreaContext.useSafeAreaInsets;
-  }
-} catch (e) {
-  // Fallback already defined
-}
 
 export default function OTPScreen({ route, navigation }: any) {
   const { otpCode, email } = route.params;

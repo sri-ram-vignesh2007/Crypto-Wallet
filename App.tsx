@@ -60,6 +60,7 @@ type RootStackParamList = {
   Verification: { mode?: 'create' | 'import' } | undefined;
   SeedPhrase: { mode: 'create' | 'import' } | undefined;
   Main: undefined;
+  Home: undefined;
   Market: undefined;
   Portfolio: { initialTab?: 'assets' | 'transactions' } | undefined;
   LiveDesk: undefined;
@@ -313,6 +314,7 @@ function AppContent() {
             ) : (
               <>
                 <Stack.Screen name="Main" component={MainTabs} />
+                <Stack.Screen name="Home" component={MainTabs} />
                 <Stack.Screen name="Market" component={MarketScreen} options={{ title: 'Markets' }} />
                 <Stack.Screen name="Portfolio" component={PortfolioScreen} options={{ title: 'Portfolio' }} />
                 <Stack.Screen name="LiveDesk" component={ExploreScreen} options={{ title: 'Live Desk' }} />

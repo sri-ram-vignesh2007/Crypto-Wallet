@@ -624,12 +624,12 @@ export default function TokenDetailScreen({ navigation, route }: Props) {
       {/* ── STICKY FLOATING TRADE BUTTON (Images 3 & 4) ──────── */}
       <View style={[styles.stickyBottomBar, { paddingBottom: Math.max(16, insets.bottom + 8), backgroundColor: colors.bg.canvas }]}>
         <TouchableOpacity
-          onPress={() => setShowTradeModal(true)}
-          style={[styles.floatingTradeBtn, { backgroundColor: isDark ? '#FFFFFF' : '#111111' }]}
+          onPress={() => navigation?.navigate?.('Swap', { tokenSymbol: symbol })}
+          style={[styles.floatingTradeBtn, { backgroundColor: '#5865F2' }]}
           activeOpacity={0.85}
         >
-          <TradeIcon color={isDark ? '#000000' : '#FFFFFF'} size={20} />
-          <Text style={[styles.floatingTradeText, { color: isDark ? '#000000' : '#FFFFFF' }]}>Trade</Text>
+          <TradeIcon color="#FFFFFF" size={20} />
+          <Text style={[styles.floatingTradeText, { color: '#FFFFFF' }]}>Trade</Text>
         </TouchableOpacity>
       </View>
 

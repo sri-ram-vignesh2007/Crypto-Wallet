@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TextInput,
-  SafeAreaView, StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
+  StatusBar, Alert, Modal, KeyboardAvoidingView, Platform,
   ActivityIndicator, Linking, Animated, Pressable, TouchableOpacity, PanResponder,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { ethers } from 'ethers';

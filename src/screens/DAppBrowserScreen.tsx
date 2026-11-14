@@ -247,7 +247,7 @@ export default function DAppBrowserScreen({ navigation }: { navigation?: any }) 
       {/* ── TOP NAV & WEB3 SEARCH BAR ───────────────────────── */}
       <View style={[styles.headerBar, { borderBottomColor: cardBorder }]}>
         <TouchableOpacity
-          onPress={() => navigation?.goBack?.() || navigation?.navigate?.('Home')}
+          onPress={() => navigation?.canGoBack?.() ? navigation.goBack() : navigation?.navigate?.('Main')}
           style={[styles.backBtnCircle, { backgroundColor: monoMutedSurface }]}
           activeOpacity={0.7}
         >

@@ -2,21 +2,11 @@
 // Clean Profile Setup Screen - Choose Avatar
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar, Text, SafeAreaView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Text } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from 'react-native-paper';
 import { useProfileStore } from '../../store/profileStore';
 import { useColors, useIsDark, useSpacing, useBorderRadius, useTypography } from '../../theme/ThemeContext';
-
-// Safe area hook with fallback
-let useSafeAreaInsets = () => ({ top: 0, bottom: 0, left: 0, right: 0 });
-try {
-  const safeAreaContext = require('react-native-safe-area-context');
-  if (safeAreaContext.useSafeAreaInsets) {
-    useSafeAreaInsets = safeAreaContext.useSafeAreaInsets;
-  }
-} catch (e) {
-  // Fallback already defined
-}
 
 const AVATARS = ['U', 'L', 'T', 'F', 'P', 'K', 'G', 'O', 'A', 'R', 'S', 'N'];
 

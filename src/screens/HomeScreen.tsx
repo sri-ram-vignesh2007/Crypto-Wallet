@@ -3,11 +3,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, ScrollView, TouchableOpacity, Text, StyleSheet, RefreshControl,
-  SafeAreaView, StatusBar, Modal, Animated, Pressable, Platform, Dimensions,
+  StatusBar, Modal, Animated, Pressable, Platform, Dimensions,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useWalletStore } from '../store/walletStore';
 import { useProfileStore } from '../store/profileStore';

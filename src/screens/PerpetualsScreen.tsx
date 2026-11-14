@@ -227,7 +227,7 @@ export default function PerpetualsScreen({ navigation }: { navigation?: any }) {
       {/* ── TOP NAV BAR ─────────────────────────────────────── */}
       <View style={[styles.topNav, { borderBottomColor: cardBorder }]}>
         <TouchableOpacity
-          onPress={() => navigation?.goBack?.() || navigation?.navigate?.('Home')}
+          onPress={() => navigation?.canGoBack?.() ? navigation.goBack() : navigation?.navigate?.('Main')}
           style={[styles.backBtnCircle, { backgroundColor: monoMutedSurface }]}
           activeOpacity={0.7}
         >

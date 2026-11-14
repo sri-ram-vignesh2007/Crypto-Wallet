@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity,
-  SafeAreaView, StatusBar, TextInput,
+  StatusBar, TextInput,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useTransactionStore, WalletTransaction } from '../store/transactionStore';

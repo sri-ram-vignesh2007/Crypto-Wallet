@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, ScrollView, Text, StyleSheet, SafeAreaView, StatusBar,
+  View, ScrollView, Text, StyleSheet, StatusBar,
   Alert, Share, Animated, Pressable, Platform, TouchableOpacity,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useWalletStore } from '../store/walletStore';

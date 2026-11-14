@@ -2,20 +2,13 @@
 
 import React, { useRef, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, StatusBar, SafeAreaView, Animated, Pressable, Dimensions, Platform,
+  View, Text, StyleSheet, StatusBar, Animated, Pressable, Dimensions, Platform,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../../theme/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-let useSafeAreaInsets = () => ({ top: 0, bottom: 0, left: 0, right: 0 });
-try {
-  const safeAreaContext = require('react-native-safe-area-context');
-  if (safeAreaContext.useSafeAreaInsets) {
-    useSafeAreaInsets = safeAreaContext.useSafeAreaInsets;
-  }
-} catch (e) {}
 
 // Apple Spring Scale Button
 const AppleButton: React.FC<{

@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity, TextInput,
-  SafeAreaView, StatusBar, RefreshControl, Modal, Animated, Pressable,
+  StatusBar, RefreshControl, Modal, Animated, Pressable,
   Share, KeyboardAvoidingView, Platform, Dimensions, NativeSyntheticEvent, NativeScrollEvent,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useProfileStore } from '../store/profileStore';
@@ -329,46 +329,6 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
   // Floating Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-
-  // Collapsible Search & Categories Bar on scroll
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
-  const headerCollapseAnim = useRef(new Animated.Value(1)).current;
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const currentY = event.nativeEvent.contentOffset.y;
-    const diff = currentY - lastScrollY.current;
-
-    if (currentY <= 15) {
-      if (!headerVisible) {
-        setHeaderVisible(true);
-        Animated.timing(headerCollapseAnim, {
-          toValue: 1,
-          duration: 180,
-          useNativeDriver: false,
-        }).start();
-      }
-    } else if (diff > 10 && currentY > 40) {
-      if (headerVisible) {
-        setHeaderVisible(false);
-        Animated.timing(headerCollapseAnim, {
-          toValue: 0,
-          duration: 180,
-          useNativeDriver: false,
-        }).start();
-      }
-    } else if (diff < -5) {
-      if (!headerVisible) {
-        setHeaderVisible(true);
-        Animated.timing(headerCollapseAnim, {
-          toValue: 1,
-          duration: 180,
-          useNativeDriver: false,
-        }).start();
-      }
-    }
-    lastScrollY.current = currentY;
-  };
 
   // Colors
   const cardBg = isDark ? '#171717' : '#FFFFFF';
@@ -725,18 +685,18 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       </View>
 
-      {/* Collapsible Section: Search Bar & Dispatches Categories (Smoothly hide on scroll up, show on slight scroll down) */}
-      <Animated.View
-        style={{
-          maxHeight: headerCollapseAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, activeTab === 'dispatches' ? 116 : 60],
-          }),
-          opacity: headerCollapseAnim,
-          overflow: 'hidden',
-        }}
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={monoPrimary}
+          />
+        }
       >
-        {/* Search Bar */}
+        {/* Search Bar (Smoothly scrolls within content without jitter) */}
         <View style={styles.searchRow}>
           <View style={[styles.searchBox, { backgroundColor: monoMutedSurface, borderColor: cardBorder }]}>
             <SearchIcon color={colors.text.muted} size={15} />
@@ -790,21 +750,7 @@ export default function ExploreScreen({ navigation }: { navigation: any }) {
             </ScrollView>
           </View>
         )}
-      </Animated.View>
 
-      <ScrollView
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={monoPrimary}
-          />
-        }
-      >
         {/* ======================================================== */}
         {/* TAB 1: CURA AI DISPATCHES                                */}
         {/* ======================================================== */}

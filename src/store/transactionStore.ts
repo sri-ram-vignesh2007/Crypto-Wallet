@@ -119,6 +119,12 @@ interface TransactionStoreState {
     toAmount: number,
     usdValue: string
   ) => void;
+  executeBuy: (
+    cryptoSymbol: string,
+    cryptoAmount: number,
+    fiatAmountUsd: number,
+    paymentMethod: string
+  ) => WalletTransaction;
   resetTransactions: () => void;
 }
 
@@ -198,6 +204,52 @@ export const useTransactionStore = create<TransactionStoreState>((set, get) => (
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTxs)),
       AsyncStorage.setItem(BALANCES_STORAGE_KEY, JSON.stringify(currentBalances)),
     ]).catch(() => {});
+  },
+
+  executeBuy: (
+    cryptoSymbol: string,
+    cryptoAmount: number,
+    fiatAmountUsd: number,
+    paymentMethod: string
+  ) => {
+    const currentBalances = { ...get().balances };
+    const symKey = cryptoSymbol.toUpperCase();
+
+    // Credit balance
+    const currentBal = currentBalances[symKey] !== undefined ? currentBalances[symKey] : 0;
+    currentBalances[symKey] = currentBal + cryptoAmount;
+
+    // Realistic tx hash
+    const randomHex = Math.random().toString(16).substring(2, 10);
+    const txHash = `0x${randomHex}${Date.now().toString(16)}e819b5c2a104`;
+
+    const newTx: WalletTransaction = {
+      id: `buy-${Date.now()}`,
+      type: 'received',
+      asset: symKey,
+      amount: cryptoAmount < 1 ? cryptoAmount.toFixed(6) : cryptoAmount.toFixed(4),
+      value: `$${fiatAmountUsd.toFixed(2)}`,
+      time: 'Just now',
+      status: 'confirmed',
+      risk: 'normal',
+      hash: txHash,
+      from: paymentMethod,
+      timestamp: Date.now(),
+    };
+
+    const updatedTxs = [newTx, ...get().transactions];
+
+    set({
+      balances: currentBalances,
+      transactions: updatedTxs,
+    });
+
+    Promise.all([
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTxs)),
+      AsyncStorage.setItem(BALANCES_STORAGE_KEY, JSON.stringify(currentBalances)),
+    ]).catch(() => {});
+
+    return newTx;
   },
 
   resetTransactions: () => {

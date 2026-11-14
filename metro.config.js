@@ -9,6 +9,19 @@ const config = getDefaultConfig(__dirname);
 config.resolver.sourceExts.push('cjs');
 config.resolver.sourceExts.push('mjs');
 
+// Custom resolver for @noble/hashes exports subpaths
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName && moduleName.includes('@noble/hashes/crypto.js')) {
+    const aliased = moduleName.replace('@noble/hashes/crypto.js', '@noble/hashes/crypto');
+    return context.resolveRequest(context, aliased, platform);
+  }
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 // Enable package exports required for React Native 0.88+ subpaths
 config.resolver.unstable_enablePackageExports = true;
 

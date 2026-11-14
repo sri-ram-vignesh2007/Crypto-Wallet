@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, ScrollView, Text, StyleSheet, TouchableOpacity,
-  SafeAreaView, StatusBar, Modal, Animated, Pressable, Dimensions,
+  StatusBar, Modal, Animated, Pressable, Dimensions,
   PanResponder,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { useColors, useIsDark } from '../theme/ThemeContext';
 import { useTransactionStore } from '../store/transactionStore';
@@ -386,7 +386,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
       {/* ── TOP HEADER (Image 2: ←, Market ˅, 🎛) ─────────────── */}
       <View style={[styles.headerBar, { paddingTop: insets.top + 6 }]}>
         <TouchableOpacity
-          onPress={() => navigation?.canGoBack?.() ? navigation.goBack() : navigation?.navigate?.('Home')}
+          onPress={() => navigation?.canGoBack?.() ? navigation.goBack() : navigation?.navigate?.('Main')}
           style={[styles.headerCircleBtn, { backgroundColor: monoMutedSurface }]}
           activeOpacity={0.7}
         >
@@ -517,7 +517,7 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
           </View>
         </View>
 
-        {/* ── SMOOTH CONTINUOUS GESTURE PERCENTAGE SLIDER (No Dots) ─── */}
+        {/* ── SMOOTH GESTURE PERCENTAGE SLIDER (Image 2) ─── */}
         <View
           {...percentSliderPanResponder.panHandlers}
           onLayout={(e) => {
@@ -532,13 +532,29 @@ export default function SwapScreen({ navigation, route }: { navigation?: any; ro
             <View style={[styles.sliderActiveLine, { width: `${selectedPercent}%`, backgroundColor: '#5865F2' }]} />
           </View>
 
-          {/* Smooth Grabbable White Thumb Handle positioned continuously without dots */}
+          {/* 5 Stops Dots Overlay matching Image 2 */}
+          <View pointerEvents="none" style={styles.dotsRow}>
+            {PERCENT_STOPS.map((stop) => (
+              <View
+                key={stop}
+                style={[
+                  styles.sliderDotCircle,
+                  {
+                    backgroundColor: '#FFFFFF',
+                    opacity: selectedPercent >= stop ? 0.95 : 0.45,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+
+          {/* Smooth Grabbable White Thumb Handle positioned continuously */}
           <View
             pointerEvents="none"
             style={[
               styles.sliderThumbCircle,
               {
-                left: `${Math.min(100, Math.max(0, selectedPercent))}%`,
+                left: `${Math.min(96, Math.max(0, selectedPercent))}%`,
               },
             ]}
           />

@@ -4,22 +4,12 @@
 import React, { useState } from 'react';
 import {
   View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView,
-  StatusBar, SafeAreaView,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, TextInput, Button } from 'react-native-paper';
 import { useProfileStore } from '../../store/profileStore';
 import { useColors, useIsDark, useSpacing, useBorderRadius, useTypography } from '../../theme/ThemeContext';
-
-// Safe area hook with fallback
-let useSafeAreaInsets = () => ({ top: 0, bottom: 0, left: 0, right: 0 });
-try {
-  const safeAreaContext = require('react-native-safe-area-context');
-  if (safeAreaContext.useSafeAreaInsets) {
-    useSafeAreaInsets = safeAreaContext.useSafeAreaInsets;
-  }
-} catch (e) {
-  // Fallback already defined
-}
 
 export default function EmailScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
